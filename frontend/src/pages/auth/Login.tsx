@@ -1,23 +1,26 @@
+import api from '@/lib/axios'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import api from '@/lib/axios'
+import { toast } from 'sonner'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function LoginPage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
 
-  const handleLogin = async () => {
-    setError('')
+  const handleLogin = async (e: any) => {
+    e.preventDefault() // Prevent form submission
     try {
       const res = await api.post('/auth/login', { email, password })
       const { token } = res.data
       localStorage.setItem('token', token) // Store token for later use
+      return navigate('/dashboard') // Redirect to dashboard after successful login
     } catch (err) {
       console.error(err)
-      setError('Invalid email or password')
+      toast.error('Login failed! Invalid email or password.')
     }
   }
 
@@ -25,13 +28,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">Login</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">Đăng nhập</CardTitle>
         </CardHeader>
         <CardContent className="mx-2 mb-4">
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               type="email"
-              placeholder="Enter email..."
+              placeholder="Email..."
               className="p-4"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -39,20 +42,21 @@ export default function LoginPage() {
             />
             <Input
               type="password"
-              placeholder="Enter password..."
+              placeholder="Mật khẩu..."
               className="p-4"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
             <Button
+              size={'lg'}
               type="submit"
-              className="w-full font-extrabold hover:translate-y-[2px] duration-200"
+              className="w-full font-abold hover:translate-y-[2px] duration-200"
             >
-              Let's Start!
+              Đăng nhập
             </Button>
+            <Link to="/forgot-password">Quên mật khẩu?</Link>
           </form>
-          {error ? <p className="mt-4 text-center text-sm">{error}</p> : null}
         </CardContent>
       </Card>
     </div>
