@@ -1,14 +1,15 @@
 import { Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { PAGE_MAP, ROUTES, type PageKey } from '@/constants/routes'
-import { ProtectedRoute } from './contexts/auth/ProtectedRoute'
+import { ProtectedRoute } from './contexts/auth/protected-route'
 import { ContextProviders } from './contexts/ContextProviders'
 
 import MainLayout from '@/layouts/MainLayout'
 
-function App() {
+export default function App() {
   const layoutRoutes = Object.values(ROUTES).filter((r) => r.auth)
   const publicRoutes = Object.values(ROUTES).filter((r) => !r.auth)
+  
   return (
     <ContextProviders>
       <Routes>
@@ -38,7 +39,7 @@ function App() {
               <Route
                 key={i}
                 path={path}
-                element={<ProtectedRoute resource="articles">{Comp}</ProtectedRoute>}
+                element={<ProtectedRoute resource={element}>{Comp}</ProtectedRoute>}
               />
             )
           })}
@@ -47,5 +48,3 @@ function App() {
     </ContextProviders>
   )
 }
-
-export default App

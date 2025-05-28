@@ -11,3 +11,7 @@ export function switchTheme(themeName: string) {
     themeLink.href = `/styles/themes/${themeName}.css` // root-relative for Vite
   }
 }
+
+export const scrollToTop = () => {
+  return scrollTo({ top: 0, behavior: 'smooth' })
+}

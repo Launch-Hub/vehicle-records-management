@@ -32,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { scrollToTop } from '@/lib/utils'
 
 const data = {
   user: {
@@ -157,10 +158,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
-              </a>
+              <div onClick={scrollToTop} className="cursor-pointer">
+                <span className="text-primary text-base font-bold">Đăng Ký Xe - Minh Tú</span>
+                {/* <ArrowUpCircleIcon className="h-5 w-5" /> */}
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

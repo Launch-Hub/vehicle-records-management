@@ -5,15 +5,18 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Link, useNavigate } from 'react-router-dom'
+import { useLoader } from '@/contexts/loader/use-loader'
 
 export default function LoginPage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const loader = useLoader()
 
   const handleLogin = async (e: any) => {
     e.preventDefault() // Prevent form submission
     try {
+      loader.show()
       const res = await api.post('/auth/login', { email, password })
       const { token } = res.data
       localStorage.setItem('token', token) // Store token for later use
@@ -21,6 +24,8 @@ export default function LoginPage() {
     } catch (err) {
       console.error(err)
       toast.error('Login failed! Invalid email or password.')
+    } finally {
+      loader.hide()
     }
   }
 
