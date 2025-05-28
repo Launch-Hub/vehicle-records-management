@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/mern-app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
