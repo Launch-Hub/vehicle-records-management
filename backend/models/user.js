@@ -27,4 +27,10 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model("User", userSchema);
+// Password comparison method
+userSchema.methods.comparePassword = function (password) {
+  return bcrypt.compare(password, this.passwordHash);
+};
+
+const User = mongoose.model("User", userSchema);
+module.exports = { User, permissionSchema };

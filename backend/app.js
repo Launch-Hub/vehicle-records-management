@@ -23,7 +23,6 @@ mongoose
   .then(() => console.log("%cMongoDB connected", "color: green; font-weight: bold;"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-app.use(`${BASE_URL}`, require("./routes/test.route"));
 app.use(`${BASE_URL}/auth`, authRoutes);
 app.use(`${BASE_URL}/users`, userRoutes);
 

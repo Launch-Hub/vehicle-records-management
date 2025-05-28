@@ -8,7 +8,7 @@ router.get("/profile", authenticateToken, userController.getProfile);
 router.put(
   "/permissions",
   authenticateToken,
-  requirePermission("adminPanel", "write"),
+  requirePermission("users", "write"),
   userController.updatePermissions
 );
 

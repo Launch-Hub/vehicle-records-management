@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import permissionSchema from "./permission.js";
+import permissionSchema from "./user";
 
 const roleSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
