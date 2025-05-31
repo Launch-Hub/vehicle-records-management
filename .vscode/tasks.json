@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Frontend",
+      "type": "shell",
+      "command": "cd frontend",
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Backend",
+      "type": "shell",
+      "command": "cd backend",
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "new",
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "Root",
+      "type": "shell",
+      "command": "",
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      }
+    }
+  ]
+}
