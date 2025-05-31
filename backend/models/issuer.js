@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const issuerSchema = new mongoose.Schema({
   citizenIDNumber: { type: String, required: true, unique: true, index: true },
@@ -9,4 +9,5 @@ const issuerSchema = new mongoose.Schema({
 });
 
 const Issuer = mongoose.model("Issuer", issuerSchema);
-export default Issuer;
+
+module.exports = { issuerSchema, Issuer };

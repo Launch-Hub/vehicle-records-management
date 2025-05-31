@@ -1,5 +1,5 @@
-import mongoose from "mongoose";
-import permissionSchema from "./user";
+const mongoose = require("mongoose");
+const { permissionSchema } = require("./permission");
 
 const roleSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
@@ -12,4 +12,5 @@ const roleSchema = new mongoose.Schema({
 });
 
 const Role = mongoose.model("Role", roleSchema);
-export default Role;
+
+module.exports = { roleSchema, Role };

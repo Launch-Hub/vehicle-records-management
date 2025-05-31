@@ -1,13 +1,5 @@
 const mongoose = require("mongoose");
-
-const permissionSchema = new mongoose.Schema(
-  {
-    read: Boolean,
-    write: Boolean,
-    delete: Boolean,
-  },
-  { _id: false }
-);
+const { permissionSchema } = require("./permission");
 
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
@@ -27,10 +19,14 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Methods area
+const bcrypt = require("bcrypt");
+
 // Password comparison method
 userSchema.methods.comparePassword = function (password) {
   return bcrypt.compare(password, this.passwordHash);
 };
 
 const User = mongoose.model("User", userSchema);
-module.exports = { User, permissionSchema };
+
+module.exports = { userSchema, User };
