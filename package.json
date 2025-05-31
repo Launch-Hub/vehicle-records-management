@@ -1,0 +1,24 @@
+{
+  "name": "vehicle-records-management",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "task:workspace": "trigger-code-workspace.bat"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Launch-Hub/vehicle-records-management.git"
+  },
+  "keywords": [
+    "legal records",
+    "vehicle",
+    "vehicle records",
+    "management"
+  ],
+  "author": "Giang, N.T.",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Launch-Hub/vehicle-records-management/issues"
+  },
+  "homepage": "https://github.com/Launch-Hub/vehicle-records-management#readme"
+}
