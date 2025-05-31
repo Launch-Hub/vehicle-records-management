@@ -1,16 +1,8 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { type User } from '@/lib/types'
 import { useNavigate } from 'react-router-dom'
-import { storeTokens, updateLastActive } from '@/lib/auth'
-
-interface AuthContextProps {
-  user: User | null
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  isAuthenticated: boolean
-}
-
-const AuthContext = createContext<AuthContextProps | undefined>(undefined)
+import { getAccessToken, storeTokens, updateLastActive } from '@/lib/auth'
+import { AuthContext } from './auth-context'
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
@@ -39,9 +31,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('access_token')
+    const token = getAccessToken()
     const userStr = sessionStorage.getItem('user')
-    if (saved && userStr) setUser(JSON.parse(userStr))
+    if (token && userStr) {
+      setUser(JSON.parse(userStr))
+      updateLastActive()
+    }
   }, [])
 
   return (
@@ -49,10 +44,4 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth must be used inside AuthProvider')
-  return context
 }

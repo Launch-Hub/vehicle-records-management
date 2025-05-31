@@ -1,15 +1,15 @@
-import { Suspense } from 'react'
+import { Suspense, type Key } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import { PAGE_MAP, ROUTES, type PageKey } from '@/constants/routes'
-import { ProtectedRoute } from './contexts/auth/protected-route'
-import { ContextProviders } from './contexts/ContextProviders'
+import { PAGE_MAP, ROUTES, type PageKey } from '@/routes'
+import { ProtectedRoute } from '@/components/shared/protected-route'
+import { ContextProviders } from '@/contexts/ContextProviders'
 
 import MainLayout from '@/layouts/MainLayout'
 
 export default function App() {
-  const layoutRoutes = Object.values(ROUTES).filter((r) => r.auth)
-  const publicRoutes = Object.values(ROUTES).filter((r) => !r.auth)
-  
+  const layoutRoutes = ROUTES.filter((r) => r.auth)
+  const publicRoutes = ROUTES.filter((r) => !r.auth)
+
   return (
     <ContextProviders>
       <Routes>
@@ -26,7 +26,7 @@ export default function App() {
         })}
 
         <Route element={<MainLayout />}>
-          {layoutRoutes.map(({ path, element }, i) => {
+          {layoutRoutes.map(({ path, element, resource, text }) => {
             const route = PAGE_MAP[element as PageKey]
             const Comp = route.lazy ? (
               <Suspense>
@@ -37,9 +37,13 @@ export default function App() {
             )
             return (
               <Route
-                key={i}
+                key={path as Key}
                 path={path}
-                element={<ProtectedRoute resource={element}>{Comp}</ProtectedRoute>}
+                element={
+                  <ProtectedRoute title={text} resource={resource}>
+                    {Comp}
+                  </ProtectedRoute>
+                }
               />
             )
           })}

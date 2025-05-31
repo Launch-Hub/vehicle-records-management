@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom'
-import { AuthProvider } from '@/contexts/auth/auth-context'
+import { AuthProvider } from '@/contexts/auth'
 import { ThemeProvider } from '@/contexts/theme/ThemeProvider'
 import { LoaderProvider } from '@/contexts/loader/LoaderProvider'
 import { Toaster } from '@/components/ui/sonner'

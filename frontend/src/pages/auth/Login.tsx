@@ -1,29 +1,27 @@
-import api from '@/lib/axios'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useLoader } from '@/contexts/loader/use-loader'
+import { useAuth } from '@/contexts/auth'
 
 export default function LoginPage() {
-  const navigate = useNavigate()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const loader = useLoader()
 
-  const handleLogin = async (e: any) => {
-    e.preventDefault() // Prevent form submission
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
     try {
       loader.show()
-      const res = await api.post('/auth/login', { email, password })
-      const { token } = res.data
-      localStorage.setItem('token', token) // Store token for later use
-      return navigate('/dashboard') // Redirect to dashboard after successful login
+      await login(email, password)
+      toast.success('Đăng nhập thành công!')
     } catch (err) {
       console.error(err)
-      toast.error('Login failed! Invalid email or password.')
+      toast.error('Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.')
     } finally {
       loader.hide()
     }

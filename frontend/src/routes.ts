@@ -6,8 +6,8 @@ import UsersPage from '@/pages/users/Users'
 import UserDetailPage from '@/pages/users/UserDetail'
 import DashboardPage from '@/pages/Dashboard'
 import ForgotPasswordPage from '@/pages/auth/ForgotPassword'
-import ForbiddenPage from '@/pages/handlers/Forbidden'
-import NotFoundPage from '@/pages/handlers/NotFound'
+import ForbiddenPage from '@/pages/system/Forbidden'
+import NotFoundPage from '@/pages/system/NotFound'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -34,12 +34,12 @@ export const PAGE_MAP = {
   },
   //
   ForbiddenPage: {
-    lazy: lazy(() => import('@/pages/handlers/Forbidden')), // lazy-loaded
+    lazy: lazy(() => import('@/pages/system/Forbidden')), // lazy-loaded
     component: ForbiddenPage,
     default: 'eager',
   },
   NotFoundPage: {
-    lazy: lazy(() => import('@/pages/handlers/NotFound')), // lazy-loaded
+    lazy: lazy(() => import('@/pages/system/NotFound')), // lazy-loaded
     component: NotFoundPage,
     default: 'eager',
   },
@@ -66,42 +66,67 @@ export const PAGE_MAP = {
   },
 }
 
-export const ROUTES = {
+interface TranslationProps {}
+
+interface RouteProps {
+  auth: boolean
+  element: string
+  resource: string
+  path: string
+  text?: string
+  language?: string
+  translations?: Array<TranslationProps>
+}
+
+export const ROUTES: Array<RouteProps> = [
   //  public routes
-  LOGIN: {
+  {
     auth: false,
     element: 'LoginPage',
+    resource: 'login',
     path: '/login',
+    text: 'Login',
   },
-  FORGOT_PASSWORD: {
+  {
     auth: false,
     element: 'ForgotPasswordPage',
+    resource: 'forgotPassword',
     path: '/forgot-password',
+    text: 'Forgot Password',
   },
   // error handlers
-  FORBIDDEN: {
+  {
     auth: false,
     element: 'ForbiddenPage',
+    resource: 'forbidden',
     path: '/forbidden',
+    text: '403 Forbidden',
   },
-  NOT_FOUND: {
+  {
     auth: false,
     element: 'NotFoundPage',
+    resource: 'notFound',
     path: '/not-found',
+    text: '404 Not Found',
+    language: 'en',
   },
   // authenticated routes
-  HOME: {
+  {
     auth: true,
     element: 'HomePage',
+    resource: 'general',
     path: '/',
+    text: '404 Not Found',
+    language: 'en',
   },
-  DASHBOARD: {
+  {
     auth: true,
     element: 'DashboardPage',
-    language: 'en',
+    resource: 'general',
     path: '/dashboard',
     text: 'Dashboard',
-    translation: [
+    language: 'en',
+    translations: [
       {
         path: '/bang-dieu-khien',
         text: 'Bảng điều khiển',
@@ -109,32 +134,34 @@ export const ROUTES = {
       },
     ],
   },
-  USERS: {
+  {
     auth: true,
     element: 'UsersPage',
+    resource: 'users',
     path: '/users',
     text: 'Manage Users',
     language: 'en',
-    translation: [
+    translations: [
       {
-        path: '/quan',
-        text: 'Bảng điều khiển',
+        path: '/quan-ly-nguoi-dung',
+        text: 'Quản lý Người Dùng',
         language: 'vi',
       },
     ],
   },
-  USER_DETAIL: {
+  {
     auth: true,
-    element: 'DashboardPage',
-    path: '/dashboard',
-    text: 'Dashboard',
+    element: 'UserDetailPage',
+    resource: 'users',
+    path: '/users/:userId',
+    text: 'User Detail',
     language: 'en',
-    translation: [
+    translations: [
       {
         language: 'vi',
-        path: '/dashboard',
-        text: 'Bảng điều khiển',
+        path: '/quan-ly-nguoi-dung/:userId',
+        text: 'Thông tin người dùng',
       },
     ],
   },
-}
+]
