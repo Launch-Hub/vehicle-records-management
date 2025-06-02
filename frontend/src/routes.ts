@@ -8,6 +8,8 @@ import DashboardPage from '@/pages/Dashboard'
 import ForgotPasswordPage from '@/pages/auth/ForgotPassword'
 import ForbiddenPage from '@/pages/system/Forbidden'
 import NotFoundPage from '@/pages/system/NotFound'
+import RecordsPage from './pages/records/Records'
+import RecordDetailPage from './pages/records/RecordDetail'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -64,18 +66,34 @@ export const PAGE_MAP = {
     component: UserDetailPage,
     default: 'eager',
   },
+  RecordsPage: {
+    lazy: lazy(() => import('@/pages/records/Records')), // lazy-loaded
+    component: RecordsPage,
+    default: 'eager',
+  },
+  RecordDetailPage: {
+    lazy: lazy(() => import('@/pages/records/RecordDetail')), // lazy-loaded
+    component: RecordDetailPage,
+    default: 'eager',
+  },
 }
 
-interface TranslationProps {}
+interface TranslationProps {
+  path: string
+  title: string
+  language: string
+}
 
 interface RouteProps {
   auth: boolean
   element: string
   resource: string
+  showSidebar?: boolean
   path: string
-  text?: string
+  title?: string
   language?: string
   translations?: Array<TranslationProps>
+  children?: Array<RouteProps>
 }
 
 export const ROUTES: Array<RouteProps> = [
@@ -85,14 +103,14 @@ export const ROUTES: Array<RouteProps> = [
     element: 'LoginPage',
     resource: 'login',
     path: '/login',
-    text: 'Login',
+    title: 'Login',
   },
   {
     auth: false,
     element: 'ForgotPasswordPage',
     resource: 'forgotPassword',
     path: '/forgot-password',
-    text: 'Forgot Password',
+    title: 'Forgot Password',
   },
   // error handlers
   {
@@ -100,14 +118,14 @@ export const ROUTES: Array<RouteProps> = [
     element: 'ForbiddenPage',
     resource: 'forbidden',
     path: '/forbidden',
-    text: '403 Forbidden',
+    title: '403 Forbidden',
   },
   {
     auth: false,
     element: 'NotFoundPage',
     resource: 'notFound',
     path: '/not-found',
-    text: '404 Not Found',
+    title: '404 Not Found',
     language: 'en',
   },
   // authenticated routes
@@ -115,21 +133,23 @@ export const ROUTES: Array<RouteProps> = [
     auth: true,
     element: 'HomePage',
     resource: 'general',
+    showSidebar: false,
     path: '/',
-    text: '404 Not Found',
+    title: 'Home',
     language: 'en',
   },
   {
     auth: true,
     element: 'DashboardPage',
     resource: 'general',
+    showSidebar: true,
     path: '/dashboard',
-    text: 'Dashboard',
+    title: 'Dashboard',
     language: 'en',
     translations: [
       {
         path: '/bang-dieu-khien',
-        text: 'Bảng điều khiển',
+        title: 'Bảng điều khiển',
         language: 'vi',
       },
     ],
@@ -138,29 +158,65 @@ export const ROUTES: Array<RouteProps> = [
     auth: true,
     element: 'UsersPage',
     resource: 'users',
+    showSidebar: true,
     path: '/users',
-    text: 'Manage Users',
+    title: 'Manage Users',
     language: 'en',
     translations: [
       {
         path: '/quan-ly-nguoi-dung',
-        text: 'Quản lý Người Dùng',
+        title: 'Quản lý Người Dùng',
         language: 'vi',
+      },
+    ],
+    children: [
+      {
+        auth: true,
+        element: 'UserDetailPage',
+        resource: 'users',
+        path: '/:userId',
+        title: 'User Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            path: '/:userId',
+            title: 'Thông tin người dùng',
+          },
+        ],
       },
     ],
   },
   {
     auth: true,
-    element: 'UserDetailPage',
-    resource: 'users',
-    path: '/users/:userId',
-    text: 'User Detail',
+    element: 'RecordsPage',
+    resource: 'records',
+    showSidebar: true,
+    path: '/records',
+    title: 'Manage Records',
     language: 'en',
     translations: [
       {
+        path: '/quan-ly-ho-so',
+        title: 'Quản lý Hồ Sơ',
         language: 'vi',
-        path: '/quan-ly-nguoi-dung/:userId',
-        text: 'Thông tin người dùng',
+      },
+    ],
+    children: [
+      {
+        auth: true,
+        element: 'RecordDetailPage',
+        resource: 'records',
+        path: '/:recordId',
+        title: 'Record Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            path: '/:recordId',
+            title: 'Chi tiết hồ sơ',
+          },
+        ],
       },
     ],
   },
