@@ -1,4 +1,4 @@
-import NotFound from '@/components/pages/_handlers/not-found'
+import NotFound from '@/components/page/handler/not-found'
 
 // 404
 export default function NotFoundPage() {

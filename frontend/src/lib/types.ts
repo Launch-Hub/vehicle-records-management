@@ -9,6 +9,7 @@ export interface User {
   _id: String
   username: string
   email: string
+  name?: string
   avatar?: string
   token: string
   roles: Array<string>

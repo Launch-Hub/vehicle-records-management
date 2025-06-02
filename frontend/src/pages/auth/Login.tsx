@@ -18,7 +18,7 @@ export default function LoginPage() {
     try {
       loader.show()
       await login(email, password)
-      toast.success('Đăng nhập thành công!')
+      // toast.success('Đăng nhập thành công!')
     } catch (err) {
       console.error(err)
       toast.error('Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.')
@@ -52,9 +52,9 @@ export default function LoginPage() {
               required
             />
             <Button
-              size={'lg'}
+              size="lg"
               type="submit"
-              className="w-full font-abold hover:translate-y-[2px] duration-200"
+              className="w-full text-md font-bold hover:translate-y-[2px] duration-200"
             >
               Đăng nhập
             </Button>

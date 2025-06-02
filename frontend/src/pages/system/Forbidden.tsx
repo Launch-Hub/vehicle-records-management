@@ -1,4 +1,4 @@
-import Forbidden from '@/components/pages/_handlers/forbidden'
+import Forbidden from '@/components/page/handler/forbidden'
 
 // 403
 export default function ForbiddenPage() {

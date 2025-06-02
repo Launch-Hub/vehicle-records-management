@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/shared/protected-route'
 import { ContextProviders } from '@/contexts/ContextProviders'
 
 import MainLayout from '@/layouts/MainLayout'
+import { LayoutProvider } from '@/contexts/layout'
 
 export default function App() {
   const layoutRoutes = ROUTES.filter((r) => r.auth)
@@ -25,8 +26,14 @@ export default function App() {
           return <Route key={i} path={path} element={Comp} />
         })}
 
-        <Route element={<MainLayout />}>
-          {layoutRoutes.map(({ path, element, resource, text }) => {
+        <Route
+          element={
+            <LayoutProvider>
+              <MainLayout />
+            </LayoutProvider>
+          }
+        >
+          {layoutRoutes.map(({ path, element, resource, title }) => {
             const route = PAGE_MAP[element as PageKey]
             const Comp = route.lazy ? (
               <Suspense>
@@ -40,7 +47,7 @@ export default function App() {
                 key={path as Key}
                 path={path}
                 element={
-                  <ProtectedRoute title={text} resource={resource}>
+                  <ProtectedRoute title={title} resource={resource}>
                     {Comp}
                   </ProtectedRoute>
                 }
