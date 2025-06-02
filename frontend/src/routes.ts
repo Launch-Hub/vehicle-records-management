@@ -1,4 +1,5 @@
 import { lazy } from 'react'
+import { FolderIcon, LayoutDashboardIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
 import HomePage from '@/pages/Home'
@@ -10,6 +11,7 @@ import ForbiddenPage from '@/pages/system/Forbidden'
 import NotFoundPage from '@/pages/system/NotFound'
 import RecordsPage from './pages/records/Records'
 import RecordDetailPage from './pages/records/RecordDetail'
+import { DEFAULT_LANG } from './constants/env'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -89,14 +91,15 @@ interface RouteProps {
   element: string
   resource: string
   showSidebar?: boolean
+  icon?: LucideIcon
   path: string
-  title?: string
+  title: string
   language?: string
   translations?: Array<TranslationProps>
   children?: Array<RouteProps>
 }
 
-export const ROUTES: Array<RouteProps> = [
+const GLOBAL_ROUTES: Array<RouteProps> = [
   //  public routes
   {
     auth: false,
@@ -143,6 +146,7 @@ export const ROUTES: Array<RouteProps> = [
     element: 'DashboardPage',
     resource: 'general',
     showSidebar: true,
+    icon: LayoutDashboardIcon,
     path: '/dashboard',
     title: 'Dashboard',
     language: 'en',
@@ -159,6 +163,7 @@ export const ROUTES: Array<RouteProps> = [
     element: 'UsersPage',
     resource: 'users',
     showSidebar: true,
+    icon: UsersIcon,
     path: '/users',
     title: 'Manage Users',
     language: 'en',
@@ -192,6 +197,7 @@ export const ROUTES: Array<RouteProps> = [
     element: 'RecordsPage',
     resource: 'records',
     showSidebar: true,
+    icon: FolderIcon,
     path: '/records',
     title: 'Manage Records',
     language: 'en',
@@ -221,3 +227,12 @@ export const ROUTES: Array<RouteProps> = [
     ],
   },
 ]
+
+export const ROUTES = GLOBAL_ROUTES.map((e) => {
+  const trans = e.translations?.find((t) => t.language === DEFAULT_LANG)
+  if (!trans) return e
+  return {
+    ...e,
+    ...trans,
+  }
+})

@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { ThemeContext, type Theme } from '@/contexts/theme/theme-conext'
+import { DEFAULT_THEME } from '@/constants/env'
 
 interface ThemeProviderProps {
   children: ReactNode
@@ -15,7 +16,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   storageKey = 'app-theme',
   children,
 }) => {
-  const defaultTheme: Theme = ( import.meta.env.VITE_DEFAULT_THEME as Theme) || 'system'
+  const defaultTheme: Theme = (DEFAULT_THEME as Theme) || 'system'
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem(storageKey) as Theme) || defaultTheme

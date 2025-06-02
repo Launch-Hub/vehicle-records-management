@@ -3,7 +3,7 @@ import { type User } from '@/lib/types'
 
 export interface AuthContextProps {
   user: User | null
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, redirectPath: string) => Promise<void>
   logout: () => void
   isAuthenticated: boolean
 }
