@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/sidebar'
 import { scrollToTop } from '@/lib/utils'
 import { useAuth } from '@/contexts/auth'
+import { ROUTES } from '@/routes'
 
 const mock_data = {
   navMain: [
@@ -89,7 +90,12 @@ const mock_data = {
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const { user, isAuthenticated } = useAuth()
-  
+  const navMain = ROUTES.filter((e) => e.showSidebar).map((e) => ({
+    title: e.title,
+    url: e.path,
+    icon: e.icon,
+  }))
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -103,13 +109,11 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={mock_data.navMain} />
+        <NavMain items={navMain} />
         {/* <NavDocuments items={data.documents} /> */}
         <NavSecondary items={mock_data.navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        {isAuthenticated && <NavUser user={user!} />}
-      </SidebarFooter>
+      <SidebarFooter>{isAuthenticated && <NavUser user={user!} />}</SidebarFooter>
     </Sidebar>
   )
 }

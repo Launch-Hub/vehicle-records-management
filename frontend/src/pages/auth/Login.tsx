@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
-import { useLoader } from '@/contexts/loader/use-loader'
+import { useLoader } from '@/contexts/loader'
 import { useAuth } from '@/contexts/auth'
 
 export default function LoginPage() {
@@ -17,7 +17,7 @@ export default function LoginPage() {
     e.preventDefault()
     try {
       loader.show()
-      await login(email, password)
+      await login(email, password, '/dashboard')
       // toast.success('Đăng nhập thành công!')
     } catch (err) {
       console.error(err)
