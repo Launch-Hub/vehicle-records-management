@@ -1,8 +1,8 @@
-import { useEffect, type JSX } from 'react'
+import { type JSX } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/auth'
 import Forbidden from '../page/handler/forbidden'
-import { useLayout } from '@/contexts/layout'
+import { ROUTES } from '@/routes'
 
 interface ProtectedRouteProps {
   title?: string
@@ -10,15 +10,19 @@ interface ProtectedRouteProps {
   children: JSX.Element
 }
 
-export const ProtectedRoute = ({ title, resource, children }: ProtectedRouteProps) => {
-  const { user, isAuthenticated } = useAuth()
-  const { setTitle } = useLayout()
+export const ProtectedRoute = ({ resource, children }: ProtectedRouteProps) => {
+  const { user, isAuthenticated, authResolved } = useAuth()
+  const loginUrl = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
+  console.count('ProtectedRoute render')
 
-  useEffect(() => {
-    setTitle(title ?? '')
-  }, [title, setTitle])
-
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!authResolved) {
+    // Render nothing or a spinner while auth is loading
+    return (
+      <div className="my-auto p-8 text-center text-muted-foreground">Đang kiểm tra phiên đăng nhập...</div>
+    )
+  }
+  // debugger
+  if (!isAuthenticated) return <Navigate to={loginUrl} replace />
 
   const canRead = user?.permissions?.[resource]?.read
   if (canRead) return children

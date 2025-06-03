@@ -80,26 +80,27 @@ export const PAGE_MAP = {
   },
 }
 
-interface TranslationProps {
-  path: string
+interface RouteTranslationProps {
+  path?: string
   title: string
   language: string
 }
 
-interface RouteProps {
+export interface CustomRouteProps {
   auth: boolean
   element: string
   resource: string
   showSidebar?: boolean
   icon?: LucideIcon
   path: string
+  enPath?: string // the original path for checking data
   title: string
-  language?: string
-  translations?: Array<TranslationProps>
-  children?: Array<RouteProps>
+  language: string
+  translations: Array<RouteTranslationProps>
+  children?: Array<CustomRouteProps>
 }
 
-const GLOBAL_ROUTES: Array<RouteProps> = [
+const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //  public routes
   {
     auth: false,
@@ -107,6 +108,14 @@ const GLOBAL_ROUTES: Array<RouteProps> = [
     resource: 'login',
     path: '/login',
     title: 'Login',
+    language: 'en',
+    translations: [
+      {
+        language: 'vi',
+        path: '/dang-nhap',
+        title: 'Đăng nhập',
+      },
+    ],
   },
   {
     auth: false,
@@ -114,22 +123,43 @@ const GLOBAL_ROUTES: Array<RouteProps> = [
     resource: 'forgotPassword',
     path: '/forgot-password',
     title: 'Forgot Password',
+    language: 'en',
+    translations: [
+      {
+        language: 'vi',
+        path: '/quen-mat-khau',
+        title: 'Quên mật khẩu',
+      },
+    ],
   },
   // error handlers
   {
     auth: false,
     element: 'ForbiddenPage',
     resource: 'forbidden',
-    path: '/forbidden',
+    path: '/403',
     title: '403 Forbidden',
+    language: 'en',
+    translations: [
+      {
+        language: 'vi',
+        title: '403 Không có quyền truy cập',
+      },
+    ],
   },
   {
     auth: false,
     element: 'NotFoundPage',
     resource: 'notFound',
-    path: '/not-found',
+    path: '/404',
     title: '404 Not Found',
     language: 'en',
+    translations: [
+      {
+        language: 'vi',
+        title: '404 Không tìm thấy trang',
+      },
+    ],
   },
   // authenticated routes
   {
@@ -140,6 +170,12 @@ const GLOBAL_ROUTES: Array<RouteProps> = [
     path: '/',
     title: 'Home',
     language: 'en',
+    translations: [
+      {
+        language: 'vi',
+        title: 'Trang chủ',
+      },
+    ],
   },
   {
     auth: true,
@@ -179,13 +215,12 @@ const GLOBAL_ROUTES: Array<RouteProps> = [
         auth: true,
         element: 'UserDetailPage',
         resource: 'users',
-        path: '/:userId',
+        path: ':userId',
         title: 'User Detail',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            path: '/:userId',
             title: 'Thông tin người dùng',
           },
         ],
@@ -213,13 +248,12 @@ const GLOBAL_ROUTES: Array<RouteProps> = [
         auth: true,
         element: 'RecordDetailPage',
         resource: 'records',
-        path: '/:recordId',
+        path: ':recordId',
         title: 'Record Detail',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            path: '/:recordId',
             title: 'Chi tiết hồ sơ',
           },
         ],
@@ -230,9 +264,30 @@ const GLOBAL_ROUTES: Array<RouteProps> = [
 
 export const ROUTES = GLOBAL_ROUTES.map((e) => {
   const trans = e.translations?.find((t) => t.language === DEFAULT_LANG)
-  if (!trans) return e
+  const base = trans ? { enPath: e.path, ...e, ...trans } : e
   return {
-    ...e,
-    ...trans,
+    ...base,
+    children: base.children?.map((child) => {
+      const childTrans = child.translations?.find((t) => t.language === DEFAULT_LANG)
+      const finalChild = childTrans ? { ...child, ...childTrans } : child
+      return {
+        ...finalChild,
+        path: finalChild.path?.replace(/^\//, ''), // remove leading slash for relative path
+      }
+    }),
+    path: base.path, // Keep top-level paths absolute
   }
 })
+
+export const getRoute = (pathname: string): CustomRouteProps | null => {
+  return ROUTES.find((route) => pathname.startsWith(route.path)) ?? null
+}
+
+export const getRouteField = <K extends keyof CustomRouteProps>(
+  returnKey: K,
+  pathname: string
+): CustomRouteProps[K] | undefined => {
+  const route = ROUTES.find((route) => pathname.startsWith(route.path))
+  if (!route) return undefined
+  return route[returnKey]
+}

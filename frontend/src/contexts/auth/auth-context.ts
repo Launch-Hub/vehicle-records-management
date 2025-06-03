@@ -6,6 +6,7 @@ export interface AuthContextProps {
   login: (email: string, password: string, redirectPath: string) => Promise<void>
   logout: () => void
   isAuthenticated: boolean
+  authResolved: boolean
 }
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined)

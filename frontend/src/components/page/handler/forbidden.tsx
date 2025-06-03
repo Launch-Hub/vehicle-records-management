@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { ROUTES } from '@/routes'
 
 export default function Forbidden() {
   const navigate = useNavigate()
+  const loginUrl = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
 
   return (
     <motion.div
@@ -19,14 +21,14 @@ export default function Forbidden() {
           <AlertTriangle className="mx-auto text-destructive" size={48} />
           <CardTitle className="text-2xl font-bold">403 - Forbidden</CardTitle>
           <p className="text-muted-foreground text-sm">
-            You don’t have permission to access this page.
+            You don't have permission to access this page.
           </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button variant="default" onClick={() => navigate(-1)}>
             Go Back
           </Button>
-          <Button variant="ghost" onClick={() => navigate('/login')}>
+          <Button variant="ghost" onClick={() => navigate(loginUrl)}>
             Login with different account
           </Button>
         </CardContent>

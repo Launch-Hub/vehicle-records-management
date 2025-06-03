@@ -8,10 +8,11 @@ export const ContextProviders = ({ children }: { children: React.ReactNode }) =>
   return (
     <ThemeProvider storageKey="app-theme">
       <Toaster position="top-right" expand={true} richColors closeButton />
-      {/* Adjust the basename as needed */}
-      <BrowserRouter basename={'/'}>
+      <BrowserRouter basename="/">
         <AuthProvider>
-          <LoaderProvider>{children}</LoaderProvider>
+          <LoaderProvider>
+            {children} {/* Your App component */}
+          </LoaderProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

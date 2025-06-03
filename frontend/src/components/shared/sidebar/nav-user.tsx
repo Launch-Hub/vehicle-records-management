@@ -22,10 +22,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
-import type { User } from '@/lib/types'
+import { useAuth } from '@/contexts/auth'
+import { useState } from 'react'
 
-export function NavUser({ user }: { user: User }) {
+export function NavUser() {
   const { isMobile } = useSidebar()
+  const { user, logout } = useAuth()
+  const [isOpen, setOpen] = useState(false)
+
+  const openProfile = () => {
+    setOpen(true)
+  }
+
+  if (!user) return <></>
 
   return (
     <SidebarMenu>
@@ -37,7 +46,7 @@ export function NavUser({ user }: { user: User }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user?.avatar || '/avatars/shadcn.jpg'} alt={user.name} />
+                <AvatarImage src={user.avatar || '/avatars/shadcn.jpg'} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -47,6 +56,7 @@ export function NavUser({ user }: { user: User }) {
               <MoreVerticalIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
+          {/* popup */}
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? 'bottom' : 'right'}
@@ -67,23 +77,19 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" onClick={openProfile}>
                 <UserCircleIcon />
-                Account
+                Tài khoản
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer" disabled>
                 <BellIcon />
-                Notifications
+                Thông báo
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={logout}>
               <LogOutIcon />
-              Log out
+              Đăng Xuất
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

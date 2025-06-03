@@ -1,9 +1,10 @@
 {
   "name": "vehicle-records-management",
-  "version": "1.0.0",
+  "version": "1.0.1.12",
   "description": "",
   "scripts": {
-    "task:workspace": "trigger-code-workspace.bat"
+    "start:db": "start-localdb.bat",
+    "stop:db": "stop-localdb.bat"
   },
   "repository": {
     "type": "git",

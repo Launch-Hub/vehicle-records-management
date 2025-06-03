@@ -1,4 +1,4 @@
-import { DataTable } from '@/components/shared/data-table'
+import { DataTable } from '@/components/shared/list/data-table'
 import { data } from '@/constants/mock-data'
 
 export default function RecordsPage() {

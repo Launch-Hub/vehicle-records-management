@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Link } from 'react-router-dom'
 import { useLoader } from '@/contexts/loader'
 import { useAuth } from '@/contexts/auth'
+import { ROUTES } from '@/routes'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -17,11 +18,25 @@ export default function LoginPage() {
     e.preventDefault()
     try {
       loader.show()
-      await login(email, password, '/dashboard')
-      // toast.success('Đăng nhập thành công!')
-    } catch (err) {
-      console.error(err)
-      toast.error('Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin.')
+      const redirectURL = ROUTES.find((e) => e.enPath === '/dashboard')?.path || '/'
+      await login(email, password, redirectURL)
+    } catch (error: any) {
+      if (error.response) {
+        // Server responded with status code != 2xx
+        const status = error.response.status
+        const message =
+          error.response.data?.message ||
+          (status === 401
+            ? 'Tên đăng nhập hoặc mật khẩu không đúng.'
+            : 'Đã xảy ra lỗi khi đăng nhập.')
+        toast.error(message)
+      } else if (error.request) {
+        // Request made but no response
+        toast.error('Không thể kết nối đến máy chủ.')
+      } else {
+        // Something else caused an error
+        toast.error('Lỗi không xác định khi đăng nhập.')
+      }
     } finally {
       loader.hide()
     }

@@ -1,6 +1,6 @@
 import { ChartAreaInteractive } from "@/components/page/dashboard/chart-area-interactive";
 import { SectionCards } from "@/components/page/dashboard/section-cards";
-import { DataTable } from "@/components/shared/data-table";
+import { DataTable } from "@/components/shared/list/data-table";
 import { data } from "@/constants/mock-data";
 
 export default function DashboardPage() {

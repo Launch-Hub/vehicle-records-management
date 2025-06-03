@@ -16,7 +16,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   storageKey = 'app-theme',
   children,
 }) => {
-  const defaultTheme: Theme = (DEFAULT_THEME as Theme) || 'system'
+  const defaultTheme: Theme = DEFAULT_THEME as Theme
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem(storageKey) as Theme) || defaultTheme
