@@ -1,6 +1,6 @@
 {
   "name": "vehicle-records-management",
-  "version": "1.0.1.12",
+  "version": "1.0.1.13",
   "description": "",
   "scripts": {
     "start:db": "start-localdb.bat",
