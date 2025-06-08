@@ -5,8 +5,10 @@ import type { LegalRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { RecordDataTable } from '@/components/page/records/table'
 import { RecordDialog } from '@/components/page/records/dialog'
+import { useSearchParams } from 'react-router-dom'
 
 export default function RecordsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isFetching, setIsFetching] = useState(false)
   const [data, setData] = useState<LegalRecord[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
