@@ -6,6 +6,7 @@ interface ThemeProviderProps {
   children: ReactNode
   storageKey: string
 }
+type Palette = 'default' | 'blue' | 'green' | 'orange' | 'violet'
 
 const getSystemTheme = (): Theme => {
   if (typeof window === 'undefined') return 'light'
@@ -23,6 +24,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     }
     return defaultTheme
   })
+  const [palette, setPalette] = useState<Palette>('green')
 
   const applyTheme = (currentTheme: Theme) => {
     const root = document.documentElement

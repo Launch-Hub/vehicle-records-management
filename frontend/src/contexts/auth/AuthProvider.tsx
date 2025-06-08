@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
-import { type User } from '@/lib/types'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { type User } from '@/lib/types/tables.type'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   clearSession,
+  getAccessToken,
   getLastActive,
   getRefreshToken,
   getUserLocal,
@@ -11,13 +12,17 @@ import {
 } from '@/lib/auth'
 import { AuthContext } from './auth-context'
 import { ROUTES } from '@/routes'
-import api from '@/lib/axios'
 import { toast } from 'sonner'
+import api from '@/lib/axios'
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [user, setUser] = useState<User | null>(null)
   const [authResolved, setAuthResolved] = useState(false)
-  const navigate = useNavigate()
+  const hasRefreshed = useRef(false)
 
   const login = async (email: string, password: string, redirectPath: string = '/') => {
     try {
@@ -37,9 +42,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loginUrl = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
     navigate(loginUrl)
   }
-
-  const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
-  const hasRefreshed = useRef(false)
 
   const refreshSession = async () => {
     const refreshToken = getRefreshToken()
@@ -67,7 +69,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (!accessToken) throw 'No access token'
       setUser(_user)
       storeTokens(accessToken, refreshToken)
-      updateLastActive()
     } catch (err) {
       console.error('Session refresh failed', err)
       logout()
@@ -77,11 +78,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   useEffect(() => {
+    if (ROUTES.find((e) => pathname.includes(e.path))?.auth !== true) return
     if (!hasRefreshed.current) {
       refreshSession()
       hasRefreshed.current = true
     }
   }, [])
+
+  useEffect(() => {
+    console.count('update last active')
+    const _user = getUserLocal()
+    if (_user) updateLastActive()
+  }, [pathname])
 
   return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, authResolved }}>

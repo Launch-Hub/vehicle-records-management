@@ -4,11 +4,11 @@ import { PAGE_MAP, ROUTES, type CustomRouteProps, type PageKey } from '@/routes'
 
 import MainLayout from '@/layouts/MainLayout'
 import { ProtectedRoute } from '@/components/shared/protected-route'
-import { ThemeProvider } from './contexts/theme/ThemeProvider'
 import { Toaster } from './components/ui/sonner'
 import { AuthProvider } from './contexts/auth'
 import { LoaderProvider } from './contexts/loader'
 import { LayoutProvider, useLayout } from './contexts/layout'
+import { useTheme } from './contexts/theme/use-theme'
 
 function renderRoute(route: CustomRouteProps, isProtected: boolean = false): ReactNode {
   const { path, element, children, resource, title } = route
@@ -40,6 +40,7 @@ function renderRoute(route: CustomRouteProps, isProtected: boolean = false): Rea
 }
 
 export default function App() {
+  const { theme } = useTheme()
   const layoutRoutes = ROUTES.filter((r) => r.auth)
   const publicRoutes = ROUTES.filter((r) => !r.auth)
 
@@ -53,22 +54,20 @@ export default function App() {
   )
 
   return (
-    <ThemeProvider storageKey="app-theme">
-      <Toaster position="top-right" expand={true} richColors closeButton />
-      <LoaderProvider>
-        <LayoutProvider>
-          <BrowserRouter basename="/">
-            <AuthProvider>
-              <Routes>
-                {/* Public Routes */}
-                {nonProtectedRoutes}
-                {/* Protected Routes wrapped in MainLayout */}
-                <Route element={<MainLayout />}>{protectedRoutes}</Route>
-              </Routes>
-            </AuthProvider>
-          </BrowserRouter>
-        </LayoutProvider>
-      </LoaderProvider>
-    </ThemeProvider>
+    <LoaderProvider>
+      <Toaster position="top-right" expand={true} theme={theme} duration={4000} richColors closeButton />
+      <LayoutProvider>
+        <BrowserRouter basename="/">
+          <AuthProvider>
+            <Routes>
+              {/* Public Routes */}
+              {nonProtectedRoutes}
+              {/* Protected Routes wrapped in MainLayout */}
+              <Route element={<MainLayout />}>{protectedRoutes}</Route>
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+      </LayoutProvider>
+    </LoaderProvider>
   )
 }

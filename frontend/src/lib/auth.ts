@@ -1,7 +1,7 @@
-const ACCESS_TOKEN_KEY = 'access_token'
-const REFRESH_TOKEN_KEY = 'refresh_token'
-const LAST_ACTIVE_KEY = 'last_active'
-const USER_KEY = 'user'
+export const ACCESS_TOKEN_KEY = 'access_token'
+export const REFRESH_TOKEN_KEY = 'refresh_token'
+export const LAST_ACTIVE_KEY = 'last_active'
+export const USER_KEY = 'user'
 
 export const getUserLocal = () => JSON.parse(localStorage.getItem(USER_KEY) || '{}')
 export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY)

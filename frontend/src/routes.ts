@@ -287,7 +287,8 @@ export const getRouteField = <K extends keyof CustomRouteProps>(
   returnKey: K,
   pathname: string
 ): CustomRouteProps[K] | undefined => {
-  const route = ROUTES.find((route) => pathname.startsWith(route.path))
+  const path = pathname.replace('/', '')
+  const route = ROUTES.find((route) => route.path.includes(path))
   if (!route) return undefined
   return route[returnKey]
 }

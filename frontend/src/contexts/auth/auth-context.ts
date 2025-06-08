@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import { type User } from '@/lib/types'
+import { type User } from '@/lib/types/tables.type'
 
 export interface AuthContextProps {
   user: User | null

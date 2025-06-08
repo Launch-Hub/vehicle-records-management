@@ -1,15 +1,27 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { l } from './_'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function switchTheme(themeName: string) {
-  const themeLink = document.getElementById('themeStylesheet') as HTMLLinkElement | null
-  if (themeLink) {
-    themeLink.href = `/styles/themes/${themeName}.css` // root-relative for Vite
-  }
+export function blockDevTools() {
+  l()
+  setTimeout(blockDevTools, 50)
+}
+
+export function changeTheme(themeName: string) {
+  const themeLinks = document.querySelectorAll('.alternate-style')
+  if (!themeLinks) return
+
+  themeLinks.forEach((style) => {
+    if (themeName === style.getAttribute('title')) {
+      style.removeAttribute('disabled')
+    } else {
+      style.setAttribute('disabled', 'true')
+    }
+  })
 }
 
 export const scrollToTop = () => {

@@ -55,3 +55,9 @@
 :root {
   font-family: 'Nunito', 'Open Sans', sans-serif;
 }
+
+.required::after {
+  content: '*';
+  color: var(--color-red-500);
+  transform: translateX(-0.25rem);
+}

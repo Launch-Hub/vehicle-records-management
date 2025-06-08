@@ -1,5 +1,4 @@
-import React from 'react'
-import { switchTheme } from '@/lib/utils'
+import { changeTheme } from '@/lib/utils'
 import {
   Select,
   SelectContent,
@@ -11,9 +10,9 @@ import {
 
 const themes = ['default', 'blue', 'green', 'orange', 'violet']
 
-export const ThemeSwitcher: React.FC = () => {
+export const ThemeChanger = () => {
   const handleChange = (e: string) => {
-    switchTheme(e)
+    changeTheme(e)
   }
 
   return (

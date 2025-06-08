@@ -82,6 +82,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     title: e.title,
     url: e.path,
     icon: e.icon,
+    items: []
   }))
 
   return (

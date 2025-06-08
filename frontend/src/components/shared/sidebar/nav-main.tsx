@@ -43,7 +43,6 @@ export function NavMain({ items }: NavMainProps) {
         <SidebarMenu>
           {items.map((item) => {
             const isActive = location.pathname.startsWith(item.url)
-
             return (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
