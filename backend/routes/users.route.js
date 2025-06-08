@@ -12,4 +12,10 @@ router.put(
   userController.updatePermissions
 );
 
+router.get("/", authenticateToken, userController.getList);
+router.get("/:id", authenticateToken, userController.getOne);
+router.post("/", authenticateToken, userController.create);
+router.put("/", authenticateToken, userController.update);
+router.delete("/:id", authenticateToken, userController.delete);
+
 module.exports = router;

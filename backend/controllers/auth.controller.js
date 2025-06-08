@@ -3,15 +3,18 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-const JWT_EXPIRY = "15m"; // access token
-const JWT_REFRESH_EXPIRY = "7d"; // refresh token
+const {
+  JWT_SECRET,
+  JWT_REFRESH_SECRET,
+  JWT_EXPIRY,
+  JWT_REFRESH_EXPIRY,
+  SALT_OR_ROUND,
+} = require("../constants");
 
 exports.register = async (req, res) => {
   const { username, email, password, roles, permissions = {} } = req.body;
 
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
   const user = new User({ username, email, passwordHash, roles, permissions });
 
   try {
@@ -41,7 +44,14 @@ exports.login = async (req, res) => {
   res.json({
     accessToken,
     refreshToken,
-    user: { id: user._id, email: user.email, roles: user.roles, permissions: user.permissions },
+    user: {
+      id: user._id,
+      name: user.name,
+      avatar: user.avatar,
+      email: user.email,
+      roles: user.roles,
+      permissions: user.permissions,
+    },
   });
 };
 

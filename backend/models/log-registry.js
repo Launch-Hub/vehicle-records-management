@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
-const { permissionSchema } = require("./permission");
 
-const roleSchema = new mongoose.Schema({
+const logRegistrySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: String,
   actionBy: {
@@ -12,6 +11,6 @@ const roleSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Role = mongoose.model("Role", roleSchema);
+const LogRegistry = mongoose.model("LogRegistry", logRegistrySchema);
 
-module.exports = { roleSchema, Role };
+module.exports = { logRegistrySchema, LogRegistry };
