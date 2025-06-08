@@ -1,7 +1,8 @@
 {
   "name": "vehicle-records-management",
-  "version": "1.0.1.13",
-  "description": "",
+  "version": "1.0.1.16",
+  "description": "vehicle-records-management",
+  "private": true,
   "scripts": {
     "start:db": "start-localdb.bat",
     "stop:db": "stop-localdb.bat"
@@ -17,7 +18,6 @@
     "management"
   ],
   "author": "Giang, N.T.",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Launch-Hub/vehicle-records-management/issues"
   },
