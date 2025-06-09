@@ -13,19 +13,21 @@ on:
   push:
     branches:
       - main
-      - "release/**"
+      - release
+      - "release/beta"
   pull_request:
     # The branches below must be a subset of the branches above
     branches:
       - main
-      - "release/**"
+      - release
+      - "release/beta"
   schedule:
     - cron: "20 19 * * 3"
 
 jobs:
   eslint:
     name: Run eslint scanning
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
