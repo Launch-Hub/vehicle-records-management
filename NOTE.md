@@ -13,7 +13,11 @@
 - `release/uat`: testing new feature (using local VM)
 - `release/beta`:
 
-
 ### production environments
 
 - `release/v<number>`: launching on production - shipped application
+
+
+## 3. About main branch
+
+Only for public archive and rollback purpose - code must be tested carefully before being merged

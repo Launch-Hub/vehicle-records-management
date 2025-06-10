@@ -1,5 +1,4 @@
 const { LegalRecord } = require("../models/legal-record");
-require("dotenv").config();
 
 exports.getList = async (req, res) => {
   try {

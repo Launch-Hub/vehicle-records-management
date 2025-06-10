@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-require("dotenv").config();
 
 const uploadRoutes = require("./routes/upload.route");
 
@@ -26,6 +25,8 @@ mongoose
   .connect(MONGO_URI, {})
   .then(() => console.log("%cMongoDB connected", "color: green; font-weight: bold;"))
   .catch((err) => console.error("MongoDB connection error:", err));
+
+app.get("/health", (_, res) => res.sendStatus(200));
 
 app.use(`${BASE_URL}/upload`, uploadRoutes);
 

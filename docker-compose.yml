@@ -1,27 +1,63 @@
 version: "3.8"
+
 services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    command: server /data --console-address ":9001"
+
   mongo:
-    image: mongo
+    image: mongo:6
+    container_name: vrm-mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   backend:
     build: ./backend
-    environment:
-      - MONGO_URL=mongodb://mongo:27017/mern-app
+    container_name: vrm-backend
+    volumes:
+      - ./backend/uploads:/app/uploads
+    env_file:
+      - .env # Global (project root)
+      - ./backend/.env # Backend-specific
     ports:
       - "5000:5000"
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   frontend:
     build: ./frontend
-    ports:
-      - "3000:80"
+    container_name: vrm-frontend
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   mongo_data:
