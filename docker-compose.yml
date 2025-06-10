@@ -61,3 +61,4 @@ services:
 
 volumes:
   mongo_data:
+  minio_data:

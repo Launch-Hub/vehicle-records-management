@@ -26,7 +26,7 @@ mongoose
   .then(() => console.log("%cMongoDB connected", "color: green; font-weight: bold;"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-app.get("/health", (_, res) => res.sendStatus(200));
+app.get(`${BASE_URL}/healthz`, (_, res) => res.sendStatus(200));
 
 app.use(`${BASE_URL}/upload`, uploadRoutes);
 
