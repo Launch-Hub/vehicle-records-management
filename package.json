@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "start:db": "start-localdb.bat",
-    "stop:db": "stop-localdb.bat"
+    "stop:db": "stop-localdb.bat",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down -v"
   },
   "repository": {
     "type": "git",

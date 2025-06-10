@@ -1,5 +1,4 @@
 const { User } = require("../models/user");
-require("dotenv").config();
 
 const { DEFAULT_PERMISSIONS, SALT_OR_ROUND } = require("../constants");
 
