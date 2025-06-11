@@ -1,18 +1,18 @@
+// const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 
-const uploadRoutes = require("./routes/upload.route");
+const allRoutes = require("./routes/index");
 
-const generalRoutes = require("./routes/general.route");
-const authRoutes = require("./routes/auth.route");
-const userRoutes = require("./routes/users.route");
-const recordRoutes = require("./routes/legal-records.route");
-
-const { MONGO_URI, BASE_URL } = process.env;
+const { MONGO_URI, BASE_API_URL } = process.env;
 
 const app = express();
+
+// Static files
 app.use("/uploads", express.static("uploads"));
+
+// Middleware
 app.use(express.json());
 app.use(
   cors({
@@ -21,18 +21,22 @@ app.use(
   })
 );
 
+// Database connection
 mongoose
   .connect(MONGO_URI, {})
   .then(() => console.log("%cMongoDB connected", "color: green; font-weight: bold;"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-app.get(`${BASE_URL}/healthz`, (_, res) => res.sendStatus(200));
+// Health check
+app.get(`${BASE_API_URL}/healthz`, (_, res) => res.sendStatus(200));
 
-app.use(`${BASE_URL}/upload`, uploadRoutes);
+// Mount all routes under the base URL
+app.use(`${BASE_API_URL}`, allRoutes); // add /v1 when on production
 
-app.use(`${BASE_URL}/general`, generalRoutes);
-app.use(`${BASE_URL}/auth`, authRoutes);
-app.use(`${BASE_URL}/users`, userRoutes);
-app.use(`${BASE_URL}/records`, recordRoutes);
+// Serve the client
+// app.use(express.static(path.join(__dirname, "/frontend/dist")));
+// app.get("*", (_, res) => {
+//   res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
+// });
 
 module.exports = app;

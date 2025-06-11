@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(user)
       storeTokens(accessToken, refreshToken, user)
       navigate(redirectPath)
+      setAuthResolved(true)
     } catch (error: any) {
       throw error // rethrow if upstream needs to catch
     }
@@ -86,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   useEffect(() => {
-    console.count('update last active')
+    console.count('path is changed, update last active')
     const _user = getUserLocal()
     if (_user) updateLastActive()
   }, [pathname])
