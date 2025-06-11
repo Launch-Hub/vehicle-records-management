@@ -6,8 +6,11 @@
   "scripts": {
     "start:db": "start-localdb.bat",
     "stop:db": "stop-localdb.bat",
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/server.js",
     "docker:up": "docker compose up --build -d",
-    "docker:down": "docker compose down -v"
+    "docker:down": "docker compose down -v",
+    "generate:key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "repository": {
     "type": "git",
