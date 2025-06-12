@@ -26,7 +26,8 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const filter = email.includes("@") ? { email } : { username: email };
+  const user = await User.findOne(filter);
   if (!user) return res.status(404).json({ error: "Invalid credentials" });
 
   const isMatch = await user.comparePassword(password);
