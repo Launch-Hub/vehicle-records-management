@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-muted">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">Forgot Password</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">Quên mật khẩu</CardTitle>
         </CardHeader>
         <CardContent className="mx-2 mb-4">
           {submitted ? (

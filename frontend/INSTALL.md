@@ -106,7 +106,8 @@ npm install react-router-dom
 ## 8. Add more necessary dependencies
 
 ```bash
-npm install vite-tsconfig-paths axios 
+npm install vite-tsconfig-paths axios
+npm install @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @tanstack/react-table
 ```
 
 **Note: Use `--legacy-peer-deps` if needed.**

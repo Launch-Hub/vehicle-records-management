@@ -1,14 +1,17 @@
+import { AppSidebar } from '@/components/shared/app-sidebar'
+import { SiteHeader } from '@/components/shared/site-header'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Outlet } from 'react-router-dom'
 
 const MainLayout = () => {
   return (
-    <div>
-      <header>Header</header>
-      <nav>Sidebar</nav>
-      <main>
-        <Outlet /> {/* Nested route will render here */}
-      </main>
-    </div>
+    <SidebarProvider>
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <Outlet />
+      </SidebarInset>
+    </SidebarProvider>
   )
 }
 
