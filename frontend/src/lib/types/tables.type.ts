@@ -5,16 +5,20 @@ interface PermissionProps {
 }
 export type Permission = Record<string, PermissionProps>
 
-interface UserProps {
-  _id?: string
+interface LoginUserProps {
   username: string
   email: string
   name?: string
   avatar?: string
+  assignedUnit: string
+  serviceNumber: string
+  //
   token?: string
-  password?: string // for crud
-  roles: Array<string>
   permissions: Permission
+}
+interface UserProps extends Omit<LoginUserProps, 'token'> {
+  _id: string
+  password?: string // for crud
   status?: string // for crud
 }
 export type User = UserProps
@@ -30,9 +34,9 @@ interface ArchiveLocationProps {
 }
 export type ArchiveLocation = ArchiveLocationProps
 
-export interface LegalRecordProps {
+export interface VehicleRecordProps {
   _id: string
-  licensePlate: string
+  plateNumber: string
   issuer: string
   phone?: string
   email?: string
@@ -44,4 +48,4 @@ export interface LegalRecordProps {
   note?: string
   status: string
 }
-export type LegalRecord = LegalRecordProps
+export type VehicleRecord = VehicleRecordProps

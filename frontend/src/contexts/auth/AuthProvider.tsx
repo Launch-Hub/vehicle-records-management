@@ -1,15 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { type User } from '@/lib/types/tables.type'
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  clearSession,
-  getAccessToken,
-  getLastActive,
-  getRefreshToken,
-  getUserLocal,
-  storeTokens,
-  updateLastActive,
-} from '@/lib/auth'
+import { clearSession, getLastActive, getRefreshToken, getUserLocal, storeTokens } from '@/lib/auth'
 import { AuthContext } from './auth-context'
 import { ROUTES } from '@/routes'
 import { toast } from 'sonner'
@@ -51,15 +43,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // If no token or inactive too long, logout
     if (!refreshToken || !lastActive || isNaN(lastActive) || !_user) {
-      toast.error('Thông tin người dùng không đúng!')
+      if (ROUTES.find((e) => pathname.includes(e.path))?.auth !== true) return
+      // toast.error('Thông tin người dùng không đúng!')
       logout()
       return
     }
     const inactiveDuration = Date.now() - lastActive
     if (inactiveDuration > INACTIVITY_TIMEOUT_MS) {
-      logout()
       toast.warning('Phiên đăng nhập hết hạn!')
       setAuthResolved(true)
+      logout()
       return
     }
 
@@ -79,7 +72,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   useEffect(() => {
-    if (ROUTES.find((e) => pathname.includes(e.path))?.auth !== true) return
     if (!hasRefreshed.current) {
       refreshSession()
       hasRefreshed.current = true
@@ -87,9 +79,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [])
 
   useEffect(() => {
-    console.count('path is changed, update last active')
+    // console.count('path is changed, update last active')
     const _user = getUserLocal()
-    if (_user) updateLastActive()
+    if (_user) refreshSession()
   }, [pathname])
 
   return (

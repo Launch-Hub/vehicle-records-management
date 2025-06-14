@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
-import type { LegalRecord } from '@/lib/types/tables.type'
+import type { VehicleRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { RecordDataTable } from '@/components/page/records/table'
-import { RecordDialog } from '@/components/page/records/dialog'
-import { useSearchParams } from 'react-router-dom'
 
 export default function RecordsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [isFetching, setIsFetching] = useState(false)
-  const [data, setData] = useState<LegalRecord[]>([])
+  const [data, setData] = useState<VehicleRecord[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
-  // 
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [object, setObject] = useState<LegalRecord | undefined>(undefined)
-  const [isCopying, setIsCopying] = useState(false)
+
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const joinPath = (base: string, segment: string) =>
+    base.endsWith('/') ? `${base}${segment}` : `${base}/${segment}`
 
   const fetchData = async () => {
     try {
@@ -27,23 +27,19 @@ export default function RecordsPage() {
           ...pagination,
         },
       })
-      if (response.data) {
-        console.log('resp: ', response.data)
-        setData(response.data)
-      }
+      if (response.data) setData(response.data)
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error('Không thể kết nối đến máy chủ! Xin thử lại sau')
     } finally {
       setIsFetching(false)
     }
-    return []
   }
 
   const handleSearch = (searchTerm: string) => {
     if (searchTerm === search && !searchTerm) return
     setSearch(searchTerm)
-    setPagination((pagination) => ({ ...pagination, pageIndex: 0 }))
+    setPagination((p) => ({ ...p, pageIndex: 0 }))
     fetchData()
   }
 
@@ -53,32 +49,19 @@ export default function RecordsPage() {
   }
 
   const handleCreate = () => {
-    setObject(undefined)
-    setShowCreateModal(true)
+    navigate(joinPath(location.pathname, 'new'))
   }
 
-  const handleEdit = (value: LegalRecord) => {
-    setObject(value)
-    setShowCreateModal(true)
+  const handleEdit = (record: VehicleRecord) => {
+    navigate(joinPath(location.pathname, record._id))
   }
 
-  const handleCopy = (value: LegalRecord) => {
-    setObject(value)
-    setIsCopying(true)
-    setShowCreateModal(true)
+  const handleCopy = (record: VehicleRecord) => {
+    navigate(`${joinPath(location.pathname, record._id)}?copy=true`)
   }
 
-  const handleDelete = (id: string) => {}
-
-  const handleSubmit = async (action: string, data: Omit<LegalRecord, '_id'>) => {
-    switch (action) {
-      case 'create':
-        break
-      case 'update':
-        break
-      case 'copy':
-        break
-    }
+  const handleDelete = (id: string) => {
+    // implement if needed
   }
 
   useEffect(() => {
@@ -98,13 +81,6 @@ export default function RecordsPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
-          />
-          <RecordDialog
-            open={showCreateModal}
-            onSubmit={handleSubmit}
-            onClose={() => setShowCreateModal(false)}
-            initialData={object}
-            isCopying={isCopying}
           />
         </div>
       </div>

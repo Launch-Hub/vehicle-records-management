@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { DialogProps } from '@/lib/types/props'
 import { useForm } from 'react-hook-form'
-import type { LegalRecord } from '@/lib/types/tables.type'
+import type { VehicleRecord } from '@/lib/types/tables.type'
 import { DICTIONARY } from '@/constants/dictionary'
 import { useEffect, useState } from 'react'
 import {
@@ -29,7 +29,7 @@ export function RecordDialog({
   onSubmit,
   initialData,
   isCopying = false,
-}: DialogProps<LegalRecord>) {
+}: DialogProps<VehicleRecord>) {
   const {
     register,
     handleSubmit,
@@ -37,9 +37,9 @@ export function RecordDialog({
     setValue,
     watch,
     formState: { isSubmitting },
-  } = useForm<Omit<LegalRecord, '_id'>>({
+  } = useForm<Omit<VehicleRecord, '_id'>>({
     defaultValues: initialData || {
-      licensePlate: '',
+      plateNumber: '',
       issuer: '',
       phone: '',
       email: '',
@@ -66,7 +66,7 @@ export function RecordDialog({
     onClose()
   }
 
-  const handleFormSubmit = async (data: Omit<LegalRecord, '_id'>) => {
+  const handleFormSubmit = async (data: Omit<VehicleRecord, '_id'>) => {
     // Upload files and get URLs
     const uploadedUrls: string[] = []
 
@@ -108,10 +108,10 @@ export function RecordDialog({
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="licensePlate" className="required">
-                {DICTIONARY['licensePlate']}
+              <Label htmlFor="plateNumber" className="required">
+                {DICTIONARY['plateNumber']}
               </Label>
-              <Input id="licensePlate" {...register('licensePlate', { required: true })} />
+              <Input id="plateNumber" {...register('plateNumber', { required: true })} />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="issuer" className="required">

@@ -14,10 +14,6 @@ import {
 } from '@/components/ui/select'
 import type { User } from '@/lib/types/tables.type'
 
-export type UserFormValues = Omit<User, '_id'> & {
-  roles: string
-}
-
 interface UserFormProps {
   initialData?: User
   isCopying?: boolean
@@ -38,14 +34,13 @@ export default function UserForm({
     setValue,
     watch,
     formState: { isSubmitting },
-  } = useForm<UserFormValues>({
+  } = useForm<Omit<User, '_id'>>({
     defaultValues: {
       username: '',
       email: '',
       name: '',
       password: '',
       avatar: '',
-      roles: 'nhân viên',
       permissions: {},
       status: 'active',
     },
@@ -53,35 +48,16 @@ export default function UserForm({
 
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleFormSubmit = (formData: UserFormValues) => {
-    const action: 'create' | 'update' | 'copy' = isCopying
-      ? 'copy'
-      : initialData
-      ? 'update'
-      : 'create'
-
-    const roles = formData.roles
-      .split(',')
-      .map((r) => r.trim())
-      .filter(Boolean)
-
-    const data: Omit<User, '_id'> = {
+  const handleFormSubmit = (formData: Omit<User, '_id'>) => {
+    onSubmit({
       ...formData,
       username: formData.username || formData.email,
-      roles,
-    }
-
-    onSubmit(data)
+    })
   }
 
   useEffect(() => {
     if (initialData) {
-      reset({
-        ...initialData,
-        roles: Array.isArray(initialData.roles)
-          ? initialData.roles.join(', ')
-          : (initialData.roles as string),
-      })
+      reset(initialData)
     }
   }, [initialData, reset])
 
@@ -126,11 +102,6 @@ export default function UserForm({
               {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             </Button>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="roles">{DICTIONARY['roles']}</Label>
-          <Input id="roles" placeholder="admin, nhân viên" {...register('roles')} />
         </div>
 
         <div className="flex flex-col gap-2">

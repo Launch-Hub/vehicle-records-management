@@ -1,8 +1,8 @@
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
-const JWT_EXPIRY = "15m"; // access token
+const JWT_EXPIRY = "1d"; // access token
 const JWT_REFRESH_EXPIRY = "7d"; // refresh token
-const SALT_OR_ROUND = 10;
+const SALT_OR_ROUND = 10; // salt for encrypt
 
 const DEFAULT_PERMISSIONS = {
   general: {
@@ -12,8 +12,8 @@ const DEFAULT_PERMISSIONS = {
   },
   users: {
     read: true,
-    write: true,
-    delete: true,
+    write: false,
+    delete: false,
   },
   settings: {
     read: true,
@@ -32,6 +32,8 @@ const DEFAULT_PERMISSIONS = {
   },
 };
 
+const BUCKET_NAME = "uploads";
+
 module.exports = {
   JWT_SECRET,
   JWT_REFRESH_SECRET,
@@ -39,4 +41,5 @@ module.exports = {
   JWT_REFRESH_EXPIRY,
   SALT_OR_ROUND,
   DEFAULT_PERMISSIONS,
+  BUCKET_NAME,
 };
