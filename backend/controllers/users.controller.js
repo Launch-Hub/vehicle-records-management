@@ -1,6 +1,75 @@
 const { User } = require("../models/user");
-
+const { parsePagination } = require("../utils/helper");
 const { DEFAULT_PERMISSIONS, SALT_OR_ROUND } = require("../constants");
+
+// manage user //
+//
+exports.getList = async (req, res) => {
+  const view = {
+    avatar: 1,
+    name: 1,
+    username: 1,
+    email: 1,
+    roles: 1,
+    status: 1,
+  };
+
+  try {
+    // Apply pagination only if pageIndex or pageSize is present
+    const { pageIndex, pageSize } = req.query;
+    const { skip, limit } = parsePagination(pageIndex, pageSize);
+
+    const query = User.find({}, view);
+    query.skip(skip).limit(limit);
+
+    const result = await query.exec();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
+
+exports.getOne = async (req, res) => {
+  try {
+    const result = await User.findById(req.params.id);
+    if (!result) return res.status(404).json({ error: true, message: "Not found" });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
+
+exports.create = async (req, res) => {
+  try {
+    const { username, email, password, roles, permissions } = req.body;
+    const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+    if (!permissions) permissions = DEFAULT_PERMISSIONS;
+    const user = await User.create({ username, email, passwordHash, roles, permissions });
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(400).json({ error: true, message: err.message });
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ error: true, message: "Not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: true, message: err.message });
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: true, message: "Not found" });
+    res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
 
 // manage profile
 exports.getProfile = async (req, res) => {
@@ -109,81 +178,5 @@ exports.updatePermissions = async (req, res) => {
     res.json({ message: "Permissions updated" });
   } catch (err) {
     res.status(400).json({ error: err.message });
-  }
-};
-
-// manage user //
-
-//
-exports.getList = async (req, res) => {
-  const view = {
-    avatar: 1,
-    name: 1,
-    username: 1,
-    email: 1,
-    roles: 1,
-    status: 1,
-  };
-
-  try {
-    const { pageIndex, pageSize } = req.query;
-
-    const query = User.find({}, view);
-
-    if (pageIndex !== undefined || pageSize !== undefined) {
-      const page = parseInt(pageIndex) || 0;
-      const size = parseInt(pageSize);
-      const limit = size === 0 ? 50 : size || 50;
-      const skip = page * limit;
-
-      query.skip(skip).limit(limit);
-    }
-
-    const users = await query.exec();
-    res.json(users);
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-};
-
-exports.getOne = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ error: true, message: "Not found" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
-  }
-};
-
-exports.create = async (req, res) => {
-  try {
-    const { username, email, password, roles, permissions } = req.body;
-    const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
-    if (!permissions) permissions = DEFAULT_PERMISSIONS;
-    const user = await User.create({ username, email, passwordHash, roles, permissions });
-    res.status(201).json(user);
-  } catch (err) {
-    res.status(400).json({ error: true, message: err.message });
-  }
-};
-
-exports.update = async (req, res) => {
-  try {
-    const updated = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ error: true, message: "Not found" });
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ error: true, message: err.message });
-  }
-};
-
-exports.delete = async (req, res) => {
-  try {
-    const deleted = await User.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: true, message: "Not found" });
-    res.json({ message: "Deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ error: true, message: err.message });
   }
 };
