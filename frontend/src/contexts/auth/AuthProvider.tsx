@@ -7,7 +7,7 @@ import { ROUTES } from '@/routes'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
 
-const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000 // 15 minutes
+const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000 // 1 day
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate()

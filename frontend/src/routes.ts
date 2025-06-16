@@ -1,5 +1,5 @@
 import { lazy } from 'react'
-import { FolderIcon, LayoutDashboardIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import { FileStackIcon, FolderIcon, LayoutDashboardIcon, UsersIcon, type LucideIcon } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
 import HomePage from '@/pages/Home'
@@ -250,6 +250,50 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
       {
         path: '/quan-ly-ho-so',
         title: 'Quản lý Hồ Sơ',
+        language: 'vi',
+      },
+    ],
+    children: [
+      {
+        element: 'RecordDetailPage',
+        path: ':id',
+        title: 'Record Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Chỉnh sửa hồ sơ',
+          },
+        ],
+      },
+      {
+        element: 'RecordDetailPage',
+        path: 'new',
+        title: 'Create Record',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo hồ sơ mới',
+          },
+        ],
+      },
+    ],
+  },
+  
+  {
+    auth: true,
+    element: 'ProcedurePage',
+    resource: 'procedures',
+    showSidebar: true,
+    icon: FileStackIcon,
+    path: '/procedures',
+    title: 'Manage Procedures',
+    language: 'en',
+    translations: [
+      {
+        path: '/quan-ly-thu-tuc',
+        title: 'Thủ tục Đăng ký',
         language: 'vi',
       },
     ],

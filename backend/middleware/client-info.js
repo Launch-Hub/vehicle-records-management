@@ -1,4 +1,4 @@
-const { getClientIp } = require("../utils/misc");
+const { getClientIp } = require("../utils/helper");
 
 exports.keepClientInfo = (req, _, next) => {
   const ip = getClientIp(req);

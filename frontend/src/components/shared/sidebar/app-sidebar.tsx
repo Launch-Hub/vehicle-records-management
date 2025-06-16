@@ -79,12 +79,16 @@ const mock_data = {
 }
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
-  const navMain = ROUTES.filter((e) => e.showSidebar).map((e) => ({
-    title: e.title,
-    url: e.path,
-    icon: e.icon,
-    items: []
-  }))
+  const navMain = ROUTES.filter((e) => e.showSidebar).map((e) => mapRoute(e))
+
+  function mapRoute(route: any) {
+    return {
+      title: route.title,
+      url: route.path,
+      icon: route.icon,
+      children: route.children?.filter((e: any) => e.showSidebar)?.map(mapRoute) ?? [],
+    }
+  }
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
