@@ -1,0 +1,23 @@
+name: 🕵️‍♂️ Commit Message Lint
+
+on:
+  push:
+    branches: ["develop"]
+  # pull_request:
+  #   types: [opened, edited, synchronize, reopened]
+
+jobs:
+  lint-commit-message:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v3
+
+      - name: 🧪 Validate commit messages
+        uses: wagoid/commitlint-github-action@v5
+        with:
+          configFile: .github/commitlint.config.js
+
+      - name: ✅ Passed commit message linting
+        if: success()
+        run: echo "🎉 All commit messages are good to go!"

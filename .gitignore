@@ -1,2 +1,8 @@
 *.bat
 *.log
+
+**/node_modules
+
+# env files
+**/*.env
+**/!.env.example

@@ -1,20 +1,15 @@
 const mongoose = require("mongoose");
-
-const permissionSchema = new mongoose.Schema(
-  {
-    read: Boolean,
-    write: Boolean,
-    delete: Boolean,
-  },
-  { _id: false }
-);
+const { permissionSchema } = require("./permission");
 
 const userSchema = new mongoose.Schema({
   username: { type: String, unique: true, required: true },
   email: { type: String, unique: true, required: true },
   passwordHash: { type: String, required: true },
+  name: String,
   avatar: { type: String, default: "default-avatar.png" },
-  roles: [String],
+  assignedUnit: String, // Đơn vị
+  serviceNumber: String, // Số hiệu
+  // roles: [String],
   permissions: {
     type: Map,
     of: permissionSchema,
@@ -25,6 +20,21 @@ const userSchema = new mongoose.Schema({
   },
   status: { type: String, enum: ["active", "inactive", "suspended"], default: "active" },
   createdAt: { type: Date, default: Date.now },
+  isDeleted: { type: Boolean, default: false },
+  isAdmin: { type: Boolean, default: false },
 });
 
-module.exports = mongoose.model("User", userSchema);
+// Methods area
+const bcrypt = require("bcrypt");
+
+// Password comparison method
+userSchema.methods.comparePassword = function (password) {
+  return bcrypt.compare(password, this.passwordHash);
+};
+userSchema.methods.hashPassword = function (password) {
+  return bcrypt.hash(password);
+};
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = { userSchema, User };

@@ -1,15 +1,16 @@
-import { AppSidebar } from '@/components/shared/app-sidebar'
-import { SiteHeader } from '@/components/shared/site-header'
+import { AppSidebar } from '@/components/shared/sidebar/app-sidebar'
+import { AppHeader } from '@/components/shared/header/app-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 const MainLayout = () => {
+  const location = useLocation()
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
-        <Outlet />
+        <AppHeader />
+        <Outlet key={location.pathname} />
       </SidebarInset>
     </SidebarProvider>
   )

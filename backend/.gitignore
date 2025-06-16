@@ -10,3 +10,6 @@ npm-debug.log*
 # env files
 .env
 .env.*
+
+# local files
+*.local.*

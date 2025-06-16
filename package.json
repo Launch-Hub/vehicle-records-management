@@ -1,0 +1,35 @@
+{
+  "name": "vehicle-records-management",
+  "version": "1.0.1.16",
+  "description": "vehicle-records-management",
+  "private": true,
+  "scripts": {
+    "start:db": "start-localdb.bat",
+    "stop:db": "stop-localdb.bat",
+    "dev:be": "cd backend && nodemon server.js",
+    "dev:fe": "cd frontend && npm run dev",
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/server.js",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down -v",
+    "generate:key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Launch-Hub/vehicle-records-management.git"
+  },
+  "keywords": [
+    "vehicle records",
+    "vehicle",
+    "vehicle records",
+    "management"
+  ],
+  "author": "Giang, N.T.",
+  "bugs": {
+    "url": "https://github.com/Launch-Hub/vehicle-records-management/issues"
+  },
+  "homepage": "https://github.com/Launch-Hub/vehicle-records-management#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

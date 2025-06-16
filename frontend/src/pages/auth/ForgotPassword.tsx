@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { Link } from 'react-router-dom'
+import { ROUTES } from '@/routes'
+import { ArrowLeft, StepBackIcon } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const loginUrl = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,6 +69,13 @@ export default function ForgotPasswordPage() {
               <Button type="submit" className={cn('w-full')} disabled={loading}>
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </Button>
+              <Link
+                className="text-indigo-800 text-sm duration-200 hover:opacity-75 flex items-center"
+                to={loginUrl}
+              >
+                <ArrowLeft size={16} />
+                Quay về trang đăng nhập
+              </Link>
             </form>
           )}
         </CardContent>

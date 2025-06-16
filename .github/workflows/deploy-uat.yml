@@ -1,0 +1,20 @@
+name: Deploy to UAT
+
+on:
+  push:
+    branches:
+      - release/uat
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build and deploy with Docker Compose
+        run: |
+          docker compose down
+          docker compose pull
+          docker compose up -d --build
