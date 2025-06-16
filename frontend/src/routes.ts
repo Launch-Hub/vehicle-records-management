@@ -87,9 +87,9 @@ interface RouteTranslationProps {
 }
 
 export interface CustomRouteProps {
-  auth: boolean
+  auth?: boolean
+  resource?: string
   element: string
-  resource: string
   showSidebar?: boolean
   icon?: LucideIcon
   path: string
@@ -212,16 +212,26 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     ],
     children: [
       {
-        auth: true,
         element: 'UserDetailPage',
-        resource: 'users',
-        path: ':userId',
-        title: 'User Detail',
+        path: ':id',
+        title: 'Create User',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            title: 'Thông tin người dùng',
+            title: 'Chỉnh sửa người dùng',
+          },
+        ],
+      },
+      {
+        element: 'UserDetailPage',
+        path: 'new',
+        title: 'Create User',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo người dùng mới',
           },
         ],
       },
@@ -245,16 +255,26 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     ],
     children: [
       {
-        auth: true,
         element: 'RecordDetailPage',
-        resource: 'records',
-        path: ':recordId',
+        path: ':id',
         title: 'Record Detail',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            title: 'Chi tiết hồ sơ',
+            title: 'Chỉnh sửa hồ sơ',
+          },
+        ],
+      },
+      {
+        element: 'RecordDetailPage',
+        path: 'new',
+        title: 'Create Record',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo hồ sơ mới',
           },
         ],
       },

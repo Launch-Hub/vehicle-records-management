@@ -7,7 +7,9 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   name: String,
   avatar: { type: String, default: "default-avatar.png" },
-  roles: [String],
+  assignedUnit: String, // Đơn vị
+  serviceNumber: String, // Số hiệu
+  // roles: [String],
   permissions: {
     type: Map,
     of: permissionSchema,

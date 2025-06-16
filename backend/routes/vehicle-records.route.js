@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const legalRecordController = require("../controllers/legal-records.controller");
+const vehicleRecordController = require("../controllers/vehicle-records.controller");
 const { authenticateToken, requirePermission } = require("../middleware/auth");
 
 // read one
@@ -8,35 +8,35 @@ router.get(
   "/",
   authenticateToken,
   requirePermission("records", "read"),
-  legalRecordController.getList
+  vehicleRecordController.getList
 );
 // read one
 router.get(
   "/:id",
   authenticateToken,
   requirePermission("records", "read"),
-  legalRecordController.getOne
+  vehicleRecordController.getOne
 );
 // create
 router.post(
   "/",
   authenticateToken,
   requirePermission("records", "write"),
-  legalRecordController.create
+  vehicleRecordController.create
 );
 // update
 router.put(
   "/:id",
   authenticateToken,
   requirePermission("records", "write"),
-  legalRecordController.update
+  vehicleRecordController.update
 );
 // delete
 router.delete(
   "/:id",
   authenticateToken,
   requirePermission("records", "delete"),
-  legalRecordController.delete
+  vehicleRecordController.delete
 );
 
 module.exports = router;

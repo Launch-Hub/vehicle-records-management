@@ -7,12 +7,14 @@ import { Link } from 'react-router-dom'
 import { useLoader } from '@/contexts/loader'
 import { useAuth } from '@/contexts/auth'
 import { ROUTES } from '@/routes'
+import { Label } from '@/components/ui/label'
 
 export default function LoginPage() {
   const { login } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const loader = useLoader()
+  const forgotUrl = ROUTES.find((e) => e.enPath === '/forgot-password')?.path || '/forgot-password'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,22 +52,30 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent className="mx-2 mb-4">
           <form onSubmit={handleLogin} className="space-y-4">
-            <Input
-              type="email"
-              placeholder="Email..."
-              className="p-4"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <Input
-              type="password"
-              placeholder="Mật khẩu..."
-              className="p-4"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email">Tên đăng nhập hoặc Email</Label>
+              <Input
+                name="email"
+                type="text"
+                // placeholder="Email..."
+                className="p-4"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password">Mật khẩu</Label>
+              <Input
+                name="password"
+                type="password"
+                // placeholder="Mật khẩu..."
+                className="p-4"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
             <Button
               size="lg"
               type="submit"
@@ -73,7 +83,12 @@ export default function LoginPage() {
             >
               Đăng nhập
             </Button>
-            <Link to="/forgot-password">Quên mật khẩu?</Link>
+            <Link
+              className="text-indigo-800 text-sm duration-200 hover:opacity-75 flex items-center"
+              to={forgotUrl}
+            >
+              Quên mật khẩu?
+            </Link>
           </form>
         </CardContent>
       </Card>

@@ -18,18 +18,24 @@ export default function Forbidden() {
     >
       <Card className="shadow-xl border-none rounded-2xl">
         <CardHeader className="text-center space-y-2">
-          <AlertTriangle className="mx-auto text-destructive" size={48} />
-          <CardTitle className="text-2xl font-bold">403 - Forbidden</CardTitle>
+          <AlertTriangle className="mx-auto text-destructive" size={54} />
+          <CardTitle className="text-2xl font-bold text-warning">
+            {/* 403 - Forbidden */}
+            Truy cập bị hạn chế
+          </CardTitle>
           <p className="text-muted-foreground text-sm">
-            You don't have permission to access this page.
+            {/* You don't have permission to access this page. */}
+            Bạn không có quyền truy cập trang này
           </p>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Button variant="default" onClick={() => navigate(-1)}>
-            Go Back
+            Quay lại
+            {/* Go Back */}
           </Button>
-          <Button variant="ghost" onClick={() => navigate(loginUrl)}>
-            Login with different account
+          <Button variant="outline" onClick={() => navigate(loginUrl)}>
+            {/* Login with different account */}
+            Đăng nhập bằng tài khoản khác
           </Button>
         </CardContent>
       </Card>

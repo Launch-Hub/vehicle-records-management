@@ -22,6 +22,7 @@ import {
 import { scrollToTop } from '@/lib/utils'
 import { useAuth } from '@/contexts/auth'
 import { ROUTES } from '@/routes'
+import { NavDocuments } from './nav-documents'
 
 const mock_data = {
   // navMain: [
@@ -99,7 +100,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={navMain} />
         {/* the below are currently not in use */}
-        {/* <NavDocuments items={data.documents} /> */}
+        {/* <NavDocuments items={mock_data.documents} /> */}
         {/* <NavSecondary items={mock_data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>

@@ -13,8 +13,8 @@ export const TABLE_DICTIONARY = {
   roles: 'Vai trò',
   status: 'Trạng thái',
   password: 'Mật khẩu',
-  // Legal Record
-  licensePlate: 'Biển số xe',
+  // Vehicle Record
+  plateNumber: 'Biển số xe',
   issuer: 'Người đăng ký',
   phone: 'Số điện thoại',
   address: 'Địa chỉ',

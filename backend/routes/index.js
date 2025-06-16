@@ -6,7 +6,7 @@ const uploadRoutes = require("./upload.route");
 const generalRoutes = require("./general.route");
 const authRoutes = require("./auth.route");
 const userRoutes = require("./users.route");
-const recordRoutes = require("./legal-records.route");
+const recordRoutes = require("./vehicle-records.route");
 
 // Mount routes on the sub-paths
 router.use("/upload", uploadRoutes);
