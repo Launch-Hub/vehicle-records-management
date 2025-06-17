@@ -3,7 +3,7 @@ const { parsePagination } = require("../utils/helper");
 
 exports.getList = async (req, res) => {
   // Define the view: fields to include
-  const view = {
+  const projection = {
     plateNumber: 1,
     issuer: 1,
     phone: 1,
@@ -13,15 +13,31 @@ exports.getList = async (req, res) => {
     createdAt: 1,
   };
   try {
-    // Apply pagination only if pageIndex or pageSize is present
-    const { pageIndex, pageSize } = req.query;
+    const { pageIndex, pageSize, search } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
-    const query = VehicleRecord.find({}, view).populate("registryCategory");
-    query.skip(skip).limit(limit);
+    const filter = {};
+    if (search) {
+      const regex = new RegExp(search, "i"); // case-insensitive partial match
+      filter.$or = [
+        { name: regex },
+        { username: regex },
+        { email: regex },
+        { serviceNumber: regex },
+      ];
+    }
 
-    const result = await query.exec();
-    res.json(result);
+    const total = await VehicleRecord.countDocuments(filter);
+    if (total === 0) return res.json({ total, items: [] });
+
+    const items = await VehicleRecord.find(filter, projection)
+      // .populate("registryCategory")
+      .sort({ createdAt: -1 }) // ✅ Default sort by newest first
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    res.json({ total, items });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
   }

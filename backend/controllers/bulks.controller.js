@@ -11,15 +11,31 @@ exports.getList = async (req, res) => {
     updatedAt: 1,
   };
   try {
-    // Apply pagination only if pageIndex or pageSize is present
-    const { pageIndex, pageSize } = req.query;
+    const { pageIndex, pageSize, search } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
-    const query = Bulk.find({}, view);
-    query.skip(skip).limit(limit);
+    const filter = {};
+    if (search) {
+      const regex = new RegExp(search, "i"); // case-insensitive partial match
+      filter.$or = [
+        { name: regex },
+        { username: regex },
+        { email: regex },
+        { serviceNumber: regex },
+      ];
+    }
 
-    const result = await query.exec();
-    res.json(result);
+    const total = await Bulk.countDocuments(filter);
+    if (total === 0) return res.json({ total, items: [] });
+
+    const items = await Bulk.find(filter, projection)
+      // .populate("registryCategory")
+      .sort({ createdAt: -1 }) // ✅ Default sort by newest first
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    res.json({ total, items });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
   }

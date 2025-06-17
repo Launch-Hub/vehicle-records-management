@@ -7,13 +7,14 @@ const getClientIp = (req) => {
   return req.connection.remoteAddress;
 };
 
-const parsePagination = (pageSize, pageIndex) => {
+const parsePagination = (pageIndex, pageSize) => {
   if (pageIndex === undefined && pageSize === undefined) return { skip: 0, limit: 50 };
 
   const page = parseInt(pageIndex) || 0;
   const size = parseInt(pageSize);
   const limit = size === 0 ? 50 : size || 50;
   const skip = page * limit;
+
   return { skip, limit };
 };
 

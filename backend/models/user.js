@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, unique: true, required: true },
   passwordHash: { type: String, required: true },
   name: String,
+  phone: String,
   avatar: { type: String, default: "default-avatar.png" },
   assignedUnit: String, // Đơn vị
   serviceNumber: String, // Số hiệu
@@ -19,9 +20,9 @@ const userSchema = new mongoose.Schema({
     loginCount: { type: Number, default: 0 },
   },
   status: { type: String, enum: ["active", "inactive", "suspended"], default: "active" },
-  createdAt: { type: Date, default: Date.now },
-  isDeleted: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now, index: true },
   isAdmin: { type: Boolean, default: false },
+  isDeleted: { type: Boolean, default: false },
 });
 
 // Methods area

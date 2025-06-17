@@ -17,5 +17,7 @@ router.get("/:id", authenticateToken, userController.getOne);
 router.post("/", authenticateToken, userController.create);
 router.put("/", authenticateToken, userController.update);
 router.delete("/:id", authenticateToken, userController.delete);
+//
+router.post("/mock", userController.mockCreate);
 
 module.exports = router;
