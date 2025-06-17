@@ -9,6 +9,7 @@ export default function UserDialog({
   onSubmit,
   initialData,
   isCopying = false,
+  isSelfEdit = false,
 }: DialogProps<User>) {
   const defaultAction = initialData || isCopying ? 'create' : 'update'
 
@@ -21,6 +22,7 @@ export default function UserDialog({
         <UserForm
           initialData={initialData}
           isCopying={isCopying}
+          isSelfEdit={isSelfEdit}
           onSubmit={(data) => onSubmit(defaultAction, data)}
           onCancel={onClose}
         />

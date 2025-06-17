@@ -54,14 +54,11 @@ export function RecordForm({
   })
 
   const values = watch()
-  const [plateView, setPlateView] = useState('')
 
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
 
   useEffect(() => {
     console.log(values.plateNumber)
-    const match = values.plateNumber.match('^[0-9]{2,2}[A-Z]{1,2}[0-9]{4,5}$')
-    if (match) setPlateView
   }, [values.plateNumber])
 
   useEffect(() => {
@@ -183,10 +180,47 @@ export function RecordForm({
               />
             </div>
           </div>
+          {/* <div className="col-span-2 space-y-2">
+          <Label htmlFor="registryCategory" className="required">
+            {DICTIONARY['registryCategory']}
+          </Label>
+          <Input id="registryCategory" {...register('registryCategory', { required: true })} />
+        </div>
+        <div className="col-span-2 space-y-2">
+          <Label htmlFor="attachmentUrls">{DICTIONARY['attachmentUrls']}</Label>
+          <Input
+            id="attachmentUrls"
+            type="file"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files || [])
+              setPendingFiles((prev) => [...prev, ...files])
+            }}
+          />
+          <div className="mt-2 space-y-1">
+            {pendingFiles.map((file, idx) => (
+              <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
+                {file.name}
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => setPendingFiles((prev) => prev.filter((_, i) => i !== idx))}
+                >
+                  <Trash className="w-4 h-4 text-red-500" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="col-span-2 space-y-2">
+          <Label htmlFor="note">{DICTIONARY['note']}</Label>
+          <Textarea id="note" {...register('note')} />
+        </div> */}
         </div>
         <div>
           <Card>
-            <CardContent>{plateView}</CardContent>
+            <CardContent>{values.plateNumber}</CardContent>
           </Card>
         </div>
       </div>

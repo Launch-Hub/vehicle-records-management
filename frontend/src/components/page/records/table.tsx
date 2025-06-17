@@ -50,10 +50,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { getLabel } from '@/constants/dictionary'
+import { getLabel, getTableLabel } from '@/constants/dictionary'
 import { useEffect, useMemo, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { LoaderOverlay } from '@/components/shared/loader/loader-overlay'
 
 interface DataTableProps<T> {
   loading: boolean
@@ -71,7 +72,7 @@ function DataRow<T>({ row }: { row: Row<T> }) {
   return (
     <TableRow data-state={row.getIsSelected() && 'selected'}>
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
+        <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
@@ -136,6 +137,9 @@ export function RecordDataTable<T extends Record<string, any>>({
     ),
     enableSorting: false,
     enableHiding: false,
+    minSize: 32,
+    maxSize: 32,
+    size: 32,
   }
 
   const actionColumn: ColumnDef<T> = {
@@ -159,10 +163,13 @@ export function RecordDataTable<T extends Record<string, any>>({
     ),
     enableSorting: false,
     enableHiding: false,
+    minSize: 32,
+    maxSize: 32,
+    size: 32,
   }
 
   const defaultColumns: ColumnDef<T>[] = useMemo(() => {
-    const userColumns = columns
+    const dataColumns = columns
       ? columns
       : initialData.length
       ? Object.keys(initialData[0])
@@ -170,14 +177,14 @@ export function RecordDataTable<T extends Record<string, any>>({
           .map((key) => ({
             accessorKey: key,
             // header: key.charAt(0).toUpperCase() + key.slice(1),
-            header: () => <>{getLabel(key)}</>,
+            header: () => <>{getTableLabel(key)}</>,
             cell: (info: any) => (
               <span className="text-muted-foreground">{String(info.getValue())}</span>
             ),
           }))
       : []
 
-    return [selectColumn, ...userColumns, actionColumn]
+    return [selectColumn, ...dataColumns, actionColumn]
   }, [columns, initialData])
 
   const table = useReactTable({
@@ -196,10 +203,37 @@ export function RecordDataTable<T extends Record<string, any>>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    defaultColumn: {
+      size: 200, //starting column size
+      minSize: 50, //enforced during column resizing
+      maxSize: 500, //enforced during column resizing
+    },
   })
+
+  const toFirstPage = () => {
+    table.setPageIndex(0)
+    console.log('pagin:', pagination)
+    onPageChange(pagination)
+  }
+  const toPreviousPage = () => {
+    table.previousPage()
+    console.log('pagin:', pagination)
+    onPageChange(pagination)
+  }
+  const toNextPage = () => {
+    table.nextPage()
+    console.log('pagin:', pagination)
+    onPageChange(pagination)
+  }
+  const toLastPage = () => {
+    table.setPageIndex(table.getPageCount() - 1)
+    console.log('pagin:', pagination)
+    onPageChange(pagination)
+  }
 
   return (
     <div className="flex w-full flex-col justify-start gap-6">
+      {loading && <LoaderOverlay />}
       <div className="flex items-center justify-between px-4 lg:px-6">
         <div className="relative w-full max-w-sm">
           <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -249,7 +283,7 @@ export function RecordDataTable<T extends Record<string, any>>({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} style={{ width: header.getSize() }}>
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
@@ -308,7 +342,7 @@ export function RecordDataTable<T extends Record<string, any>>({
               <Button
                 variant="outline"
                 className="hidden h-8 w-8 p-0 lg:flex"
-                onClick={() => table.setPageIndex(0)}
+                onClick={toFirstPage}
                 disabled={!table.getCanPreviousPage()}
               >
                 <span className="sr-only">Đến trang đầu</span>
@@ -318,7 +352,7 @@ export function RecordDataTable<T extends Record<string, any>>({
                 variant="outline"
                 className="size-8"
                 size="icon"
-                onClick={() => table.previousPage()}
+                onClick={toPreviousPage}
                 disabled={!table.getCanPreviousPage()}
               >
                 <span className="sr-only">Trang trước</span>
@@ -328,7 +362,7 @@ export function RecordDataTable<T extends Record<string, any>>({
                 variant="outline"
                 className="size-8"
                 size="icon"
-                onClick={() => table.nextPage()}
+                onClick={toNextPage}
                 disabled={!table.getCanNextPage()}
               >
                 <span className="sr-only">Trang kế</span>
@@ -338,7 +372,7 @@ export function RecordDataTable<T extends Record<string, any>>({
                 variant="outline"
                 className="hidden size-8 lg:flex"
                 size="icon"
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                onClick={toLastPage}
                 disabled={!table.getCanNextPage()}
               >
                 <span className="sr-only">Đến trang cuối</span>

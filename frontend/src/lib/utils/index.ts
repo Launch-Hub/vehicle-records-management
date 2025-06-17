@@ -27,3 +27,12 @@ export function changeTheme(themeName: string) {
 export const scrollToTop = () => {
   return scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+export const joinPath = (base: string, segment: string) => {
+  return base.endsWith('/') ? `${base}${segment}` : `${base}/${segment}`
+}
+
+export const backPath = (path: string) => {
+  const lastSlashIndex = path.lastIndexOf('/')
+  return lastSlashIndex > 0 ? path.slice(0, lastSlashIndex) : ''
+}

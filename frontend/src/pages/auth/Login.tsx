@@ -8,6 +8,7 @@ import { useLoader } from '@/contexts/loader'
 import { useAuth } from '@/contexts/auth'
 import { ROUTES } from '@/routes'
 import { Label } from '@/components/ui/label'
+import { LogoPng } from '@/constants/assets'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -24,7 +25,6 @@ export default function LoginPage() {
       await login(email, password, redirectURL)
     } catch (error: any) {
       if (error.response) {
-        // Server responded with status code != 2xx
         const status = error.response.status
         const message =
           error.response.data?.message ||
@@ -33,10 +33,8 @@ export default function LoginPage() {
             : 'Đã xảy ra lỗi khi đăng nhập.')
         toast.error(message)
       } else if (error.request) {
-        // Request made but no response
         toast.error('Không thể kết nối đến máy chủ.')
       } else {
-        // Something else caused an error
         toast.error('Lỗi không xác định khi đăng nhập.')
       }
     } finally {
@@ -46,52 +44,69 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">Đăng nhập</CardTitle>
-        </CardHeader>
-        <CardContent className="mx-2 mb-4">
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Tên đăng nhập hoặc Email</Label>
-              <Input
-                name="email"
-                type="text"
-                // placeholder="Email..."
-                className="p-4"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+      <div className="w-full max-w-3xl flex rounded-xl shadow-2xl overflow-hidden">
+        {/* Image Section */}
+        <div
+          className="hidden md:block w-2/5 bg-cover bg-center"
+          // style={{
+          //   backgroundImage:
+          //     'url(https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=800)',
+          // }}
+        >
+          <div className="h-full bg-accent flex flex-col items-center justify-center">
+            <h2 className="text-secondary text-2xl font-bold text-center">Đăng Ký Xe</h2>
+            <h1 className="text-primary text-5xl font-extrabold text-center p-4">Minh Tú</h1>
+            <div className="max-w-1/2 mx-auto">
+              <img src={LogoPng} className="w-full object-contain" />
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Mật khẩu</Label>
-              <Input
-                name="password"
-                type="password"
-                // placeholder="Mật khẩu..."
-                className="p-4"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button
-              size="lg"
-              type="submit"
-              className="w-full text-md font-bold hover:translate-y-[2px] duration-200"
-            >
-              Đăng nhập
-            </Button>
-            <Link
-              className="text-indigo-800 text-sm duration-200 hover:opacity-75 flex items-center"
-              to={forgotUrl}
-            >
-              Quên mật khẩu?
-            </Link>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+        {/* Login Form Section */}
+        <Card className="w-full md:w-3/5 bg-background border-none rounded-none">
+          <CardHeader className="pt-8">
+            <CardTitle className="text-3xl font-bold text-center">Đăng nhập</CardTitle>
+          </CardHeader>
+          <CardContent className="px-8 pb-8">
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email">Tên đăng nhập hoặc Email</Label>
+                <Input
+                  name="email"
+                  type="text"
+                  className="p-4 text-base rounded-lg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password">Mật khẩu</Label>
+                <Input
+                  name="password"
+                  type="password"
+                  className="p-4 text-base rounded-lg"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button
+                size="lg"
+                type="submit"
+                className="w-full text-lg font-bold hover:bg-primary/90 transition-transform hover:-translate-y-1 duration-200"
+              >
+                Đăng nhập
+              </Button>
+              <Link
+                className="text-indigo-800 text-sm hover:text-indigo-600 transition-opacity duration-200 flex items-center"
+                to={forgotUrl}
+              >
+                Quên mật khẩu?
+              </Link>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

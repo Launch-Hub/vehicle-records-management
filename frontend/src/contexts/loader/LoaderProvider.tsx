@@ -1,4 +1,4 @@
-import { GlobalLoader } from '@/components/shared/global-loader'
+import { GlobalLoader } from '@/components/shared/loader/global-loader'
 import { useState, type ReactNode } from 'react'
 import { LoaderContext } from './loader-context'
 

@@ -5,6 +5,7 @@ import api from '@/lib/axios'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { RecordDataTable } from '@/components/page/records/table'
+import { joinPath } from '@/lib/utils'
 
 export default function RecordsPage() {
   const [isFetching, setIsFetching] = useState(false)
@@ -14,9 +15,6 @@ export default function RecordsPage() {
 
   const navigate = useNavigate()
   const location = useLocation()
-
-  const joinPath = (base: string, segment: string) =>
-    base.endsWith('/') ? `${base}${segment}` : `${base}/${segment}`
 
   const fetchData = async () => {
     try {
