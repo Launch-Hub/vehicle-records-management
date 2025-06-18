@@ -1,4 +1,4 @@
-const { Bulk } = require("../models/bulk");
+const { Procedure } = require("../models/procedure");
 const { parsePagination } = require("../utils/helper");
 
 exports.getList = async (req, res) => {
@@ -22,11 +22,11 @@ exports.getList = async (req, res) => {
       filter.$or = [{ code: regex }, { name: regex }];
     }
 
-    const total = await Bulk.countDocuments(filter);
+    const total = await Procedure.countDocuments(filter);
     if (total === 0) return res.json({ total, items: [] });
 
-    // const items = await Bulk.find(filter, projection)
-    const items = await Bulk.find(filter)
+    const items = await Procedure.find(filter, projection)
+      // .populate("registryCategory")
       .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
@@ -40,7 +40,7 @@ exports.getList = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   try {
-    const result = await Bulk.findById(req.params.id);
+    const result = await Procedure.findById(req.params.id);
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
     res.json(result);
   } catch (err) {
@@ -63,7 +63,7 @@ exports.create = async (req, res) => {
       });
     }
 
-    const result = await Bulk.create(req.body);
+    const result = await Procedure.create(req.body);
 
     res.locals.documentId = result._id; // ✅ required for activity logger
     res.status(201).json(result);
@@ -74,7 +74,7 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const result = await Bulk.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const result = await Procedure.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
@@ -86,7 +86,7 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const result = await Bulk.findByIdAndDelete(req.params.id);
+    const result = await Procedure.findByIdAndDelete(req.params.id);
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger

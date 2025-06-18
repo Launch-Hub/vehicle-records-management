@@ -16,19 +16,8 @@ const vehicleRecordSchema = new mongoose.Schema(
     phone: String,
     email: String,
     address: String,
-    // registryCategory: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "RegistryCategory",
-    //   required: true,
-    // },
-    // attachmentUrls: {
-    //   type: Array,
-    //   of: String,
-    //   default: [],
-    // },
-    // proceedEvidenceUrl: String,
     archiveAt: archiveSchema,
-    description: String,
+    issuerId: String, // id of the user who create the record
     note: String,
     status: { type: String, enum: ["in processing", "archived"], default: "new" },
   },

@@ -1,15 +1,11 @@
 const mongoose = require("mongoose");
 
-const bulkSchema = new mongoose.Schema(
+const procedurechema = new mongoose.Schema(
   {
-    recordId: { // thông tin hồ sơ
+    recordId: {
+      // thông tin hồ sơ
       type: mongoose.Schema.Types.ObjectId,
       ref: "VehicleRecord",
-      required: true,
-    },
-    procedureTypeId: { // hạng mục đăng ký
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Bulk",
       required: true,
     },
     bulkId: {
@@ -27,6 +23,6 @@ const bulkSchema = new mongoose.Schema(
   { timestamp: true, autoIndex: true }
 );
 
-const Bulk = mongoose.model("Bulk", bulkSchema);
+const Procedure = mongoose.model("Procedure", procedurechema);
 
-module.exports = { bulkSchema, Bulk }; // Lô Hồ sơ Đăng ký
+module.exports = { procedurechema, Procedure }; // Thủ tục Đăng ký

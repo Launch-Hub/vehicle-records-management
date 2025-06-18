@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const uploadController = require("../controllers/upload.controller");
+const controller = require("../controllers/upload.controller");
 const { DEFAULT_LIMIT_SIZE, createMulterMiddleware } = require("../middleware/multer");
 const { docFileFilter, imageFileFilter } = require("../utils/file-filters");
 const { keepClientInfo } = require("../middleware/client-info");

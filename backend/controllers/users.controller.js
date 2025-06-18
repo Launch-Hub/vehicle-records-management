@@ -93,6 +93,7 @@ exports.create = async (req, res) => {
       permissions: finalPermissions,
     });
 
+    res.locals.documentId = result._id; // ✅ required for activity logger
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
@@ -119,10 +120,11 @@ exports.update = async (req, res) => {
       }
     }
 
-    const updated = await User.findByIdAndUpdate(userId, req.body, { new: true });
-    if (!updated) return res.status(404).json({ error: true, message: "Not found" });
+    const result = await User.findByIdAndUpdate(userId, req.body, { new: true });
+    if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
-    res.json(updated);
+    res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
+    res.json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
   }
@@ -130,8 +132,10 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const deleted = await User.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: true, message: "Not found" });
+    const result = await User.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).json({ error: true, message: "Not found" });
+
+    res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });

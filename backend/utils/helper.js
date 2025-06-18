@@ -18,7 +18,20 @@ const parsePagination = (pageIndex, pageSize) => {
   return { skip, limit };
 };
 
+const nomalizeText = (text) => {
+  return text
+    .normalize("NFD") // Decompose accented characters
+    .replace(/[\u0300-\u036f]/g, "") // Remove diacritic marks
+    .replace(/đ/g, "d") // Replace Vietnamese-specific 'đ'
+    .replace(/Đ/g, "D")
+    .replace(/[^a-zA-Z0-9 ]/g, "") // Remove punctuation/special chars
+    .replace(/\s+/g, " ") // Normalize whitespace
+    .trim(); // Remove leading/trailing spaces
+};
+
 module.exports = {
   getClientIp,
   parsePagination,
+  //
+  nomalizeText,
 };

@@ -1,14 +1,19 @@
-const { VehicleRecord } = require("../models/vehicle-record");
+const { VehicleRecord } = require("../models/vehicle_record");
 const { parsePagination } = require("../utils/helper");
 
 exports.getList = async (req, res) => {
   // Define the view: fields to include
   const projection = {
     plateNumber: 1,
-    issuer: 1,
+    color: 1,
+    identificationNumber: 1,
+    engineNumber: 1,
+    registrant: 1,
     phone: 1,
     email: 1,
-    registryCategory: 1,
+    address: 1,
+    archiveAt: 1,
+    note: 1,
     status: 1,
     createdAt: 1,
   };
@@ -17,13 +22,13 @@ exports.getList = async (req, res) => {
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
     const filter = {};
-    if (search) {
+    if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
       filter.$or = [
-        { name: regex },
-        { username: regex },
-        { email: regex },
-        { serviceNumber: regex },
+        { plateNumber: regex },
+        { identificationNumber: regex },
+        { engineNumber: regex },
+        { registrant: regex },
       ];
     }
 
@@ -32,7 +37,7 @@ exports.getList = async (req, res) => {
 
     const items = await VehicleRecord.find(filter, projection)
       // .populate("registryCategory")
-      .sort({ createdAt: -1 }) // ✅ Default sort by newest first
+      .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
       .exec();
@@ -56,6 +61,8 @@ exports.getOne = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const result = await VehicleRecord.create(req.body);
+
+    res.locals.documentId = result._id; // ✅ required for activity logger
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
@@ -64,9 +71,11 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const updated = await VehicleRecord.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updated) return res.status(404).json({ error: true, message: "Not found" });
-    res.json(updated);
+    const result = await VehicleRecord.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!result) return res.status(404).json({ error: true, message: "Not found" });
+
+    res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
+    res.json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
   }
@@ -74,8 +83,10 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const deleted = await VehicleRecord.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ error: true, message: "Not found" });
+    const result = await VehicleRecord.findByIdAndDelete(req.params.id);
+    if (!result) return res.status(404).json({ error: true, message: "Not found" });
+
+    res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });

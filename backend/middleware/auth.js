@@ -17,6 +17,8 @@ exports.authenticateToken = (req, res, next) => {
 
 exports.requirePermission = (feature, action) => {
   return (req, res, next) => {
+    if (req.user?.isAdmin) return next();
+
     const perms = Object.fromEntries(req.user?.permissions)?.[feature];
     if (!perms || perms[action] !== true) {
       return res.status(403).json({ message: "Permission denied" });

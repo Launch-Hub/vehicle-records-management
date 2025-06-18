@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { permissionSchema } = require("./permission");
+const { permissionSchema } = require("./shared/permission");
 
 const roleSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
