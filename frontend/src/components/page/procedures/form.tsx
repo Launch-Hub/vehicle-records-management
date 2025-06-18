@@ -162,29 +162,20 @@ export function RecordForm({
             <Input id="address" {...register('address')} />
           </div>
           <div className="col-span-4 space-y-2">
-            <Label>{DICTIONARY['archiveLocation']}</Label>
+            <Label>{DICTIONARY['archiveAt']}</Label>
             <div className="grid grid-cols-5 gap-2">
-              <Input
-                placeholder="Kho"
-                {...register('archiveLocation.storage', { required: true })}
-              />
-              <Input
-                placeholder="Phòng"
-                {...register('archiveLocation.room', { required: true })}
-              />
-              <Input placeholder="Dãy" {...register('archiveLocation.row', { required: true })} />
-              <Input placeholder="Kệ" {...register('archiveLocation.shelf', { required: true })} />
-              <Input
-                placeholder="Tầng"
-                {...register('archiveLocation.level', { required: true })}
-              />
+              <Input placeholder="Kho" {...register('archiveAt.storage', { required: true })} />
+              <Input placeholder="Phòng" {...register('archiveAt.room', { required: true })} />
+              <Input placeholder="Dãy" {...register('archiveAt.row', { required: true })} />
+              <Input placeholder="Kệ" {...register('archiveAt.shelf', { required: true })} />
+              <Input placeholder="Tầng" {...register('archiveAt.level', { required: true })} />
             </div>
           </div>
           {/* <div className="col-span-2 space-y-2">
-          <Label htmlFor="registryCategory" className="required">
-            {DICTIONARY['registryCategory']}
+          <Label htmlFor="registerType" className="required">
+            {DICTIONARY['registerType']}
           </Label>
-          <Input id="registryCategory" {...register('registryCategory', { required: true })} />
+          <Input id="registerType" {...register('registerType', { required: true })} />
         </div>
         <div className="col-span-2 space-y-2">
           <Label htmlFor="attachmentUrls">{DICTIONARY['attachmentUrls']}</Label>

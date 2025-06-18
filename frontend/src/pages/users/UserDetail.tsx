@@ -30,14 +30,14 @@ export default function UserDetailPage() {
     )
     if (isCreating) return
 
-    const fetchUser = async () => {
+    const fetchDetail = async () => {
       loader.show()
       try {
         const res = await api.get(`/users/${id}`)
         if (res.data) {
           setInitialData(res.data)
         } else {
-          toast.error('Không tìm thấy người dùng.')
+          toast.error('Không tìm thấy dữ liệu.')
           navigate(-1)
         }
       } catch (err) {
@@ -48,7 +48,7 @@ export default function UserDetailPage() {
         loader.hide()
       }
     }
-    fetchUser()
+    fetchDetail()
   }, [id])
 
   const handleSubmit = async (action: 'create' | 'update' | 'copy', data: Omit<User, '_id'>) => {

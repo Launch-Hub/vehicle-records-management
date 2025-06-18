@@ -22,9 +22,9 @@ export const TABLE_DICTIONARY = {
   phone: 'Số điện thoại',
   address: 'Địa chỉ',
   issuer: 'Người tiếp nhận',
-  registryCategory: 'Loại đăng ký',
+  registerType: 'Loại đăng ký',
   attachmentUrls: 'Tài liệu đính kèm',
-  archiveLocation: 'Vị trí lưu trữ',
+  archiveAt: 'Vị trí lưu trữ',
   description: 'Mô tả',
   note: 'Ghi chú',
 }
@@ -40,7 +40,7 @@ export const PERMISSION_DICTIONARY = {
   records: 'Quản lý Tạo mục',
   procedures: 'Quản lý đăng ký',
   bulks: 'Quản lý Lô đăng ký',
-  registry_categories: 'Quản lý Tạo mục',
+  action_types: 'Quản lý Tạo mục',
   activites: 'Quản lý hoạt động',
   //
   read: 'Xem',

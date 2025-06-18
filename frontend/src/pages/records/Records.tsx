@@ -41,19 +41,6 @@ const columns: ColumnDef<VehicleRecord>[] = [
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 120,
   },
-  // {
-  //   accessorKey: 'status',
-  //   header: () => <div className="text-center">{getTableLabel('status')}</div>,
-  //   cell: (info: any) => (
-  //     <div className="flex justify-center items-center">
-  //       <Dot size={32} className={info.getValue() == 'active' ? 'text-success' : 'text-error'} />
-  //       <span className="text-muted-foreground">
-  //         {USER_STATUSES.find((e) => e.value === info.getValue())?.label}
-  //       </span>
-  //     </div>
-  //   ),
-  //   size: 100,
-  // },
 ]
 
 export default function RecordsPage() {
@@ -63,8 +50,8 @@ export default function RecordsPage() {
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
 
-  const navigate = useNavigate()
   const location = useLocation()
+  const navigate = useNavigate()
 
   const fetchData = async () => {
     try {
@@ -98,10 +85,18 @@ export default function RecordsPage() {
   }
 
   const handleEdit = (record: VehicleRecord) => {
+    if (!record._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
     navigate(joinPath(location.pathname, record._id))
   }
 
   const handleCopy = (record: VehicleRecord) => {
+    if (!record._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
     navigate(`${joinPath(location.pathname, record._id)}?copy=true`)
   }
 

@@ -134,8 +134,6 @@ export function UserDataTable<T extends Record<string, any>>({
     ),
     enableSorting: false,
     enableHiding: false,
-    minSize: 32,
-    maxSize: 32,
     size: 32,
   }
 
@@ -160,8 +158,6 @@ export function UserDataTable<T extends Record<string, any>>({
     ),
     enableSorting: false,
     enableHiding: false,
-    minSize: 32,
-    maxSize: 32,
     size: 32,
   }
 
@@ -208,7 +204,11 @@ export function UserDataTable<T extends Record<string, any>>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    manualPagination: true,
+    defaultColumn: {
+      size: 160, //starting column size
+      minSize: 50, //enforced during column resizing
+      maxSize: 500, //enforced during column resizing
+    },
   })
 
   const handleSearch = (term: string) => {

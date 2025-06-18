@@ -11,20 +11,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Trash } from 'lucide-react'
 import type { VehicleRecord } from '@/lib/types/tables.type'
-import { DICTIONARY } from '@/constants/dictionary'
+import { DICTIONARY, getLabel } from '@/constants/dictionary'
 import { PLATE_COLORS } from '@/constants/general'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface RecordFormProps {
   initialData?: VehicleRecord
   isCopying?: boolean
-  onSubmit: (action: 'create' | 'update' | 'copy', data: Omit<VehicleRecord, '_id'>) => void
+  onSubmit: (data: Omit<VehicleRecord, '_id'>) => void
   onCancel?: () => void
 }
 
-export function RecordForm({
+export default function VehicleRecordForm({
   initialData,
   isCopying = false,
   onSubmit,
@@ -50,19 +49,64 @@ export function RecordForm({
       issuer: '',
       note: '',
       status: 'new',
+      archiveAt: {
+        storage: 'default',
+        room: '',
+        row: '',
+        shelf: '',
+        level: '',
+      },
     },
   })
 
   const values = watch()
-  const [plateView, setPlateView] = useState('')
 
-  const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const handleFormSubmit = async (data: Omit<VehicleRecord, '_id'>) => {
+    onSubmit(data)
+  }
 
-  useEffect(() => {
-    console.log(values.plateNumber)
-    const match = values.plateNumber.match('^[0-9]{2,2}[A-Z]{1,2}[0-9]{4,5}$')
-    if (match) setPlateView
-  }, [values.plateNumber])
+  const renderPlate = () => {
+    const splitPlateNumber = (plate: string) => {
+      if (plate.includes('-')) {
+        return plate
+          .split('-')
+          .map((e, i) =>
+            i == 0 && e.length === 4
+              ? e.slice(0, e.length - 2) + '-' + e.slice(e.length - 2)
+              : i == 1 && e.length === 5
+              ? e.slice(0, e.length - 2) + '.' + e.slice(e.length - 2)
+              : e
+          )
+      } else {
+        const match = plate.match(/^(.*?)(\d+)$/)
+        if (match) {
+          return [match[1], match[2].slice(0, 2) + '.' + match[2].slice(2)]
+        } else {
+          // If the format is unexpected, return the original
+          return [plate]
+        }
+      }
+    }
+    const plateParts = splitPlateNumber(values.plateNumber!)
+
+    return (
+      <div
+        className="w-full aspect-video border-4 border-black/70 p-2 rounded-xl flex flex-col gap-1 items-center text-4xl font-extrabold family-biensoxe"
+        style={{
+          backgroundColor: PLATE_COLORS.find((e) => e.label === values.color)?.color,
+        }}
+      >
+        <div className="text-black/90">{plateParts[0]}</div>
+        <div className="text-black/90 mb-1">{plateParts[1]}</div>
+      </div>
+    )
+  }
+
+  // useEffect(() => {
+  //   console.log(values.plateNumber)
+  //   const match = values.plateNumber.match('^[0-9]{2,2}[A-Z]{1,2}[0-9]{4,5}$')
+  //   if (match) setPlateView(values.plateNumber)
+  // }, [values.plateNumber])
 
   useEffect(() => {
     if (initialData) {
@@ -70,53 +114,21 @@ export function RecordForm({
     }
   }, [initialData, reset])
 
-  const handleFormSubmit = async (data: Omit<VehicleRecord, '_id'>) => {
-    const uploadedUrls: string[] = []
-
-    for (const file of pendingFiles) {
-      const formData = new FormData()
-      const timestamp = Date.now()
-      const ext = file.name.slice(file.name.lastIndexOf('.'))
-      const base = file.name.replace(/\.[^/.]+$/, '')
-      formData.append('file', file, `${base}-${timestamp}${ext}`)
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const result = await res.json()
-      if (res.ok) {
-        uploadedUrls.push(result.url)
-      } else {
-        console.error('Upload error:', result.message)
-      }
-    }
-
-    data.attachmentUrls = [...(data.attachmentUrls || []), ...uploadedUrls]
-
-    const action: 'create' | 'update' | 'copy' = isCopying
-      ? 'copy'
-      : initialData
-      ? 'update'
-      : 'create'
-
-    onSubmit(action, data)
-  }
+  const isEditing = initialData && !isCopying
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div className="flex gap-16">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-2">
             <Label htmlFor="plateNumber" className="required">
-              {DICTIONARY['plateNumber']}
+              {getLabel('plateNumber')}
             </Label>
             <Input id="plateNumber" {...register('plateNumber', { required: true })} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="identificationNumber" className="required">
-              {DICTIONARY['identificationNumber']}
+              {getLabel('identificationNumber')}
             </Label>
             <Input
               id="identificationNumber"
@@ -125,13 +137,13 @@ export function RecordForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="engineNumber" className="required">
-              {DICTIONARY['engineNumber']}
+              {getLabel('engineNumber')}
             </Label>
             <Input id="engineNumber" {...register('engineNumber', { required: true })} />
           </div>
           <div className="space-y-2">
             <Label htmlFor="color" className="required">
-              {DICTIONARY['color']}
+              {getLabel('color')}
             </Label>
             <Select value={watch('color')} onValueChange={(value) => setValue('color', value)}>
               <SelectTrigger id="color" className="w-full">
@@ -148,47 +160,34 @@ export function RecordForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="registrant" className="required">
-              {DICTIONARY['registrant']}
+              {getLabel('registrant')}
             </Label>
             <Input id="registrant" {...register('registrant', { required: true })} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">{DICTIONARY['phone']}</Label>
+            <Label htmlFor="phone">{getLabel('phone')}</Label>
             <Input id="phone" {...register('phone')} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">{DICTIONARY['email']}</Label>
+            <Label htmlFor="email">{getLabel('email')}</Label>
             <Input id="email" type="email" {...register('email')} />
           </div>
-          <div className="col-span-4 space-y-2">
-            <Label htmlFor="address">{DICTIONARY['address']}</Label>
+          <div className="space-y-2">
+            <Label htmlFor="address">{getLabel('address')}</Label>
             <Input id="address" {...register('address')} />
           </div>
           <div className="col-span-4 space-y-2">
-            <Label>{DICTIONARY['archiveLocation']}</Label>
-            <div className="grid grid-cols-5 gap-2">
-              <Input
-                placeholder="Kho"
-                {...register('archiveLocation.storage', { required: true })}
-              />
-              <Input
-                placeholder="Phòng"
-                {...register('archiveLocation.room', { required: true })}
-              />
-              <Input placeholder="Dãy" {...register('archiveLocation.row', { required: true })} />
-              <Input placeholder="Kệ" {...register('archiveLocation.shelf', { required: true })} />
-              <Input
-                placeholder="Tầng"
-                {...register('archiveLocation.level', { required: true })}
-              />
+            <Label>{getLabel('archiveAt')}</Label>
+            <div className="grid grid-cols-4 gap-2">
+              <Input placeholder="Kho" {...register('archiveAt.storage')} hidden />
+              <Input placeholder="Phòng" {...register('archiveAt.room')} />
+              <Input placeholder="Dãy" {...register('archiveAt.row')} />
+              <Input placeholder="Kệ" {...register('archiveAt.shelf')} />
+              <Input placeholder="Tầng" {...register('archiveAt.level')} />
             </div>
           </div>
         </div>
-        <div>
-          <Card>
-            <CardContent>{plateView}</CardContent>
-          </Card>
-        </div>
+        {values.plateNumber && <div className="w-1/6 lg:pt-6">{renderPlate()}</div>}
       </div>
 
       <div className="mt-8 flex justify-end gap-2">
@@ -198,7 +197,7 @@ export function RecordForm({
           </Button>
         )}
         <Button type="submit" disabled={isSubmitting}>
-          {initialData && !isCopying ? 'Lưu thay đổi' : 'Tạo mới'}
+          {isEditing ? 'Lưu thay đổi' : 'Tạo mới'}
         </Button>
       </div>
     </form>

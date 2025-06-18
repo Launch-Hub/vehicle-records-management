@@ -2,11 +2,11 @@ import { getPermissionLabel } from './dictionary'
 
 export const PLATE_COLORS = [
   {
-    label: 'Trắng',
+    label: 'Nền màu trắng, chữ và số màu đen',
     color: '#ffffff',
   },
   {
-    label: 'Vàng',
+    label: 'Nền màu vàng, chữ và số màu đen',
     color: '#fec917',
   },
 ]
@@ -27,7 +27,7 @@ const PermissionOrigin = [
   'records',
   'procedures',
   'bulks',
-  'registry_categories',
+  'action_types',
   'activites',
 ]
 export const $generalPerms = ['general', 'settings', 'reports']

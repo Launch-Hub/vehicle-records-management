@@ -47,9 +47,9 @@ export interface VehicleRecordProps {
   phone?: string
   email?: string
   address?: string
-  registryCategory: string
+  registerType: string
   attachmentUrls: string[]
-  archiveLocation: ArchiveLocationProps
+  archiveAt?: ArchiveLocationProps
   description?: string
   note?: string
   status: string

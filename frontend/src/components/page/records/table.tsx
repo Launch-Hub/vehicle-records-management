@@ -109,11 +109,6 @@ export function RecordDataTable<T extends Record<string, any>>({
     setData(initialData)
   }, [initialData])
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term)
-    onSearch(term)
-  }
-
   const selectColumn: ColumnDef<T> = {
     id: 'select',
     header: ({ table }) => (
@@ -139,8 +134,6 @@ export function RecordDataTable<T extends Record<string, any>>({
     ),
     enableSorting: false,
     enableHiding: false,
-    minSize: 32,
-    maxSize: 32,
     size: 32,
   }
 
@@ -165,8 +158,7 @@ export function RecordDataTable<T extends Record<string, any>>({
     ),
     enableSorting: false,
     enableHiding: false,
-    minSize: 32,
-    maxSize: 32,
+
     size: 32,
   }
 
@@ -190,6 +182,8 @@ export function RecordDataTable<T extends Record<string, any>>({
   }, [columns, initialData])
 
   const table = useReactTable({
+    // Use a default pageSize for pageCount calculation
+    pageCount: Math.ceil(total / pagination.pageSize), // Fallback to 10 if pageSize isn't available yet
     data,
     columns: defaultColumns,
     state: { rowSelection, columnVisibility, columnFilters, sorting, pagination },
@@ -198,40 +192,33 @@ export function RecordDataTable<T extends Record<string, any>>({
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const newState =
+        typeof updater === 'function' ? updater(table.getState().pagination) : updater
+      setPagination(newState)
+      onPageChange(newState)
+      setRowSelection({})
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    defaultColumn: {
-      size: 200, //starting column size
-      minSize: 50, //enforced during column resizing
-      maxSize: 500, //enforced during column resizing
-    },
+    manualPagination: true,
   })
 
-  const toFirstPage = () => {
-    table.setPageIndex(0)
-    console.log('pagin:', pagination)
-    onPageChange(pagination)
+  const handleSearch = (term: string) => {
+    setSearchTerm(term)
+    table.setPageIndex(0) // Reset to first page on search
+    onSearch(term)
   }
-  const toPreviousPage = () => {
-    table.previousPage()
-    console.log('pagin:', pagination)
-    onPageChange(pagination)
-  }
-  const toNextPage = () => {
-    table.nextPage()
-    console.log('pagin:', pagination)
-    onPageChange(pagination)
-  }
-  const toLastPage = () => {
-    table.setPageIndex(table.getPageCount() - 1)
-    console.log('pagin:', pagination)
-    onPageChange(pagination)
-  }
+
+  // Pagination handlers
+  const toFirstPage = () => table.setPageIndex(0)
+  const toPreviousPage = () => table.previousPage()
+  const toNextPage = () => table.nextPage()
+  const toLastPage = () => table.setPageIndex(table.getPageCount() - 1)
 
   return (
     <div className="flex w-full flex-col justify-start gap-6">
@@ -321,9 +308,7 @@ export function RecordDataTable<T extends Record<string, any>>({
               </Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value) => {
-                  table.setPageSize(Number(value))
-                }}
+                onValueChange={(value) => table.setPageSize(Number(value))}
               >
                 <SelectTrigger className="w-20" id="rows-per-page">
                   <SelectValue placeholder={table.getState().pagination.pageSize} />
@@ -338,7 +323,7 @@ export function RecordDataTable<T extends Record<string, any>>({
               </Select>
             </div>
             <div className="flex w-fit items-center justify-center text-sm font-medium">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Trang {table.getState().pagination.pageIndex + 1} trên {table.getPageCount()}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               <Button
