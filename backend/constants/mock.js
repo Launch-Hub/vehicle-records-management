@@ -181,10 +181,22 @@ exports.mock_users = [
   },
 ];
 
+exports.sample_record = {
+  // plateNumber: "51A-12345", // unique
+  color: "Vàng",
+  // identificationNumber: "VIN000001", // uinque
+  // engineNumber: "ENG000001", // uinque
+  registrant: "Nguyen Van A",
+  phone: "0901234567",
+  email: "vana@example.com",
+  address: "123 Đường Lê Lợi, Q1, TP.HCM",
+  note: "Xe sử dụng hằng ngày",
+  status: "processing",
+};
 exports.mock_records = [
   {
     plateNumber: "51A-12345",
-    color: "Red",
+    color: "Vàng",
     identificationNumber: "VIN000001",
     engineNumber: "ENG000001",
     registrant: "Nguyen Van A",
@@ -192,11 +204,11 @@ exports.mock_records = [
     email: "vana@example.com",
     address: "123 Đường Lê Lợi, Q1, TP.HCM",
     note: "Xe sử dụng hằng ngày",
-    status: "in processing",
+    status: "processing",
   },
   {
     plateNumber: "51B-67890",
-    color: "Blue",
+    color: "Trắng",
     identificationNumber: "VIN000002",
     engineNumber: "ENG000002",
     registrant: "Tran Thi B",
@@ -208,7 +220,7 @@ exports.mock_records = [
   },
   {
     plateNumber: "59C-22222",
-    color: "White",
+    color: "Trắng",
     identificationNumber: "VIN000003",
     engineNumber: "ENG000003",
     registrant: "Le Van C",
@@ -216,11 +228,11 @@ exports.mock_records = [
     email: "le.c@example.com",
     address: "789 Nguyễn Trãi, Q10, TP.HCM",
     note: "Mới mua",
-    status: "in processing",
+    status: "processing",
   },
   {
     plateNumber: "60D-33333",
-    color: "Black",
+    color: "Trắng",
     identificationNumber: "VIN000004",
     engineNumber: "ENG000004",
     registrant: "Pham Thi D",
@@ -232,7 +244,7 @@ exports.mock_records = [
   },
   {
     plateNumber: "61E-44444",
-    color: "Silver",
+    color: "Trắng",
     identificationNumber: "VIN000005",
     engineNumber: "ENG000005",
     registrant: "Hoang Van E",
@@ -240,11 +252,11 @@ exports.mock_records = [
     email: "hoange@example.com",
     address: "34 Phan Xích Long, Phú Nhuận",
     note: "Đăng kiểm định kỳ",
-    status: "in processing",
+    status: "processing",
   },
   {
     plateNumber: "62F-55555",
-    color: "Gray",
+    color: "Trắng",
     identificationNumber: "VIN000006",
     engineNumber: "ENG000006",
     registrant: "Dang Thi F",
@@ -256,7 +268,7 @@ exports.mock_records = [
   },
   {
     plateNumber: "63G-66666",
-    color: "Green",
+    color: "Trắng",
     identificationNumber: "VIN000007",
     engineNumber: "ENG000007",
     registrant: "Ngo Van G",
@@ -264,11 +276,11 @@ exports.mock_records = [
     email: "ngog@example.com",
     address: "23 Nguyễn Thị Minh Khai, Q1",
     note: "Xe điện",
-    status: "in processing",
+    status: "processing",
   },
   {
     plateNumber: "64H-77777",
-    color: "Orange",
+    color: "Vàng",
     identificationNumber: "VIN000008",
     engineNumber: "ENG000008",
     registrant: "Bui Thi H",
@@ -280,7 +292,7 @@ exports.mock_records = [
   },
   {
     plateNumber: "65K-88888",
-    color: "Brown",
+    color: "Vàng",
     identificationNumber: "VIN000009",
     engineNumber: "ENG000009",
     registrant: "Vo Van K",
@@ -288,11 +300,11 @@ exports.mock_records = [
     email: "vok@example.com",
     address: "567 Lý Thái Tổ, Q10",
     note: "Xe du lịch",
-    status: "in processing",
+    status: "processing",
   },
   {
     plateNumber: "66L-99999",
-    color: "Yellow",
+    color: "Vàng",
     identificationNumber: "VIN000010",
     engineNumber: "ENG000010",
     registrant: "Nguyen Thi L",
@@ -302,4 +314,15 @@ exports.mock_records = [
     note: "Xe chở hàng",
     status: "archived",
   },
+];
+
+// prettier-ignore
+exports.person_names = [
+  "Nguyễn Văn An", "Trần Thị Bích", "Lê Văn Cường", "Phạm Thị Dung", 
+  "Hoàng Minh Đức", "Võ Thị Hạnh", "Đặng Quốc Huy", "Bùi Thị Lan", 
+  "Ngô Văn Long", "Dương Thị Mai", "Vũ Quang Minh", "Đỗ Thị Ngọc", 
+  "Phan Văn Nam", "Lý Thị Nhung", "Huỳnh Quốc Phong", "Tô Thị Quỳnh", 
+  "Cao Minh Sơn", "Trịnh Thị Thảo", "Lâm Thanh Tùng", "Mai Thị Vân", 
+  "Hồ Văn Việt", "Đinh Thị Yến", "Châu Ngọc Ánh", "Kiều Hải Đăng", 
+  "Tăng Thanh Hà", "Nguyễn Đình Vũ",
 ];

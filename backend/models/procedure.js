@@ -1,5 +1,32 @@
 const mongoose = require("mongoose");
 
+const statuses = {
+  draft: "Nháp",
+  processing: "Đang xử lý",
+  completed: "Đã hoàn thành",
+  rejected: "Đã từ chối",
+  cancelled: "Đã huỷ",
+  archived: "Đã lưu trữ",
+};
+
+const stepSchema = new mongoose.Schema(
+  {
+    order: Number, // created order | auto-increase
+    step: Number, // step number
+    title: String, // step name
+    action: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ActionType",
+    },
+    note: String,
+    attachments: [String],
+    isCompleted: { type: Boolean, default: false },
+    completedAt: { type: Date, default: Date.now },
+    // createdAt <- startedAt
+  },
+  { timestamp: true }
+);
+
 const procedurechema = new mongoose.Schema(
   {
     recordId: {
@@ -13,9 +40,13 @@ const procedurechema = new mongoose.Schema(
       ref: "Bulk",
       required: true,
     },
-    status: String,
-    note: String,
-
+    registerType: { type: String, require: true },
+    steps: [stepSchema], // only 1 step exist isCompleted = false
+    status: {
+      type: String,
+      enum: ["draft", "processing", "completed", "rejected", "cancelled", "archived"],
+      default: "draft",
+    },
     // timestamp has both props
     // createdAt: { type: Date, default: Date.now },
     // updatedAt: { type: Date, default: Date.now },

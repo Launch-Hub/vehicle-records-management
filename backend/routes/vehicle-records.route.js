@@ -31,5 +31,7 @@ router.delete(
   logActivityMiddleware("create", resource),
   controller.delete
 );
+//
+router.post("/mock", controller.mockCreate);
 
 module.exports = router;

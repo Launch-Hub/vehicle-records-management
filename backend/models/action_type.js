@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
 
-const registryCategorySchema = new mongoose.Schema({
+const actionTypeSchema = new mongoose.Schema({
+  order: Number, // created order | auto-increase
   name: { type: String, unique: true, required: true },
+  step: { type: Number, unique: true, required: true },
+  toNextStep: { type: Boolean, default: false },
 });
 
-const RegistryCategory = mongoose.model("RegistryCategory", registryCategorySchema);
+const ActionType = mongoose.model("ActionType", actionTypeSchema);
 
-module.exports = { registryCategorySchema, RegistryCategory };
+module.exports = { actionTypeSchema, ActionType };

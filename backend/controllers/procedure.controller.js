@@ -4,20 +4,16 @@ const { parsePagination } = require("../utils/helper");
 exports.getList = async (req, res) => {
   // Define the view: fields to include
   const projection = {
-    code: 1,
-    name: 1,
-    initSize: 1,
-    currentSize: 1,
-    note: 1,
-    createdAt: 1,
-    updatedAt: 1,
+    recordId: 1,
+    bulkId: 1,
+    status: 1,
   };
   try {
     const { pageIndex, pageSize, search } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
     const filter = {};
-    if (search) {
+    if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
       filter.$or = [{ code: regex }, { name: regex }];
     }
@@ -26,7 +22,7 @@ exports.getList = async (req, res) => {
     if (total === 0) return res.json({ total, items: [] });
 
     const items = await Procedure.find(filter, projection)
-      // .populate("registryCategory")
+      // .populate("registerType")
       .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
@@ -50,7 +46,7 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { code, name, initSize, currentSize } = req.body;
+    const { code, name } = req.body;
 
     const existingItem = await User.findOne({
       $or: [{ name }, { code }],

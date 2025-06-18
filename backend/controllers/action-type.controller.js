@@ -1,32 +1,33 @@
-const { Bulk } = require("../models/bulk");
+const { ActionType } = require("../models/action_type");
 const { parsePagination } = require("../utils/helper");
 
 exports.getList = async (req, res) => {
   // Define the view: fields to include
   const projection = {
-    code: 1,
+    order: 1,
     name: 1,
-    initSize: 1,
-    currentSize: 1,
-    note: 1,
-    createdAt: 1,
-    updatedAt: 1,
+    step: 1,
+    toNextStep: 1,
   };
   try {
-    const { pageIndex, pageSize, search } = req.query;
+    const { pageIndex, pageSize, search, step } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
     const filter = {};
     if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
-      filter.$or = [{ code: regex }, { name: regex }];
+      filter.$or = [{ name: regex }];
+    }
+    if (!!step) {
+      // is a number
+      filter.step = parseInt(step);
     }
 
-    const total = await Bulk.countDocuments(filter);
+    const total = await ActionType.countDocuments(filter);
     if (total === 0) return res.json({ total, items: [] });
 
-    // const items = await Bulk.find(filter, projection)
-    const items = await Bulk.find(filter)
+    // const items = await ActionType.find(filter, projection)
+    const items = await ActionType.find(filter)
       .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
@@ -40,7 +41,7 @@ exports.getList = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   try {
-    const result = await Bulk.findById(req.params.id);
+    const result = await ActionType.findById(req.params.id);
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
     res.json(result);
   } catch (err) {
@@ -50,20 +51,20 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { code, name, initSize, currentSize } = req.body;
+    const { name, step } = req.body;
 
     const existingItem = await User.findOne({
-      $or: [{ name }, { code }],
+      $and: [{ name }, { step }],
     });
 
     if (existingItem) {
       return res.status(409).json({
         error: true,
-        message: "Lô có tên này đã tồn tại.",
+        message: "Tạo mục đã tồn tại.",
       });
     }
 
-    const result = await Bulk.create(req.body);
+    const result = await ActionType.create(req.body);
 
     res.locals.documentId = result._id; // ✅ required for activity logger
     res.status(201).json(result);
@@ -74,7 +75,7 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const result = await Bulk.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const result = await ActionType.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
@@ -86,7 +87,7 @@ exports.update = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const result = await Bulk.findByIdAndDelete(req.params.id);
+    const result = await ActionType.findByIdAndDelete(req.params.id);
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger

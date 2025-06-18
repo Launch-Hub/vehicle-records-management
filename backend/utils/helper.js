@@ -29,9 +29,14 @@ const nomalizeText = (text) => {
     .trim(); // Remove leading/trailing spaces
 };
 
+const fillNumber = (number, totalLength = 7, fillChar = "0") => {
+  return number.toString().padStart(totalLength, fillChar);
+};
+
 module.exports = {
   getClientIp,
   parsePagination,
   //
   nomalizeText,
+  fillNumber,
 };

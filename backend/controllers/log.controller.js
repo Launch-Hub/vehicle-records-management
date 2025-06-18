@@ -16,7 +16,7 @@ exports.getList = async (req, res) => {
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
     const filter = {};
-    if (search) {
+    if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
       filter.$or = [
         { name: regex },
@@ -45,7 +45,7 @@ exports.getList = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   try {
-    const result = await ActivityLog.findById(req.params.id).populate("registryCategory");
+    const result = await ActivityLog.findById(req.params.id).populate("registerType");
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
     res.json(result);
   } catch (err) {

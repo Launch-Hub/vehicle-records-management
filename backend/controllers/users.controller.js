@@ -71,14 +71,14 @@ exports.create = async (req, res) => {
     const { username, email, password, roles, permissions } = req.body;
 
     // Check for duplicate username or email
-    const existingUser = await User.findOne({
+    const existingItem = await User.findOne({
       $or: [{ username }, { email }],
     });
 
-    if (existingUser) {
+    if (existingItem) {
       return res.status(409).json({
         error: true,
-        message: "Username or email already exists",
+        message: "Tên đăng nhập hoặc email đã được sử dụng.",
       });
     }
 
@@ -255,22 +255,11 @@ exports.updatePermissions = async (req, res) => {
 // ----------------
 
 exports.mockCreate = async (_, res) => {
-  try {
+   try {
     const bulk = [];
 
     for (const user of mock_users) {
-      const {
-        username,
-        email,
-        password,
-        roles,
-        permissions,
-        name,
-        avatar,
-        assignedUnit,
-        serviceNumber,
-        isAdmin,
-      } = user;
+      const { username, email } = user;
 
       // Check for duplicates by username or email
       const exists = await User.findOne({
@@ -285,25 +274,18 @@ exports.mockCreate = async (_, res) => {
       const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
       const finalPermissions = permissions || DEFAULT_PERMISSIONS;
 
-      const createdUser = await User.create({
-        username,
-        email,
+      const createdItem = await User.create({
+        ...user,
         passwordHash,
-        roles,
         permissions: finalPermissions,
-        name,
-        avatar,
-        assignedUnit,
-        serviceNumber,
-        isAdmin,
       });
 
-      bulk.push(createdUser);
+      bulk.push(createdItem);
     }
 
     res.status(201).json({
       created: bulk.length,
-      users: bulk,
+      items: bulk,
     });
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
