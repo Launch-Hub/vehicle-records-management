@@ -1,13 +1,13 @@
-name: Deploy to Self-Hosted Ubuntu | Local VM
+name: Deploy to Self-Hosted Ubuntu | Vietnix
 
 on:
   push:
     branches:
-      - release/uat
+      - release/beta
 
 jobs:
   deploy:
-    runs-on: [self-hosted, vmware]
+    runs-on: [self-hosted, vietnix]
 
     steps:
       - name: Checkout code
