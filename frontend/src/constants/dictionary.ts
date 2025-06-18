@@ -40,7 +40,7 @@ export const PERMISSION_DICTIONARY = {
   records: 'Quản lý Tạo mục',
   procedures: 'Quản lý đăng ký',
   bulks: 'Quản lý Lô đăng ký',
-  'registry-categories': 'Quản lý Tạo mục',
+  registry_categories: 'Quản lý Tạo mục',
   activites: 'Quản lý hoạt động',
   //
   read: 'Xem',

@@ -93,14 +93,12 @@ export default function UsersPage() {
 
   const handleSearch = (searchTerm: string) => {
     if (searchTerm === search && !searchTerm) return
-    setSearch(searchTerm)
+    setSearch((_) => searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
-    fetchData()
   }
 
   const handleChangePage = (newPagination: PaginationProps) => {
     setPagination(newPagination)
-    fetchData() // Trigger API call with updated pagination
   }
 
   const handleCreate = () => {
@@ -129,8 +127,8 @@ export default function UsersPage() {
 
   useEffect(() => {
     fetchData()
-  }, [pagination]) // Re-fetch when pagination changes
-
+  }, [search, pagination])
+  
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">

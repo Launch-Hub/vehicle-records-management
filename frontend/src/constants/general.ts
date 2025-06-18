@@ -27,7 +27,7 @@ const PermissionOrigin = [
   'records',
   'procedures',
   'bulks',
-  'registry-categories',
+  'registry_categories',
   'activites',
 ]
 export const $generalPerms = ['general', 'settings', 'reports']

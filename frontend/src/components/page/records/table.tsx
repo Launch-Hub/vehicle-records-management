@@ -59,6 +59,7 @@ import { LoaderOverlay } from '@/components/shared/loader/loader-overlay'
 interface DataTableProps<T> {
   loading: boolean
   data: T[]
+  total: number
   columns?: ColumnDef<T>[]
   onSearch: (term: string) => void
   onPageChange: (pagination: PaginationProps) => void
@@ -83,6 +84,7 @@ function DataRow<T>({ row }: { row: Row<T> }) {
 export function RecordDataTable<T extends Record<string, any>>({
   data: initialData,
   loading,
+  total,
   columns,
   onSearch,
   onPageChange,

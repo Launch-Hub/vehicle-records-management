@@ -16,6 +16,55 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { User } from '@/lib/types/tables.type'
 import { $generalPerms, ROLES } from '@/constants/general'
+import { toast } from 'sonner'
+
+const processImage = (file: File, callback: (base64: string) => void) => {
+  if (!file.type.startsWith('image/')) {
+    toast.error('Vui lòng chọn tệp hình ảnh (JPG, PNG, ...).')
+    return
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    toast.error('Hình ảnh phải nhỏ hơn 2MB.')
+    return
+  }
+
+  const img = new Image()
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    img.src = e.target?.result as string
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')!
+      const maxSize = 1000
+
+      // Calculate crop dimensions to maintain aspect ratio
+      let width = img.width
+      let height = img.height
+      let offsetX = 0
+      let offsetY = 0
+
+      if (width > height) {
+        width = height
+        offsetX = (img.width - width) / 2
+      } else if (height > width) {
+        height = width
+        offsetY = (img.height - height) / 2
+      }
+
+      // Set canvas size to 1000x1000
+      canvas.width = maxSize
+      canvas.height = maxSize
+
+      // Resize and crop to center
+      ctx.drawImage(img, offsetX, offsetY, width, height, 0, 0, maxSize, maxSize)
+
+      // Convert to base64 (JPEG for smaller size)
+      const base64String = canvas.toDataURL('image/jpeg', 0.8)
+      callback(base64String)
+    }
+  }
+  reader.readAsDataURL(file)
+}
 
 interface UserFormProps {
   initialData?: User
@@ -56,17 +105,16 @@ export default function UserForm({
   const [showPassword, setShowPassword] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(initialData?.avatar || null)
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = (file: File) => {
+    processImage(file, (base64) => {
+      setAvatarPreview(base64)
+      setValue('avatar', base64)
+    })
+  }
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64String = reader.result as string
-        setAvatarPreview(base64String)
-        setValue('avatar', base64String)
-      }
-      reader.readAsDataURL(file)
-    }
+    if (file) handleAvatarChange(file)
   }
 
   const handleFormSubmit = (formData: Omit<User, '_id'>) => {
@@ -99,7 +147,7 @@ export default function UserForm({
               id="avatar"
               type="file"
               accept="image/*"
-              onChange={handleAvatarChange}
+              onChange={handleFileInput}
               className="hidden"
             />
             <div

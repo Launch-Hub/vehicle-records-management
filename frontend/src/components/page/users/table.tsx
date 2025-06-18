@@ -109,11 +109,6 @@ export function UserDataTable<T extends Record<string, any>>({
     setData(initialData)
   }, [initialData])
 
-  const handleSearch = (term: string) => {
-    setSearchTerm(term)
-    onSearch(term)
-  }
-
   const selectColumn: ColumnDef<T> = {
     id: 'select',
     header: ({ table }) => (
@@ -158,7 +153,7 @@ export function UserDataTable<T extends Record<string, any>>({
           <DropdownMenuItem onClick={() => onEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setConfirmDelete({ open: true, item: row.original })}>
-            Xoá
+            <span className="text-destructive">Xoá</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -190,7 +185,8 @@ export function UserDataTable<T extends Record<string, any>>({
   }, [columns, initialData])
 
   const table = useReactTable({
-    pageCount: Math.ceil(total / data.length),
+    // Use a default pageSize for pageCount calculation
+    pageCount: Math.ceil(total / pagination.pageSize), // Fallback to 10 if pageSize isn't available yet
     data,
     columns: defaultColumns,
     state: { rowSelection, columnVisibility, columnFilters, sorting, pagination },
@@ -199,35 +195,33 @@ export function UserDataTable<T extends Record<string, any>>({
     onColumnVisibilityChange: setColumnVisibility,
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
+    onPaginationChange: (updater) => {
+      const newState =
+        typeof updater === 'function' ? updater(table.getState().pagination) : updater
+      setPagination(newState)
+      onPageChange(newState)
+      setRowSelection({})
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    manualPagination: true,
   })
 
-  const toFirstPage = () => {
-    table.setPageIndex(0)
-    setPagination({ ...pagination, pageIndex: 0 })
-    onPageChange(pagination)
+  const handleSearch = (term: string) => {
+    setSearchTerm(term)
+    table.setPageIndex(0) // Reset to first page on search
+    onSearch(term)
   }
-  const toPreviousPage = () => {
-    table.previousPage()
-    setPagination({ ...pagination, pageIndex: pagination.pageIndex - 1 })
-    onPageChange(pagination)
-  }
-  const toNextPage = () => {
-    table.nextPage()
-    setPagination({ ...pagination, pageIndex: pagination.pageIndex + 1 })
-    onPageChange(pagination)
-  }
-  const toLastPage = () => {
-    table.setPageIndex(table.getPageCount() - 1)
-    setPagination({ ...pagination, pageIndex: table.getPageCount() - 1 })
-    onPageChange(pagination)
-  }
+
+  // Pagination handlers
+  const toFirstPage = () => table.setPageIndex(0)
+  const toPreviousPage = () => table.previousPage()
+  const toNextPage = () => table.nextPage()
+  const toLastPage = () => table.setPageIndex(table.getPageCount() - 1)
 
   return (
     <div className="flex w-full flex-col justify-start gap-6 relative">
@@ -317,9 +311,7 @@ export function UserDataTable<T extends Record<string, any>>({
               </Label>
               <Select
                 value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value) => {
-                  table.setPageSize(Number(value))
-                }}
+                onValueChange={(value) => table.setPageSize(Number(value))}
               >
                 <SelectTrigger className="w-20" id="rows-per-page">
                   <SelectValue placeholder={table.getState().pagination.pageSize} />
