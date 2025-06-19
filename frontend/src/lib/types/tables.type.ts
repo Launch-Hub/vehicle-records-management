@@ -9,17 +9,19 @@ interface LoginUserProps {
   username: string
   email: string
   name?: string
+  phone?: string
   avatar?: string
   assignedUnit: string
   serviceNumber: string
-  //
+  roles?: string[]
   token?: string
   permissions: Permission
+  isAdmin?: boolean
 }
 interface UserProps extends Omit<LoginUserProps, 'token'> {
   _id: string
   password?: string // for crud
-  status?: string // for crud
+  status: string // for crud
 }
 export type User = UserProps
 
@@ -37,13 +39,17 @@ export type ArchiveLocation = ArchiveLocationProps
 export interface VehicleRecordProps {
   _id: string
   plateNumber: string
+  color: string
+  identificationNumber: string
+  engineNumber: string
+  registrant: string
   issuer: string
   phone?: string
   email?: string
   address?: string
-  registryCategory: string
+  registerType: string
   attachmentUrls: string[]
-  archiveLocation: ArchiveLocationProps
+  archiveAt?: ArchiveLocationProps
   description?: string
   note?: string
   status: string

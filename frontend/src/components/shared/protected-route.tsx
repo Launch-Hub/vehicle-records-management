@@ -23,9 +23,9 @@ export const ProtectedRoute = ({ resource, children }: ProtectedRouteProps) => {
     )
   }
   // if resolved but the user is not logged in - redirect to login page
-  if (!isAuthenticated) return <Navigate to={loginUrl} replace />
+  if (!isAuthenticated || !user) return <Navigate to={loginUrl} replace />
 
-  const canRead = user?.permissions?.[resource]?.read
+  const canRead = user.isAdmin === true || user.permissions?.[resource]?.read
   if (canRead) return children
 
   return (

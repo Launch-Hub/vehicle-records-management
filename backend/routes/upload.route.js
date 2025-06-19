@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const uploadController = require("../controllers/upload.controller");
+const controller = require("../controllers/upload.controller");
 const { DEFAULT_LIMIT_SIZE, createMulterMiddleware } = require("../middleware/multer");
 const { docFileFilter, imageFileFilter } = require("../utils/file-filters");
 const { keepClientInfo } = require("../middleware/client-info");
 const { BUCKET_NAME } = require("../constants");
 
-const { minUpload, uploadToMinio } = require("../controllers/upload.controller");
-router.post("/upload", minUpload, uploadToMinio);
+const { minUploader, uploadToMinio } = require("../controllers/upload.controller");
+router.post("/upload", minUploader, uploadToMinio);
 
 // direct upload (du)
 // single file upload

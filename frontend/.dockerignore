@@ -1,4 +1,34 @@
+# Ignore node_modules and log files
 node_modules
-build
-Dockerfile
-.dockerignore
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Ignore dotenv and env config files
+.env
+.env.*.local
+
+# Ignore local development files
+.vscode
+.DS_Store
+*.swp
+*.swo
+
+# Ignore test and coverage
+__tests__/
+coverage/
+*.test.js
+*.spec.js
+
+# Ignore build output (will be rebuilt inside Docker)
+dist/
+build/
+
+# Ignore Git and OS metadata
+.git
+.gitignore
+
+# Ignore Docker output
+*.tar
+docker-compose.override.yml

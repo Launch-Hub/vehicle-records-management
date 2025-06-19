@@ -1,4 +1,4 @@
-name: Deploy to UAT
+name: Deploy to Self-Hosted Ubuntu | VPS Sieu Toc
 
 on:
   push:
@@ -7,14 +7,58 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, vpssieutoc-1]
 
     steps:
-      - name: Checkout code
+      - name: Checkout source code
         uses: actions/checkout@v3
 
-      - name: Build and deploy with Docker Compose
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create api .env from GitHub Secrets
         run: |
-          docker compose down
-          docker compose pull
-          docker compose up -d --build
+          cat <<EOF > backend/.env
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          API_PORT=5000
+          BASE_API_URL=${{ secrets.BASE_API_URL }}
+          CLIENT_ORIGIN=${{ secrets.CLIENT_ORIGIN }}
+          MINIO_ENDPOINT=${{ secrets.MINIO_ENDPOINT }}
+          MINIO_API_PORT=${{ secrets.MINIO_API_PORT }}
+          MINIO_PROTOCOL=${{ secrets.MINIO_PROTOCOL }}
+          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
+          MINIO_WEBUI_PORT=${{ secrets.MINIO_WEBUI_PORT }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+          EOF
+
+      - name: Create client .env from GitHub Secrets
+        run: |
+          cat <<EOF > .env
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
+          EOF
+
+      - name: Create root .env from GitHub Secrets (if needed)
+        run: |
+          cat <<EOF > .env
+          APP_NAME=${{ secrets.APP_NAME }}
+          EOF
+
+      - name: Shut down existing containers
+        run: docker compose down --remove-orphans
+
+      - name: Build and start Docker services
+        run: docker compose up -d --build
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Deploy frontend to nginx folder
+        run: |
+          sudo rm -rf /var/www/vrm_app/frontend/dist
+          sudo cp -r frontend/dist /var/www/vrm_app/frontend/

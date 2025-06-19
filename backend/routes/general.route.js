@@ -6,7 +6,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/v", (req, res) => {
-  res.json({ code: 200, version: "0.4.2" });
+  res.json({ code: 200, version: "0.4.9" });
 });
 
 module.exports = router;

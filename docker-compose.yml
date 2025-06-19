@@ -44,20 +44,20 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-
-  frontend:
-    build: ./frontend
-    container_name: vrm-frontend
-    depends_on:
-      backend:
-        condition: service_healthy
-    ports:
-      - "80:80"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+  # keep the frontend independent for easy development
+  # frontend:
+  #   build: ./frontend
+  #   container_name: vrm-frontend
+  #   depends_on:
+  #     backend:
+  #       condition: service_healthy
+  #   ports:
+  #     - "80:80"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
 
 volumes:
   mongo_data:

@@ -1,6 +1,6 @@
 const { User } = require("../models/user");
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const {
   JWT_SECRET,
@@ -51,6 +51,7 @@ exports.login = async (req, res) => {
       email: user.email,
       roles: user.roles,
       permissions: user.permissions,
+      isAdmin: user.isAdmin,
     },
   });
 };

@@ -6,7 +6,7 @@ const permissionSchema = new mongoose.Schema(
     write: Boolean,
     delete: Boolean,
   },
-  { _id: false }
+  { _id: false } // disable _id for subdocuments
 );
 
 const Permission = mongoose.model("Permission", permissionSchema);
