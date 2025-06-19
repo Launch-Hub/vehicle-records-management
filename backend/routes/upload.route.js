@@ -6,8 +6,8 @@ const { docFileFilter, imageFileFilter } = require("../utils/file-filters");
 const { keepClientInfo } = require("../middleware/client-info");
 const { BUCKET_NAME } = require("../constants");
 
-const { minUpload, uploadToMinio } = require("../controllers/upload.controller");
-router.post("/upload", minUpload, uploadToMinio);
+const { minUploader, uploadToMinio } = require("../controllers/upload.controller");
+router.post("/upload", minUploader, uploadToMinio);
 
 // direct upload (du)
 // single file upload

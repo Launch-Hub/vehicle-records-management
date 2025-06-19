@@ -204,11 +204,7 @@ export function UserDataTable<T extends Record<string, any>>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    defaultColumn: {
-      size: 160, //starting column size
-      minSize: 50, //enforced during column resizing
-      maxSize: 500, //enforced during column resizing
-    },
+    manualPagination: true,
   })
 
   const handleSearch = (term: string) => {

@@ -8,6 +8,7 @@ import { RecordDataTable } from '@/components/page/records/table'
 import { joinPath } from '@/lib/utils'
 import { getTableLabel } from '@/constants/dictionary'
 import type { ColumnDef } from '@tanstack/react-table'
+import { UserDataTable } from '@/components/page/users/table'
 
 const columns: ColumnDef<VehicleRecord>[] = [
   {
@@ -112,7 +113,7 @@ export default function RecordsPage() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <RecordDataTable
+          <UserDataTable
             loading={isFetching}
             total={total}
             data={data}

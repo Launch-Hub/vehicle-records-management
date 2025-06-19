@@ -6,7 +6,7 @@ const crypto = require("crypto");
 const minioClient = require("../utils/minio-client");
 
 const storage = multer.memoryStorage();
-const minUpload = multer({ storage }).single("file");
+const minUploader = multer({ storage }).single("file");
 const uploadToMinio = async (req, res) => {
   try {
     const file = req.file;
@@ -53,7 +53,7 @@ const single = async (req, res) => {
 };
 
 module.exports = {
-  minUpload,
+  minUploader,
   uploadToMinio,
   //
   single,
