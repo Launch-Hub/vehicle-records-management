@@ -47,10 +47,10 @@ jobs:
           EOF
 
       - name: Shut down existing containers
-        run: docker compose down --remove-orphans
+        run: docker-compose down --remove-orphans
 
       - name: Build and start Docker services
-        run: docker compose up -d --build
+        run: docker-compose up -d --build
 
       - name: Build frontend
         run: |
