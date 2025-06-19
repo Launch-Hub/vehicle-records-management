@@ -55,7 +55,7 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Deploy frontend to nginx folder
