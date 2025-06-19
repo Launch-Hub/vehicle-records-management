@@ -28,7 +28,7 @@ mongoose
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Health check
-app.get(`${BASE_API_URL}/healthz`, (_, res) => res.sendStatus(200));
+app.get(`${BASE_API_URL}/health`, (_, res) => res.sendStatus(200));
 
 // Mount all routes under the base URL
 app.use(`${BASE_API_URL}`, allRoutes); // add /v1 when on production

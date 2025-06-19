@@ -22,8 +22,8 @@ coverage/
 *.spec.js
 
 # Ignore build output (will be rebuilt inside Docker)
-dist/
-build/
+# dist/
+# build/
 
 # Ignore Git and OS metadata
 .git
