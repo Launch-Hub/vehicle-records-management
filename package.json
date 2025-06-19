@@ -1,6 +1,6 @@
 {
   "name": "vehicle-records-management",
-  "version": "1.0.1.16",
+  "version": "1.0.1.42",
   "description": "vehicle-records-management",
   "private": true,
   "scripts": {
@@ -10,8 +10,8 @@
     "dev:fe": "cd frontend && npm run dev",
     "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
     "start": "node backend/server.js",
-    "docker:up": "docker compose up --build -d",
-    "docker:down": "docker compose down -v",
+    "docker:up": "docker-compose -p vrm up --build -d",
+    "docker:down": "docker-compose -p vrm down --remove-orphans",
     "generate:key": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "repository": {

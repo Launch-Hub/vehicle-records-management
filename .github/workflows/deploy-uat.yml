@@ -1,4 +1,4 @@
-name: Deploy to Self-Hosted Ubuntu | VPS Sieu Toc
+name: 🚀 Deploy to Self-Hosted Ubuntu | VPS Sieu Toc
 
 on:
   push:
@@ -47,10 +47,10 @@ jobs:
           EOF
 
       - name: Shut down existing containers
-        run: docker-compose down --remove-orphans
+        run: docker-compose -p vrm down --remove-orphans
 
       - name: Build and start Docker services
-        run: docker-compose up -d --build
+        run: docker-compose -p vrm up -d --build
 
       - name: Build frontend
         run: |
