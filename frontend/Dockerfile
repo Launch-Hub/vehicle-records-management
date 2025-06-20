@@ -1,4 +1,4 @@
-FROM node:18-slim AS client-builder
+FROM node:20-alpine AS client-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
