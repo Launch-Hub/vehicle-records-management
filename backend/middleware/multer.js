@@ -1,31 +1,63 @@
-const multer = require("multer");
+const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
+const { UPLOAD_BUCKET, DEFAULT_LIMIT_SIZE } = require("../constants");
+const { imageFileFilter, docFileFilter } = require("../utils/file-filters");
 
-const DEFAULT_LIMIT_SIZE = 2 * 1024 * 1024;
+// multer storages
 
 // Factory function
-const createMulterMiddleware = ({
-  destination = "uploads/",
-  limits = { fileSize: DEFAULT_LIMIT_SIZE },
-  fileFilter,
-}) => {
-  const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, destination);
-    },
-    filename: (_, file, cb) => {
-      const timestamp = Date.now();
-      const ext = path.extname(file.originalname);
-      const base = path.basename(file.originalname, ext);
-      cb(null, `${base}-${timestamp}${ext}`);
-    },
-  });
+function createMulterMiddleware({ subdirectory = "", fileFilter, limits }, storageType = "disk") {
+  const destination = path.join(UPLOAD_BUCKET, subdirectory);
 
-  return multer({
-    storage,
-    limits,
-    fileFilter,
-  });
+  const storage =
+    storageType === "disk"
+      ? multer.diskStorage({
+          //(req, file, cb) => ...
+          destination: (_, __, cb) => cb(null, destination),
+          filename: (_, file, cb) => {
+            const timestamp = Date.now();
+            const uniqueName = `${timestamp}-${file.originalname}`;
+            cb(null, uniqueName);
+          },
+        })
+      : multer.memoryStorage();
+  // Ensure the subdirectory exists
+  fs.mkdirSync(destination, { recursive: true });
+
+  return multer({ storage, fileFilter, limits });
+}
+
+// middleware
+const directUpload = {
+  image: createMulterMiddleware({
+    subdirectory: "images",
+    fileFilter: imageFileFilter,
+    limits: { fileSize: DEFAULT_LIMIT_SIZE },
+  }).single("file"),
+  document: createMulterMiddleware({
+    subdirectory: "documents",
+    fileFilter: docFileFilter,
+    limits: { fileSize: DEFAULT_LIMIT_SIZE },
+  }).single("file"),
+};
+const minioUpload = {
+  image: createMulterMiddleware(
+    {
+      subdirectory: "images",
+      fileFilter: imageFileFilter,
+      limits: { fileSize: DEFAULT_LIMIT_SIZE },
+    },
+    "memory"
+  ).single("file"),
+  document: createMulterMiddleware(
+    {
+      subdirectory: "documents",
+      fileFilter: docFileFilter,
+      limits: { fileSize: DEFAULT_LIMIT_SIZE },
+    },
+    "memory"
+  ).single("file"),
 };
 
-module.exports = { DEFAULT_LIMIT_SIZE, createMulterMiddleware };
+module.exports = { createMulterMiddleware, directUpload, minioUpload };

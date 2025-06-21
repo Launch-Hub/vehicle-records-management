@@ -6,12 +6,15 @@ on:
       - release/beta
 
 jobs:
-  deploy:
-    runs-on: [self-hosted, vietnix]
-
+  deploy-backend:
+    runs-on: [self-hosted, vpssieutoc-1]
+    if: contains(github.event.head_commit.touched, 'backend/')
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -20,19 +23,42 @@ jobs:
         run: |
           cat <<EOF > backend/.env
           MONGO_URI=${{ secrets.MONGO_URI }}
-          JWT_SECRET=${{ secrets.JWT_SECRET }}
-          API_PORT=5000
           BASE_API_URL=${{ secrets.BASE_API_URL }}
           CLIENT_ORIGIN=${{ secrets.CLIENT_ORIGIN }}
-          MINIO_ENDPOINT=${{ secrets.MINIO_ENDPOINT }}
-          MINIO_API_PORT=${{ secrets.MINIO_API_PORT }}
-          MINIO_PROTOCOL=${{ secrets.MINIO_PROTOCOL }}
-          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
-          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
-          MINIO_WEBUI_PORT=${{ secrets.MINIO_WEBUI_PORT }}
           JWT_SECRET=${{ secrets.JWT_SECRET }}
           JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
           EOF
+
+      - name: Create root .env from GitHub Secrets
+        run: |
+          cat <<EOF > .env
+          API_PORT=5000
+          CLIENT_PORT=3000
+          MINIO_URL=${{ secrets.MINIO_URL }}
+          MINIO_API_PORT=${{ secrets.MINIO_API_PORT }}
+          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
+          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
+          BUCKET_NAME=${{ secrets.BUCKET_NAME }}
+          EOF
+
+      # make a clean build
+      - name: Shut down existing backend containers
+        run: |
+          docker-compose -p vrm -f docker-compose.yml stop backend minio || true
+          docker-compose -p vrm -f docker-compose.yml down --remove-orphans
+
+      - name: Build and start backend Docker services
+        run: docker-compose -p vrm -f docker-compose.yml up -d --build backend minio
+
+  deploy-frontend:
+    runs-on: [self-hosted, vpssieutoc-1]
+    if: contains(github.event.head_commit.touched, 'frontend/')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
       - name: Create client .env from GitHub Secrets
         run: |
@@ -40,25 +66,22 @@ jobs:
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOF
 
-      - name: Create root .env from GitHub Secrets (if needed)
-        run: |
-          cat <<EOF > .env
-          APP_NAME=${{ secrets.APP_NAME }}
-          EOF
-
-      - name: Shut down existing containers
-        run: docker-compose -p vrm down --remove-orphans
-
-      - name: Build and start Docker services
-        run: docker-compose -p vrm up -d --build
-
       - name: Build frontend
         run: |
           cd frontend
           npm install --legacy-peer-deps
           npm run build
 
+      - name: Prepare nginx deploy path
+        run: |
+          sudo mkdir -p /var/www/vrm_app/frontend
+          sudo chown -R $USER:$USER /var/www/vrm_app/frontend
+
       - name: Deploy frontend to nginx folder
         run: |
           sudo rm -rf /var/www/vrm_app/frontend/dist
           sudo cp -r frontend/dist /var/www/vrm_app/frontend/
+          sudo cp -r nginx.conf /etc/nginx/sites-available/vrm_app
+          sudo ln -s /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
+          sudo nginx -t
+          sudo systemctl restart nginx

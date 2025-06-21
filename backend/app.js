@@ -1,16 +1,16 @@
-// const path = require("path");
 const express = require("express");
-const cors = require("cors");
 const mongoose = require("mongoose");
-
+const cors = require("cors");
 const allRoutes = require("./routes/index");
+const { UPLOAD_BUCKET } = require("./constants");
 
 const { MONGO_URI, BASE_API_URL } = process.env;
 
 const app = express();
 
 // Static files
-app.use("/uploads", express.static("uploads"));
+require("./utils/init")();
+app.use("/uploads", express.static(UPLOAD_BUCKET));
 
 // Middleware
 app.use(express.json());
@@ -32,11 +32,5 @@ app.get(`${BASE_API_URL}/health`, (_, res) => res.sendStatus(200));
 
 // Mount all routes under the base URL
 app.use(`${BASE_API_URL}`, allRoutes); // add /v1 when on production
-
-// Serve the client
-// app.use(express.static(path.join(__dirname, "/frontend/dist")));
-// app.get("*", (_, res) => {
-//   res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
-// });
 
 module.exports = app;
