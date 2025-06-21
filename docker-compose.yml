@@ -37,13 +37,13 @@ services:
     build: ./backend
     container_name: vrm-backend
     volumes:
-      - ./backend/uploads:/app/uploads
+      - ./public/vrm-bucket:/app/public/vrm-bucket
     env_file:
       - .env # Global (project root)
       - ./backend/.env # Backend-specific
     environment:
       - NODE_ENV=production
-      - MONGO_URI=mongodb://vrm-mongo:27017/vrm_db
+      - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
     ports:
       - "5000:5000"
     depends_on:

@@ -41,14 +41,11 @@ jobs:
           BUCKET_NAME=${{ secrets.BUCKET_NAME }}
           EOF
 
-      # make a clean build
       - name: Shut down existing backend containers
-        run: |
-          docker-compose -p vrm -f docker-compose.yml stop backend minio || true
-          docker-compose -p vrm -f docker-compose.yml down --remove-orphans
+        run: docker-compose -p vrm -f docker-compose.yml stop api minio || true
 
       - name: Build and start backend Docker services
-        run: docker-compose -p vrm -f docker-compose.yml up -d --build backend minio
+        run: docker-compose -p vrm -f docker-compose.yml up -d --build api minio
 
   deploy-frontend:
     runs-on: [self-hosted, vpssieutoc-1]

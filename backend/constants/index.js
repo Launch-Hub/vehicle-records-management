@@ -1,5 +1,8 @@
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const path = require("path");
+
+const JWT_SECRET = process.env.JWT_SECRET || "secret";
+const DEFAULT_BUCKET_NAME = process.env.BUCKET_NAME || "vrm-bucket";
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "refresh-secret";
 const JWT_EXPIRY = "1d"; // access token
 const JWT_REFRESH_EXPIRY = "7d"; // refresh token
 const SALT_OR_ROUND = 10; // salt for encrypt
@@ -32,7 +35,9 @@ const DEFAULT_PERMISSIONS = {
   },
 };
 
-const BUCKET_NAME = "uploads";
+const DEFAULT_LIMIT_SIZE = 2 * 1024 * 1024;
+const INIT_BUCKET = path.join(__dirname, "uploads");
+const UPLOAD_BUCKET = path.join(__dirname, "..", "..", "public", DEFAULT_BUCKET_NAME);
 
 module.exports = {
   JWT_SECRET,
@@ -41,5 +46,8 @@ module.exports = {
   JWT_REFRESH_EXPIRY,
   SALT_OR_ROUND,
   DEFAULT_PERMISSIONS,
-  BUCKET_NAME,
+  DEFAULT_BUCKET_NAME,
+  DEFAULT_LIMIT_SIZE,
+  INIT_BUCKET,
+  UPLOAD_BUCKET,
 };
