@@ -11,25 +11,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Trash } from 'lucide-react'
-import type { VehicleRecord } from '@/lib/types/tables.type'
-import { DICTIONARY } from '@/constants/dictionary'
-import { PLATE_COLORS } from '@/constants/general'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Plus, Trash2 } from 'lucide-react'
+import type { Procedure, ProcedureStepProps, VehicleRecord } from '@/lib/types/tables.type'
+import api from '@/lib/axios'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Check, ChevronsUpDown } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { REGISTRATION_TYPES } from '@/constants/mock-data'
+import type { PaginationProps } from '@/lib/types/props'
 
-interface RecordFormProps {
-  initialData?: VehicleRecord
+// Debounce Hook
+function useDebounce<T>(value: T, delay?: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay || 500)
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+interface ProcedureFormProps {
+  initialData?: Procedure
   isCopying?: boolean
-  onSubmit: (action: 'create' | 'update' | 'copy', data: Omit<VehicleRecord, '_id'>) => void
+  hideBulkId?: boolean
+  onSubmit: (data: Omit<Procedure, '_id'>) => void
   onCancel?: () => void
 }
 
-export function RecordForm({
+export default function ProcedureForm({
   initialData,
   isCopying = false,
+  hideBulkId = false,
   onSubmit,
   onCancel,
-}: RecordFormProps) {
+}: ProcedureFormProps) {
   const {
     register,
     handleSubmit,
@@ -37,186 +65,276 @@ export function RecordForm({
     setValue,
     watch,
     formState: { isSubmitting },
-  } = useForm<Omit<VehicleRecord, '_id'>>({
+  } = useForm<Omit<Procedure, '_id'>>({
     defaultValues: initialData || {
-      plateNumber: '',
-      color: '',
-      identificationNumber: '',
-      engineNumber: '',
-      registrant: '',
-      phone: '',
-      email: '',
-      address: '',
-      issuer: '',
-      note: '',
-      status: 'new',
+      recordId: '',
+      bulkId: undefined,
+      registrationType: '',
+      steps: [],
+      status: 'draft',
     },
   })
 
-  const values = watch()
+  const [steps, setSteps] = useState<ProcedureStepProps[]>(initialData?.steps || [])
+  const [vehicleRecords, setVehicleRecords] = useState<VehicleRecord[]>([])
+  const [openRecordSelect, setOpenRecordSelect] = useState(false)
+  const [recordPagination, setRecordPagination] = useState<PaginationProps>({
+    pageIndex: 0,
+    pageSize: 50,
+  })
+  const [totalRecords, setTotalRecords] = useState(0)
+  const [recordSearch, setRecordSearch] = useState('')
+  const [isFetchingRecords, setIsFetchingRecords] = useState(false)
 
-  const [pendingFiles, setPendingFiles] = useState<File[]>([])
+  const debouncedRecordSearch = useDebounce(recordSearch, 500)
+
+  const fetchRecords = async (searchQuery: string, page: number) => {
+    setIsFetchingRecords(true)
+    try {
+      const res = await api.get('/records', {
+        params: { search: searchQuery, pageIndex: page, pageSize: recordPagination.pageSize },
+      })
+      if (res.data.items) {
+        setVehicleRecords((prev) => (page === 0 ? res.data.items : [...prev, ...res.data.items]))
+        setTotalRecords(res.data.total)
+        setRecordPagination((prev) => ({ ...prev, pageIndex: page }))
+      }
+    } catch (error) {
+      console.error('Failed to fetch vehicle records', error)
+    } finally {
+      setIsFetchingRecords(false)
+    }
+  }
 
   useEffect(() => {
-    console.log(values.plateNumber)
-  }, [values.plateNumber])
+    fetchRecords(debouncedRecordSearch, 0)
+  }, [debouncedRecordSearch])
+
+  const handleLoadMoreRecords = () => {
+    if (!isFetchingRecords && vehicleRecords.length < totalRecords) {
+      fetchRecords(debouncedRecordSearch, recordPagination.pageIndex + 1)
+    }
+  }
 
   useEffect(() => {
     if (initialData) {
       reset(initialData)
+      setSteps(initialData.steps || [])
     }
   }, [initialData, reset])
 
-  const handleFormSubmit = async (data: Omit<VehicleRecord, '_id'>) => {
-    const uploadedUrls: string[] = []
-
-    for (const file of pendingFiles) {
-      const formData = new FormData()
-      const timestamp = Date.now()
-      const ext = file.name.slice(file.name.lastIndexOf('.'))
-      const base = file.name.replace(/\.[^/.]+$/, '')
-      formData.append('file', file, `${base}-${timestamp}${ext}`)
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const result = await res.json()
-      if (res.ok) {
-        uploadedUrls.push(result.url)
-      } else {
-        console.error('Upload error:', result.message)
-      }
-    }
-
-    data.attachmentUrls = [...(data.attachmentUrls || []), ...uploadedUrls]
-
-    const action: 'create' | 'update' | 'copy' = isCopying
-      ? 'copy'
-      : initialData
-      ? 'update'
-      : 'create'
-
-    onSubmit(action, data)
+  const handleFormSubmit = (data: Omit<Procedure, '_id'>) => {
+    const finalSteps = initialData ? steps : []
+    onSubmit({ ...data, steps: finalSteps })
   }
 
+  const addStep = () => {
+    const newStep: ProcedureStepProps = {
+      order: steps.length + 1,
+      step: steps.length + 1,
+      title: '',
+      action: '',
+      note: '',
+      attachments: [],
+      isCompleted: false,
+    }
+    setSteps([...steps, newStep])
+  }
+
+  const removeStep = (index: number) => {
+    setSteps(steps.filter((_, i) => i !== index))
+  }
+
+  const updateStep = (index: number, field: keyof ProcedureStepProps, value: any) => {
+    const updatedSteps = [...steps]
+    updatedSteps[index] = { ...updatedSteps[index], [field]: value }
+    setSteps(updatedSteps)
+  }
+
+  const statusOptions = [
+    { value: 'draft', label: 'Nháp' },
+    { value: 'processing', label: 'Đang xử lý' },
+    { value: 'completed', label: 'Đã hoàn thành' },
+    { value: 'rejected', label: 'Đã từ chối' },
+    { value: 'cancelled', label: 'Đã huỷ' },
+    { value: 'archived', label: 'Đã lưu trữ' },
+  ]
+
+  const isEditing = !!initialData?._id
+
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <div className="flex gap-16">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="recordId" className="required">
+            Hồ sơ
+          </Label>
+          <Popover open={openRecordSelect} onOpenChange={setOpenRecordSelect}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openRecordSelect}
+                className="w-full justify-between"
+              >
+                {watch('recordId')
+                  ? vehicleRecords.find((r) => r._id === watch('recordId'))?.plateNumber
+                  : 'Chọn hồ sơ...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+              <Command>
+                <CommandInput
+                  placeholder="Tìm kiếm biển số..."
+                  onValueChange={setRecordSearch}
+                />
+                <CommandEmpty>Không tìm thấy hồ sơ.</CommandEmpty>
+                <CommandGroup>
+                  {vehicleRecords.map((record) => (
+                    <CommandItem
+                      key={record._id}
+                      value={record._id}
+                      onSelect={(currentValue) => {
+                        setValue('recordId', currentValue === watch('recordId') ? '' : currentValue)
+                        setOpenRecordSelect(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          watch('recordId') === record._id ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                      {record.plateNumber} - {record.registrant}
+                    </CommandItem>
+                  ))}
+                  {vehicleRecords.length < totalRecords && (
+                    <CommandItem
+                      onSelect={handleLoadMoreRecords}
+                      className="justify-center text-center cursor-pointer"
+                    >
+                      {isFetchingRecords ? 'Đang tải...' : 'Tải thêm'}
+                    </CommandItem>
+                  )}
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {!hideBulkId && (
           <div className="space-y-2">
-            <Label htmlFor="plateNumber" className="required">
-              {DICTIONARY['plateNumber']}
-            </Label>
-            <Input id="plateNumber" {...register('plateNumber', { required: true })} />
+            <Label htmlFor="bulkId">Lô (tùy chọn)</Label>
+            <Input id="bulkId" {...register('bulkId')} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="identificationNumber" className="required">
-              {DICTIONARY['identificationNumber']}
-            </Label>
-            <Input
-              id="identificationNumber"
-              {...register('identificationNumber', { required: true })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="engineNumber" className="required">
-              {DICTIONARY['engineNumber']}
-            </Label>
-            <Input id="engineNumber" {...register('engineNumber', { required: true })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="color" className="required">
-              {DICTIONARY['color']}
-            </Label>
-            <Select value={watch('color')} onValueChange={(value) => setValue('color', value)}>
-              <SelectTrigger id="color" className="w-full">
-                <SelectValue placeholder="Chọn màu" />
-              </SelectTrigger>
-              <SelectContent>
-                {PLATE_COLORS.map((c) => (
-                  <SelectItem value={c.label} style={{ backgroundColor: c.color }}>
-                    <span>{c.label}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="registrant" className="required">
-              {DICTIONARY['registrant']}
-            </Label>
-            <Input id="registrant" {...register('registrant', { required: true })} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">{DICTIONARY['phone']}</Label>
-            <Input id="phone" {...register('phone')} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">{DICTIONARY['email']}</Label>
-            <Input id="email" type="email" {...register('email')} />
-          </div>
-          <div className="col-span-4 space-y-2">
-            <Label htmlFor="address">{DICTIONARY['address']}</Label>
-            <Input id="address" {...register('address')} />
-          </div>
-          <div className="col-span-4 space-y-2">
-            <Label>{DICTIONARY['archiveAt']}</Label>
-            <div className="grid grid-cols-5 gap-2">
-              <Input placeholder="Kho" {...register('archiveAt.storage', { required: true })} />
-              <Input placeholder="Phòng" {...register('archiveAt.room', { required: true })} />
-              <Input placeholder="Dãy" {...register('archiveAt.row', { required: true })} />
-              <Input placeholder="Kệ" {...register('archiveAt.shelf', { required: true })} />
-              <Input placeholder="Tầng" {...register('archiveAt.level', { required: true })} />
+        )}
+
+        <div className="space-y-2">
+          <Label htmlFor="registrationType" className="required">
+            Loại đăng ký
+          </Label>
+          <Select
+            value={watch('registrationType')}
+            onValueChange={(value) => setValue('registrationType', value as any)}
+          >
+            <SelectTrigger id="registrationType" className="w-full">
+              <SelectValue placeholder="Chọn loại đăng ký" />
+            </SelectTrigger>
+            <SelectContent>
+              {REGISTRATION_TYPES.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="status">Trạng thái</Label>
+          <Select
+            value={watch('status')}
+            onValueChange={(value) => setValue('status', value as any)}
+          >
+            <SelectTrigger id="status" className="w-full">
+              <SelectValue placeholder="Chọn trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {isEditing && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>Các bước thủ tục</Label>
+              <Button type="button" variant="outline" size="sm" onClick={addStep}>
+                <Plus className="w-4 h-4 mr-2" />
+                Thêm bước
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {steps.map((step, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm">Bước {step.step}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={step.isCompleted ? 'default' : 'secondary'}>
+                          {step.isCompleted ? 'Hoàn thành' : 'Chưa hoàn thành'}
+                        </Badge>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeStep(index)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <Label>Tiêu đề</Label>
+                      <Input
+                        value={step.title}
+                        onChange={(e) => updateStep(index, 'title', e.target.value)}
+                        placeholder="Nhập tiêu đề bước"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Hành động</Label>
+                      <Input
+                        value={step.action}
+                        onChange={(e) => updateStep(index, 'action', e.target.value)}
+                        placeholder="Nhập hành động"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Ghi chú</Label>
+                      <Textarea
+                        value={step.note || ''}
+                        onChange={(e) => updateStep(index, 'note', e.target.value)}
+                        placeholder="Nhập ghi chú"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
-          {/* <div className="col-span-2 space-y-2">
-          <Label htmlFor="registerType" className="required">
-            {DICTIONARY['registerType']}
-          </Label>
-          <Input id="registerType" {...register('registerType', { required: true })} />
-        </div>
-        <div className="col-span-2 space-y-2">
-          <Label htmlFor="attachmentUrls">{DICTIONARY['attachmentUrls']}</Label>
-          <Input
-            id="attachmentUrls"
-            type="file"
-            multiple
-            onChange={(e) => {
-              const files = Array.from(e.target.files || [])
-              setPendingFiles((prev) => [...prev, ...files])
-            }}
-          />
-          <div className="mt-2 space-y-1">
-            {pendingFiles.map((file, idx) => (
-              <div key={idx} className="flex items-center gap-2 text-sm text-muted-foreground">
-                {file.name}
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => setPendingFiles((prev) => prev.filter((_, i) => i !== idx))}
-                >
-                  <Trash className="w-4 h-4 text-red-500" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="col-span-2 space-y-2">
-          <Label htmlFor="note">{DICTIONARY['note']}</Label>
-          <Textarea id="note" {...register('note')} />
-        </div> */}
-        </div>
-        <div>
-          <Card>
-            <CardContent>{values.plateNumber}</CardContent>
-          </Card>
-        </div>
+        )}
       </div>
 
-      <div className="mt-8 flex justify-end gap-2">
+      <div className="flex justify-end gap-2">
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel}>
             Huỷ bỏ

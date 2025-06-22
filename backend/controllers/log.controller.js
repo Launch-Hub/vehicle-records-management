@@ -45,7 +45,7 @@ exports.getList = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   try {
-    const result = await ActivityLog.findById(req.params.id).populate("registerType");
+    const result = await ActivityLog.findById(req.params.id).populate("registrationType");
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
     res.json(result);
   } catch (err) {

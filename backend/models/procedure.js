@@ -38,9 +38,9 @@ const procedurechema = new mongoose.Schema(
     bulkId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Bulk",
-      required: true,
+      required: false,
     },
-    registerType: { type: String, require: true },
+    registrationType: { type: String, require: true }, // type of registration (not the action inside step)
     steps: [stepSchema], // only 1 step exist isCompleted = false
     status: {
       type: String,

@@ -1,16 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/bulks.controller");
+const controller = require("../controllers/procedure.controller");
 const { authenticateToken, requirePermission } = require("../middleware/auth");
 const { logActivityMiddleware } = require("../utils/activity-logger");
-const resource = "bulks";
+const resource = "procedures";
 
 // read
 router.get("/", authenticateToken, requirePermission(resource, "read"), controller.getList);
 router.get("/:id", authenticateToken, requirePermission(resource, "read"), controller.getOne);
-router.get("/:bulkId/procedures", authenticateToken, requirePermission(resource, "read"), controller.getProceduresByBulk);
-router.get("/count/today", controller.getTodaysCount);
-router.get("/search", controller.getList);
 // write
 router.post(
   "/",

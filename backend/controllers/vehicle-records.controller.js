@@ -37,7 +37,7 @@ exports.getList = async (req, res) => {
     if (total === 0) return res.json({ total, items: [] });
 
     const items = await VehicleRecord.find(filter, projection)
-      // .populate("registerType")
+      // .populate("registrationType")
       .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)

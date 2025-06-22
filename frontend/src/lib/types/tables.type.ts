@@ -47,7 +47,7 @@ export interface VehicleRecordProps {
   phone?: string
   email?: string
   address?: string
-  registerType: string
+  registrationType: string
   attachmentUrls: string[]
   archiveAt?: ArchiveLocationProps
   description?: string
@@ -55,3 +55,43 @@ export interface VehicleRecordProps {
   status: string
 }
 export type VehicleRecord = VehicleRecordProps
+
+export interface ProcedureStepProps {
+  _id?: string
+  order: number
+  step: number
+  title: string
+  action: string // ActionType ID
+  note?: string
+  attachments: string[]
+  isCompleted: boolean
+  completedAt?: Date
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export interface ProcedureProps {
+  _id: string
+  recordId: string | VehicleRecordProps
+  bulkId?: string | BulkProps
+  registrationType: string
+  steps: ProcedureStepProps[]
+  status: 'draft' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'archived'
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export type Procedure = ProcedureProps
+
+export interface BulkProps {
+  _id: string
+  code: string
+  name: string
+  initSize: number
+  currentSize: number
+  note?: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export type Bulk = BulkProps

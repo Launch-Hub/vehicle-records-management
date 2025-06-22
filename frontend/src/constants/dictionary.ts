@@ -22,7 +22,7 @@ export const TABLE_DICTIONARY = {
   phone: 'Số điện thoại',
   address: 'Địa chỉ',
   issuer: 'Người tiếp nhận',
-  registerType: 'Loại đăng ký',
+  registrationType: 'Loại đăng ký',
   attachmentUrls: 'Tài liệu đính kèm',
   archiveAt: 'Vị trí lưu trữ',
   description: 'Mô tả',

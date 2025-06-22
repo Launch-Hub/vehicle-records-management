@@ -50,9 +50,9 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { code, name, initSize, currentSize } = req.body;
+    const { code, name } = req.body;
 
-    const existingItem = await User.findOne({
+    const existingItem = await Bulk.findOne({
       $or: [{ name }, { code }],
     });
 
@@ -91,6 +91,42 @@ exports.delete = async (req, res) => {
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
     res.json({ message: "Deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
+
+// Get procedures by bulk ID
+exports.getProceduresByBulk = async (req, res) => {
+  try {
+    const { bulkId } = req.params;
+    const { Procedure } = require("../models/procedure");
+    
+    const procedures = await Procedure.find({ bulkId })
+      .populate("recordId", "plateNumber registrant")
+      .sort({ createdAt: -1 });
+
+    res.json(procedures);
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
+
+exports.getTodaysCount = async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1); // Start of tomorrow
+
+    const count = await Bulk.countDocuments({
+      createdAt: {
+        $gte: today,
+        $lt: tomorrow,
+      },
+    });
+    res.json({ count });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
   }

@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [authResolved, setAuthResolved] = useState(false)
   const hasRefreshed = useRef(false)
+  const lastPathname = useRef(pathname)
 
   const login = async (email: string, password: string, redirectPath: string = '/') => {
     const response = await api.post('/auth/login', { email, password })
@@ -75,7 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setAuthResolved(true)
     }
-  }, [pathname, logout])
+  }, [logout])
 
   useEffect(() => {
     if (!hasRefreshed.current) {
@@ -86,8 +87,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Only refresh session on pathname change if user is already logged in
+    // and pathname has actually changed
     const _user = getUserLocal()
-    if (_user && hasRefreshed.current) {
+    if (_user && hasRefreshed.current && lastPathname.current !== pathname) {
+      lastPathname.current = pathname
       refreshSession()
     }
   }, [pathname, refreshSession])

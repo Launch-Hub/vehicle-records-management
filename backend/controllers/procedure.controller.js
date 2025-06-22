@@ -7,6 +7,9 @@ exports.getList = async (req, res) => {
     recordId: 1,
     bulkId: 1,
     status: 1,
+    registrationType: 1,
+    createdAt: 1,
+    updatedAt: 1,
   };
   try {
     const { pageIndex, pageSize, search } = req.query;
@@ -15,14 +18,15 @@ exports.getList = async (req, res) => {
     const filter = {};
     if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
-      filter.$or = [{ code: regex }, { name: regex }];
+      filter.$or = [{ registrationType: regex }];
     }
 
     const total = await Procedure.countDocuments(filter);
     if (total === 0) return res.json({ total, items: [] });
 
     const items = await Procedure.find(filter, projection)
-      // .populate("registerType")
+      .populate("recordId", "plateNumber registrant")
+      .populate("bulkId", "name")
       .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
@@ -36,7 +40,9 @@ exports.getList = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   try {
-    const result = await Procedure.findById(req.params.id);
+    const result = await Procedure.findById(req.params.id)
+      .populate("recordId", "plateNumber registrant")
+      .populate("bulkId", "name");
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
     res.json(result);
   } catch (err) {
@@ -46,16 +52,19 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { code, name } = req.body;
+    const { recordId, bulkId, registrationType } = req.body;
 
-    const existingItem = await User.findOne({
-      $or: [{ name }, { code }],
+    // Check if a procedure already exists for this record and bulk combination
+    const existingItem = await Procedure.findOne({
+      recordId,
+      bulkId,
+      registrationType,
     });
 
     if (existingItem) {
       return res.status(409).json({
         error: true,
-        message: "Lô có tên này đã tồn tại.",
+        message: "Thủ tục này đã tồn tại cho hồ sơ và lô này.",
       });
     }
 

@@ -1,5 +1,12 @@
 import { lazy } from 'react'
-import { FileStackIcon, FolderIcon, LayoutDashboardIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import {
+  FileStackIcon,
+  FolderIcon,
+  LayoutDashboardIcon,
+  UsersIcon,
+  PackageIcon,
+  type LucideIcon,
+} from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
 import HomePage from '@/pages/Home'
@@ -11,6 +18,10 @@ import ForbiddenPage from '@/pages/system/Forbidden'
 import NotFoundPage from '@/pages/system/NotFound'
 import RecordsPage from './pages/records/Records'
 import RecordDetailPage from './pages/records/RecordDetail'
+import ProceduresPage from '@/pages/procedures/Procedures'
+import ProcedureDetailPage from '@/pages/procedures/ProcedureDetail'
+import BulksPage from '@/pages/bulks/Bulks'
+import BulkDetailPage from '@/pages/bulks/BulkDetail'
 import { DEFAULT_LANG } from './constants/env'
 
 export type PageComponent =
@@ -76,6 +87,26 @@ export const PAGE_MAP = {
   RecordDetailPage: {
     lazy: lazy(() => import('@/pages/records/RecordDetail')), // lazy-loaded
     component: RecordDetailPage,
+    default: 'eager',
+  },
+  ProceduresPage: {
+    lazy: lazy(() => import('@/pages/procedures/Procedures')), // lazy-loaded
+    component: ProceduresPage,
+    default: 'eager',
+  },
+  ProcedureDetailPage: {
+    lazy: lazy(() => import('@/pages/procedures/ProcedureDetail')), // lazy-loaded
+    component: ProcedureDetailPage,
+    default: 'eager',
+  },
+  BulksPage: {
+    lazy: lazy(() => import('@/pages/bulks/Bulks')), // lazy-loaded
+    component: BulksPage,
+    default: 'eager',
+  },
+  BulkDetailPage: {
+    lazy: lazy(() => import('@/pages/bulks/BulkDetail')), // lazy-loaded
+    component: BulkDetailPage,
     default: 'eager',
   },
 }
@@ -280,10 +311,54 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
       },
     ],
   },
-  
+
   {
     auth: true,
-    element: 'ProcedurePage',
+    element: 'BulksPage',
+    resource: 'bulks',
+    showSidebar: true,
+    icon: PackageIcon,
+    path: '/bulks',
+    title: 'Manage Bulks',
+    language: 'en',
+    translations: [
+      {
+        path: '/quan-ly-lo',
+        title: 'Quản lý Lô Đăng Ký',
+        language: 'vi',
+      },
+    ],
+    children: [
+      {
+        element: 'BulkDetailPage',
+        path: ':id',
+        title: 'Bulk Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Chỉnh sửa lô',
+          },
+        ],
+      },
+      {
+        element: 'BulkDetailPage',
+        path: 'new',
+        title: 'Create Bulk',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo lô mới',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    auth: true,
+    element: 'ProceduresPage',
     resource: 'procedures',
     showSidebar: true,
     icon: FileStackIcon,
@@ -293,32 +368,32 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/quan-ly-thu-tuc',
-        title: 'Thủ tục Đăng ký',
+        title: 'Quản lý Đăng Ký',
         language: 'vi',
       },
     ],
     children: [
       {
-        element: 'RecordDetailPage',
+        element: 'ProcedureDetailPage',
         path: ':id',
-        title: 'Record Detail',
+        title: 'Procedure Detail',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            title: 'Chỉnh sửa hồ sơ',
+            title: 'Chỉnh sửa thủ tục',
           },
         ],
       },
       {
-        element: 'RecordDetailPage',
+        element: 'ProcedureDetailPage',
         path: 'new',
-        title: 'Create Record',
+        title: 'Create Procedure',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            title: 'Tạo hồ sơ mới',
+            title: 'Tạo thủ tục mới',
           },
         ],
       },
