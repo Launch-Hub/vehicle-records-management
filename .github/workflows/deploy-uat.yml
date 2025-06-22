@@ -3,7 +3,8 @@ name: 🚀 Deploy to Self-Hosted Ubuntu | VPS Sieu Toc
 on:
   push:
     branches:
-      - release/uat
+      - develop
+      # - release/uat
 
 jobs:
   deploy-backend:
