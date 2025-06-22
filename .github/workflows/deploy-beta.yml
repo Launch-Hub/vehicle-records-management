@@ -8,7 +8,7 @@ on:
 jobs:
   deploy-backend:
     runs-on: [self-hosted, vpssieutoc-1]
-    if: contains(github.event.head_commit.touched, 'backend/')
+    # if: contains(github.event.head_commit.touched, 'backend/')
     steps:
       - uses: actions/checkout@v4
 
@@ -52,7 +52,7 @@ jobs:
 
   deploy-frontend:
     runs-on: [self-hosted, vpssieutoc-1]
-    if: contains(github.event.head_commit.touched, 'frontend/')
+    # if: contains(github.event.head_commit.touched, 'frontend/')
     steps:
       - uses: actions/checkout@v4
 
