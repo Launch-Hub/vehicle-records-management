@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
 import { type User } from '@/lib/types/tables.type'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { clearSession, getLastActive, getRefreshToken, getUserLocal, storeTokens } from '@/lib/auth'
@@ -17,16 +17,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const hasRefreshed = useRef(false)
 
   const login = async (email: string, password: string, redirectPath: string = '/') => {
-    try {
-      const response = await api.post('/auth/login', { email, password })
-      const { accessToken, refreshToken, user } = response.data
-      setUser(user)
-      storeTokens(accessToken, refreshToken, user)
-      navigate(redirectPath)
-      setAuthResolved(true)
-    } catch (error: any) {
-      throw error // rethrow if upstream needs to catch
-    }
+    const response = await api.post('/auth/login', { email, password })
+    const { accessToken, refreshToken, user } = response.data
+    setUser(user)
+    storeTokens(accessToken, refreshToken, user)
+    navigate(redirectPath)
+    setAuthResolved(true)
   }
 
   const logout = () => {
@@ -36,7 +32,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate(loginUrl)
   }
 
-  const refreshSession = async () => {
+  const updateProfile = async (data: Partial<User>) => {
+    const response = await api.put('/users/profile', data)
+    const updatedUser = response.data
+    setUser(updatedUser)
+    // Update the user data in localStorage as well
+    const currentUser = getUserLocal()
+    if (currentUser) {
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+    }
+  }
+
+  const refreshSession = useCallback(async () => {
     const refreshToken = getRefreshToken()
     const lastActive = getLastActive()
     const _user = getUserLocal()
@@ -44,7 +51,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // If no token or inactive too long, logout
     if (!refreshToken || !lastActive || isNaN(lastActive) || !_user) {
       if (ROUTES.find((e) => pathname.includes(e.path))?.auth !== true) return
-      // toast.error('Thông tin người dùng không đúng!')
       logout()
       return
     }
@@ -69,23 +75,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setAuthResolved(true)
     }
-  }
+  }, [pathname, logout])
 
   useEffect(() => {
     if (!hasRefreshed.current) {
       refreshSession()
       hasRefreshed.current = true
     }
-  }, [])
+  }, [refreshSession])
 
   useEffect(() => {
-    // console.count('path is changed, update last active')
+    // Only refresh session on pathname change if user is already logged in
     const _user = getUserLocal()
-    if (_user) refreshSession()
-  }, [pathname])
+    if (_user && hasRefreshed.current) {
+      refreshSession()
+    }
+  }, [pathname, refreshSession])
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, authResolved }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, authResolved, updateProfile }}>
       {children}
     </AuthContext.Provider>
   )

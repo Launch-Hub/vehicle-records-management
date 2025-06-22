@@ -84,14 +84,15 @@ const uploadToMinio = async (req, res) => {
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
-    const bucket = req.body.bucket || DEFAULT_BUCKET_NAME;
-    const folder = req.body.folder || "misc";
-
+    // const bucket = req.body.bucket || DEFAULT_BUCKET_NAME;
+    // const folder = req.body.folder || "misc";
+    const bucket = req.body.bucket || "misc"; // simplify it to bucket only
     // Ensure bucket exists
     await ensureBucketExists(s3, bucket);
 
+    const fileName = req.body.fileName || crypto.randomUUID();
     const extension = path.extname(file.originalname);
-    const objectName = `${folder}/${crypto.randomUUID()}${extension}`;
+    const objectName = `${fileName}${extension}`;
 
     // Save to MinIO
     await s3.send(

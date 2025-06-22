@@ -144,17 +144,45 @@ exports.delete = async (req, res) => {
 
 // manage profile
 exports.getProfile = async (req, res) => {
-  const { user } = await User.findById(req.user.id).select("-passwordHash");
+  const user = await User.findById(req.user.id).select("-passwordHash");
   res.json(user);
 };
 exports.updateProfile = async (req, res) => {
-  const { userId, username, email } = req.body;
-  const { user } = await User.findById(userId);
-  if (!user) return res.status(404).json({ message: "User not found" });
-  if (username) user.username = username;
-  if (email) user.email = email;
-  await user.save();
-  res.json({ message: "Profile updated" });
+  try {
+    const userId = req.user.id; // Use current user's ID from token
+    const { username, email, name, phone, assignedUnit, serviceNumber, avatar } = req.body;
+    
+    // Check if username or email is changing to a value that already exists on another user
+    if (username || email) {
+      const duplicate = await User.findOne({
+        _id: { $ne: userId }, // exclude current user
+        $or: [...(username ? [{ username }] : []), ...(email ? [{ email }] : [])],
+      });
+
+      if (duplicate) {
+        return res.status(409).json({
+          error: true,
+          message: "Username or email already in use by another user",
+        });
+      }
+    }
+
+    const updateData = {};
+    if (username !== undefined) updateData.username = username;
+    if (email !== undefined) updateData.email = email;
+    if (name !== undefined) updateData.name = name;
+    if (phone !== undefined) updateData.phone = phone;
+    if (assignedUnit !== undefined) updateData.assignedUnit = assignedUnit;
+    if (serviceNumber !== undefined) updateData.serviceNumber = serviceNumber;
+    if (avatar !== undefined) updateData.avatar = avatar;
+
+    const result = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-passwordHash");
+    if (!result) return res.status(404).json({ error: true, message: "User not found" });
+
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: true, message: err.message });
+  }
 };
 exports.updateAvatar = async (req, res) => {
   const { userId, avatar } = req.body;

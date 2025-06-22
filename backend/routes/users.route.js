@@ -6,6 +6,7 @@ const { logActivityMiddleware } = require("../utils/activity-logger");
 const resource = "users";
 
 router.get("/profile", authenticateToken, controller.getProfile);
+router.put("/profile", authenticateToken, controller.updateProfile);
 
 // router.put(
 //   "/permissions",

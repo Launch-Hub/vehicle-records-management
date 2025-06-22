@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -12,9 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { VehicleRecord } from '@/lib/types/tables.type'
-import { DICTIONARY, getLabel } from '@/constants/dictionary'
+import { getLabel } from '@/constants/dictionary'
 import { PLATE_COLORS } from '@/constants/general'
-import { Card, CardContent } from '@/components/ui/card'
 
 interface RecordFormProps {
   initialData?: VehicleRecord
