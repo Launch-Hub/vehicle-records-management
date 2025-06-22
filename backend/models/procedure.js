@@ -1,8 +1,10 @@
 const mongoose = require("mongoose");
+const { DEFAULT_DUE_DATE } = require("../constants");
 
 const statuses = {
   draft: "Nháp",
   processing: "Đang xử lý",
+  overdue: "Đã quá hạn",
   completed: "Đã hoàn thành",
   rejected: "Đã từ chối",
   cancelled: "Đã huỷ",
@@ -44,9 +46,13 @@ const procedurechema = new mongoose.Schema(
     steps: [stepSchema], // only 1 step exist isCompleted = false
     status: {
       type: String,
-      enum: ["draft", "processing", "completed", "rejected", "cancelled", "archived"],
-      default: "draft",
-    },
+      enum: ["pending", "processing", "completed", "cancelled", "archived"],
+      default: "pending", // pending (step 1) -> processing (step 2...) -> completed|cancelled -> archived
+    }, // no need overdue status -> use the dueDate instead
+    dueDate: { type: Date, default: Date.now + DEFAULT_DUE_DATE },
+    isCompleted: { type: Boolean, default: false },
+    completedAt: { type: Date, default: null }, // only when isCompleted = true
+    archivedAt: { type: Date, default: null }, // only when status = archived
     // timestamp has both props
     // createdAt: { type: Date, default: Date.now },
     // updatedAt: { type: Date, default: Date.now },
@@ -56,4 +62,4 @@ const procedurechema = new mongoose.Schema(
 
 const Procedure = mongoose.model("Procedure", procedurechema);
 
-module.exports = { procedurechema, Procedure }; // Thủ tục Đăng ký
+module.exports = { procedurechema, Procedure, procedureStatuses: statuses }; // Thủ tục Đăng ký

@@ -1,16 +1,17 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Switch } from '@/components/ui/switch'
+import { ChevronDown } from 'lucide-react'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import { getLabel } from '@/constants/dictionary'
 import { PLATE_COLORS } from '@/constants/general'
@@ -37,6 +38,8 @@ export default function VehicleRecordForm({
   onSubmit,
   onCancel,
 }: RecordFormProps) {
+  const [useCustomColor, setUseCustomColor] = useState(false)
+
   const form = useForm<VehicleRecordFormValues>({
     resolver: zodResolver(VehicleRecordSchema),
     defaultValues: {
@@ -48,19 +51,17 @@ export default function VehicleRecordForm({
       phone: '',
       email: '',
       address: '',
-      issuer: '',
+      vehicleType: 'Xe con',
+      issuerId: '',
       note: '',
-      status: 'new',
+      status: 'idle',
       archiveAt: {
-        storage: 'default',
+        storage: 'Kho A',
         room: '',
         row: '',
         shelf: '',
         level: '',
       },
-      registrationType: '',
-      attachmentUrls: [],
-      description: '',
       ...initialData,
     },
   })
@@ -71,7 +72,7 @@ export default function VehicleRecordForm({
     onSubmit(data)
   }
 
-  const renderPlate = () => {
+  const renderPlate = useMemo(() => {
     const splitPlateNumber = (plate: string) => {
       if (plate.includes('-')) {
         return plate
@@ -95,28 +96,33 @@ export default function VehicleRecordForm({
     }
     const plateParts = splitPlateNumber(values.plateNumber!)
 
+    // Get background color for plate preview
+    let backgroundColor = '#ffffff'
+    if (!useCustomColor) {
+      const selectedColor = PLATE_COLORS.find((e) => e.label === values.color)
+      backgroundColor = selectedColor?.color || '#ffffff'
+    }
+
     return (
       <div
-        className="w-full aspect-video border-4 border-black/70 p-2 rounded-xl flex flex-col gap-1 items-center text-4xl font-extrabold family-biensoxe"
+        className="h-[120px] aspect-15/10 border-4 border-black/70 p-2 rounded-xl flex flex-col gap-1 items-center justify-center text-4xl font-extrabold family-biensoxe"
         style={{
-          backgroundColor: PLATE_COLORS.find((e) => e.label === values.color)?.color,
+          backgroundColor: backgroundColor,
         }}
       >
         <div className="text-black/90">{plateParts[0]}</div>
         <div className="text-black/90 mb-1">{plateParts[1]}</div>
       </div>
     )
-  }
-
-  // useEffect(() => {
-  //   console.log(values.plateNumber)
-  //   const match = values.plateNumber.match('^[0-9]{2,2}[A-Z]{1,2}[0-9]{4,5}$')
-  //   if (match) setPlateView(values.plateNumber)
-  // }, [values.plateNumber])
+  }, [values.plateNumber, values.color, useCustomColor])
 
   useEffect(() => {
     if (initialData) {
       form.reset(initialData)
+      // Check if the initial color is a custom color (not in predefined list)
+      if (initialData.color && !PLATE_COLORS.find((c) => c.label === initialData.color)) {
+        setUseCustomColor(true)
+      }
     }
   }, [initialData, form])
 
@@ -125,8 +131,9 @@ export default function VehicleRecordForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <div className="flex gap-16">
-          <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex flex-col gap-8">
+          <div className="w-1/6">{renderPlate}</div>
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
             <div className="space-y-2">
               <FormField
                 control={form.control}
@@ -135,7 +142,10 @@ export default function VehicleRecordForm({
                   <FormItem>
                     <FormLabel className="required">{getLabel('plateNumber')}</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input 
+                        {...field} 
+                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -177,26 +187,51 @@ export default function VehicleRecordForm({
                 control={form.control}
                 name="color"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="required">{getLabel('color')}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn màu" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PLATE_COLORS.map((c) => (
-                          <SelectItem
-                            key={c.label}
-                            value={c.label}
-                            style={{ backgroundColor: c.color }}
-                          >
-                            <span>{c.label}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <FormItem className="w-full gap-0.5">
+                    <FormLabel className="w-full flex justify-between items-center">
+                      <span className="required">{getLabel('color')}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-500">Tùy chỉnh</span>
+                        <Switch
+                          id="custom-color"
+                          checked={useCustomColor}
+                          onCheckedChange={setUseCustomColor}
+                          className="mr-0"
+                        />
+                      </div>
+                    </FormLabel>
+                    <FormControl className="w-full">
+                      {useCustomColor ? (
+                        <Input {...field} placeholder="Nhập màu tùy chỉnh..." />
+                      ) : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="w-full !max-w-full overflow-hidden">
+                            <Button variant="outline" className="w-full justify-between">
+                              <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
+                                {values.color ? values.color : 'Chọn màu'}
+                              </span>
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            {PLATE_COLORS.map((c) => (
+                              <DropdownMenuItem
+                                key={c.label}
+                                onClick={() => {
+                                  field.onChange(c.label)
+                                }}
+                              >
+                                <div
+                                  className="h-4 w-4 rounded-full"
+                                  style={{ backgroundColor: c.color }}
+                                />
+                                <span className="ml-2">{c.label}</span>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -210,7 +245,14 @@ export default function VehicleRecordForm({
                   <FormItem>
                     <FormLabel className="required">{getLabel('registrant')}</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input 
+                        {...field} 
+                        onChange={(e) => {
+                          const value = e.target.value
+                          const capitalized = value.replace(/\b\w/g, (char) => char.toUpperCase())
+                          field.onChange(capitalized)
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -265,7 +307,19 @@ export default function VehicleRecordForm({
             <div className="col-span-4 space-y-2">
               <Label>{getLabel('archiveAt')}</Label>
               <div className="grid grid-cols-4 gap-2">
-                <Input placeholder="Kho" {...form.register('archiveAt.storage')} hidden />
+                {/* current storage is fixed - 1 storage only */}
+                {/* <FormField
+                  control={form.control}
+                  name="archiveAt.storage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input placeholder="Kho" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
                 <FormField
                   control={form.control}
                   name="archiveAt.room"
@@ -317,7 +371,6 @@ export default function VehicleRecordForm({
               </div>
             </div>
           </div>
-          {values.plateNumber && <div className="w-1/6 lg:pt-6">{renderPlate()}</div>}
         </div>
 
         <div className="mt-8 flex justify-end gap-2">

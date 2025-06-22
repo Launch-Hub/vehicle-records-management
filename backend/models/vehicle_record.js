@@ -3,7 +3,7 @@ const { archiveSchema } = require("./archive");
 
 const statuses = {
   idle: "Nhàn rỗi",
-  processing: "Đang xử lý",
+  active: "Đang xử lý",
   archived: "Đã lưu trữ",
 };
 
@@ -26,7 +26,7 @@ const vehicleRecordSchema = new mongoose.Schema(
     archiveAt: archiveSchema,
     issuerId: String, // id of the user who create the record
     note: String,
-    status: { type: String, enum: ["processing", "archived"], default: "idle" },
+    status: { type: String, enum: ["idle", "active", "archived"], default: "idle" },
   },
   { timestamps: true }
 );
@@ -38,4 +38,4 @@ vehicleRecordSchema.methods.stringToLocation = function () {
 
 const VehicleRecord = mongoose.model("VehicleRecord", vehicleRecordSchema);
 
-module.exports = { vehicleRecordSchema, VehicleRecord };
+module.exports = { vehicleRecordSchema, VehicleRecord, vehicleRecordStatuses: statuses };

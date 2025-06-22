@@ -64,10 +64,10 @@ export default function VehicleRecordDetailPage() {
     try {
       if (action === 'create') {
         await api.post('/records', data)
-        toast.success('Tạo người dùng thành công.')
+        toast.success('Tạo hồ sơ thành công.')
       } else {
         await api.put(`/records/${id}`, data)
-        toast.success('Cập nhật người dùng thành công.')
+        toast.success('Cập nhật hồ sơ thành công.')
       }
       navigate(-1)
     } catch (err) {
@@ -84,9 +84,9 @@ export default function VehicleRecordDetailPage() {
         {/* <h1 className="text-secondary text-xl font-semibold ">
           {defaultAction === 'create'
             ? isCopying
-              ? 'Sao chép người dùng'
-              : 'Tạo người dùng mới'
-            : 'Chỉnh sửa người dùng'}
+              ? 'Sao chép hồ sơ'
+              : 'Tạo hồ sơ mới'
+            : 'Chỉnh sửa hồ sơ'}
         </h1> */}
 
         <Button

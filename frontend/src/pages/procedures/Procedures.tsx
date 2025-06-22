@@ -47,6 +47,7 @@ const columns: ColumnDef<Procedure>[] = [
       const statusMap: Record<string, string> = {
         draft: 'Nháp',
         processing: 'Đang xử lý',
+        overdue: 'Đã quá hạn',
         completed: 'Đã hoàn thành',
         rejected: 'Đã từ chối',
         cancelled: 'Đã huỷ',
@@ -86,7 +87,7 @@ export default function ProceduresPage() {
   }
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search && !searchTerm) return
+    if (searchTerm === search || !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }

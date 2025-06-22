@@ -43,16 +43,17 @@ export interface VehicleRecordProps {
   identificationNumber: string
   engineNumber: string
   registrant: string
-  issuer: string
+  vehicleType?: string
   phone?: string
   email?: string
   address?: string
-  registrationType: string
-  attachmentUrls: string[]
   archiveAt?: ArchiveLocationProps
+  issuerId?: string
   description?: string
   note?: string
   status: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 export type VehicleRecord = VehicleRecordProps
 

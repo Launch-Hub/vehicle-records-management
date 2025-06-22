@@ -1,7 +1,3 @@
-type TableDictionary = typeof TABLE_DICTIONARY
-type FullDictionary = typeof DICTIONARY
-type PermissionDictionary = typeof PERMISSION_DICTIONARY
-
 export const TABLE_DICTIONARY = {
   // User
   avatar: '',
@@ -29,7 +25,7 @@ export const TABLE_DICTIONARY = {
   note: 'Ghi chú',
 }
 export function getTableLabel(key: string): string {
-  return TABLE_DICTIONARY[key as keyof TableDictionary] ?? ''
+  return TABLE_DICTIONARY[key as keyof typeof TABLE_DICTIONARY] ?? ''
 }
 
 export const PERMISSION_DICTIONARY = {
@@ -49,7 +45,7 @@ export const PERMISSION_DICTIONARY = {
 }
 
 export function getPermissionLabel(key: string): string {
-  return PERMISSION_DICTIONARY[key as keyof PermissionDictionary] ?? ''
+  return PERMISSION_DICTIONARY[key as keyof typeof PERMISSION_DICTIONARY] ?? ''
 }
 
 export const DICTIONARY = {
@@ -58,5 +54,27 @@ export const DICTIONARY = {
   avatar: 'Ảnh đại diện',
 }
 export function getLabel(key: string): string {
-  return DICTIONARY[key as keyof FullDictionary] ?? ''
+  return DICTIONARY[key as keyof typeof DICTIONARY] ?? ''
+}
+
+export const RECORD_STATUS_DICTIONARY = {
+  idle: 'Nhàn rỗi',
+  active: 'Đang xử lý',
+  archived: 'Đã lưu trữ',
+}
+export function getStatusLabel(key: string): string {
+  return RECORD_STATUS_DICTIONARY[key as keyof typeof RECORD_STATUS_DICTIONARY] ?? ''
+}
+
+export const PROCEDURE_STATUS_DICTIONARY = {
+  draft: 'Nháp',
+  processing: 'Đang xử lý',
+  overdue: 'Đã quá hạn',
+  completed: 'Đã hoàn thành',
+  rejected: 'Đã từ chối',
+  cancelled: 'Đã huỷ',
+  archived: 'Đã lưu trữ',
+}
+export function getProcedureStatusLabel(key: string): string {
+  return PROCEDURE_STATUS_DICTIONARY[key as keyof typeof PROCEDURE_STATUS_DICTIONARY] ?? ''
 }

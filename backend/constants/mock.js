@@ -191,7 +191,7 @@ exports.sample_record = {
   email: "vana@example.com",
   address: "123 Đường Lê Lợi, Q1, TP.HCM",
   note: "Xe sử dụng hằng ngày",
-  status: "processing",
+  status: "active",
 };
 exports.mock_records = [
   {
@@ -204,7 +204,7 @@ exports.mock_records = [
     email: "vana@example.com",
     address: "123 Đường Lê Lợi, Q1, TP.HCM",
     note: "Xe sử dụng hằng ngày",
-    status: "processing",
+    status: "active",
   },
   {
     plateNumber: "51B-67890",
@@ -228,7 +228,7 @@ exports.mock_records = [
     email: "le.c@example.com",
     address: "789 Nguyễn Trãi, Q10, TP.HCM",
     note: "Mới mua",
-    status: "processing",
+    status: "active",
   },
   {
     plateNumber: "60D-33333",
@@ -252,7 +252,7 @@ exports.mock_records = [
     email: "hoange@example.com",
     address: "34 Phan Xích Long, Phú Nhuận",
     note: "Đăng kiểm định kỳ",
-    status: "processing",
+    status: "active",
   },
   {
     plateNumber: "62F-55555",
@@ -276,7 +276,7 @@ exports.mock_records = [
     email: "ngog@example.com",
     address: "23 Nguyễn Thị Minh Khai, Q1",
     note: "Xe điện",
-    status: "processing",
+    status: "active",
   },
   {
     plateNumber: "64H-77777",
@@ -300,7 +300,7 @@ exports.mock_records = [
     email: "vok@example.com",
     address: "567 Lý Thái Tổ, Q10",
     note: "Xe du lịch",
-    status: "processing",
+    status: "active",
   },
   {
     plateNumber: "66L-99999",
@@ -324,5 +324,9 @@ exports.person_names = [
   "Phan Văn Nam", "Lý Thị Nhung", "Huỳnh Quốc Phong", "Tô Thị Quỳnh", 
   "Cao Minh Sơn", "Trịnh Thị Thảo", "Lâm Thanh Tùng", "Mai Thị Vân", 
   "Hồ Văn Việt", "Đinh Thị Yến", "Châu Ngọc Ánh", "Kiều Hải Đăng", 
-  "Tăng Thanh Hà", "Nguyễn Đình Vũ",
+  "Tăng Thanh Hà", "Nguyễn Đình Vũ", "Phan Nhật", "Phạm Nguyên Ngọc",
+  "Trần Văn Anh Đức", "Nguyễn Trần Trung Quân", "Đỗ Thị Lan Anh",
+  "Nguyễn Thị Bích Ngọc", "Nguyễn Văn Bình", "Trần Thị Cẩm Tú",
+  "Đào Tuấn Khải", "Nguyễn Thị Hồng Nhung", "Nguyễn Văn Huy",
+  "Cao Tấn Hà", "Lỗ Giản", "Trần Ích Kha", "Đỗ Văn Kiên",
 ];

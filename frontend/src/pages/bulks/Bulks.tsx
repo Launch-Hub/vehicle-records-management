@@ -69,7 +69,7 @@ export default function BulksPage() {
   }
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search && !searchTerm) return
+    if (searchTerm === search || !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }

@@ -92,7 +92,7 @@ export default function UsersPage() {
   }
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search && !searchTerm) return
+    if (searchTerm === search || !searchTerm) return
     setSearch((_) => searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }

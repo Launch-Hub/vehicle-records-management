@@ -30,21 +30,17 @@ export const VehicleRecordSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
   address: z.string().optional(),
-  issuer: z.string(),
+  vehicleType: z.string().optional(),
+  issuerId: z.string().optional(),
   note: z.string().optional(),
   status: z.string(),
-  archiveAt: z
-    .object({
-      storage: z.string(),
-      room: z.string(),
-      row: z.string(),
-      shelf: z.string(),
-      level: z.string(),
-    })
-    .optional(),
-  registrationType: z.string(),
-  attachmentUrls: z.array(z.string()),
-  description: z.string().optional(),
+  archiveAt: z.object({
+    storage: z.string().min(1, 'Kho là bắt buộc'),
+    room: z.string().min(1, 'Phòng là bắt buộc'),
+    row: z.string().min(1, 'Dãy là bắt buộc'),
+    shelf: z.string().min(1, 'Kệ là bắt buộc'),
+    level: z.string().min(1, 'Tầng là bắt buộc'),
+  }).optional(),
 })
 export type VehicleRecordFormValues = z.infer<typeof VehicleRecordSchema>
 
