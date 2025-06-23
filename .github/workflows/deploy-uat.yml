@@ -9,7 +9,6 @@ on:
 jobs:
   deploy-backend:
     runs-on: [self-hosted, vpssieutoc-1]
-    # if: contains(github.event.head_commit.touched, 'backend/')
     steps:
       - uses: actions/checkout@v4
 
@@ -49,11 +48,11 @@ jobs:
           docker-compose -p vrm -f docker-compose.yml down --remove-orphans
 
       - name: Build and start backend Docker services
-        run: docker-compose -p vrm -f docker-compose.yml up -d --build backend minio
+        run: docker-compose -p vrm -f docker-compose.yml up -d --build
 
-  deploy-frontend:
-    runs-on: [self-hosted, vpssieutoc-1]
-    # if: contains(github.event.head_commit.touched, 'frontend/')
+  # build on Github Ubuntu to save the resource
+  build-frontend:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -61,7 +60,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Create client .env from GitHub Secrets
+      - name: Create client .env
         run: |
           cat <<EOF > .env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
@@ -73,6 +72,21 @@ jobs:
           npm install --legacy-peer-deps
           npm run build
 
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  deploy-frontend:
+    runs-on: [self-hosted, vpssieutoc-1]
+    needs: build-frontend
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+
       - name: Prepare nginx deploy path
         run: |
           sudo mkdir -p /var/www/vrm_app/frontend
@@ -81,8 +95,8 @@ jobs:
       - name: Deploy frontend to nginx folder
         run: |
           sudo rm -rf /var/www/vrm_app/frontend/dist
-          sudo cp -r frontend/dist /var/www/vrm_app/frontend/
+          sudo cp -r dist /var/www/vrm_app/frontend/dist
           sudo cp -r nginx.conf /etc/nginx/sites-available/vrm_app
-          sudo ln -s /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
+          sudo ln -sf /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
           sudo nginx -t
           sudo systemctl restart nginx
