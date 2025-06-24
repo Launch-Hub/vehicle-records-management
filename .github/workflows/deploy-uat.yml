@@ -61,7 +61,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Create client .env
+      - name: Create client frontend/.env
         run: |
           cat <<EOF > .env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
@@ -92,7 +92,7 @@ jobs:
       - name: Prepare nginx deploy path
         run: |
           sudo mkdir -p /var/www/vrm_app/frontend
-          sudo chown -R $USER:$USER /var/www/vrm_app/frontend
+          sudo chown -R cicd:cicd /var/www/vrm_app/frontend
 
       - name: Deploy frontend to nginx folder
         run: |
