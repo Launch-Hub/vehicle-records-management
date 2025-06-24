@@ -82,7 +82,9 @@ jobs:
 
   deploy-frontend:
     runs-on: [self-hosted, vpssieutoc-1]
-    needs: build-frontend
+    needs:
+      - build-frontend
+      - deploy-backend
     steps:
       - uses: actions/download-artifact@v4
         with:
