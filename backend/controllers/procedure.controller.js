@@ -64,7 +64,7 @@ exports.create = async (req, res) => {
     if (existingItem) {
       return res.status(409).json({
         error: true,
-        message: "Thủ tục này đã tồn tại cho hồ sơ và lô này.",
+        message: "Đăng ký này đã tồn tại cho hồ sơ và lô này.",
       });
     }
 

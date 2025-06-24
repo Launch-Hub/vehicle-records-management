@@ -80,6 +80,8 @@ export interface ProcedureProps {
   status: 'draft' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'archived'
   createdAt?: Date
   updatedAt?: Date
+  // for store in the client only
+  _tempRecord?: VehicleRecordProps
 }
 
 export type Procedure = ProcedureProps

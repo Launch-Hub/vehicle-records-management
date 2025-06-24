@@ -62,4 +62,4 @@ const procedurechema = new mongoose.Schema(
 
 const Procedure = mongoose.model("Procedure", procedurechema);
 
-module.exports = { procedurechema, Procedure, procedureStatuses: statuses }; // Thủ tục Đăng ký
+module.exports = { procedurechema, Procedure, procedureStatuses: statuses }; // Đăng ký Đăng ký

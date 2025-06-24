@@ -25,7 +25,7 @@ export default function ProcedureDetailPage() {
   const [initialData, setInitialData] = useState<Procedure | undefined>(undefined)
 
   useEffect(() => {
-    const resource = 'thủ tục'
+    const resource = 'đăng ký'
     setTitle(
       isCreating
         ? `Tạo ${resource} mới`
@@ -64,10 +64,10 @@ export default function ProcedureDetailPage() {
     try {
       if (action === 'create') {
         await api.post('/procedures', data)
-        toast.success('Tạo thủ tục thành công.')
+        toast.success('Tạo đăng ký thành công.')
       } else {
         await api.put(`/procedures/${id}`, data)
-        toast.success('Cập nhật thủ tục thành công.')
+        toast.success('Cập nhật đăng ký thành công.')
       }
       navigate(-1)
     } catch (err) {

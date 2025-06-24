@@ -381,7 +381,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         translations: [
           {
             language: 'vi',
-            title: 'Chỉnh sửa thủ tục',
+            title: 'Chỉnh sửa đăng ký',
           },
         ],
       },
@@ -393,7 +393,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         translations: [
           {
             language: 'vi',
-            title: 'Tạo thủ tục mới',
+            title: 'Tạo đăng ký mới',
           },
         ],
       },

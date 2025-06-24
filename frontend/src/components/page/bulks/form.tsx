@@ -5,14 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { Bulk } from '@/lib/types/tables.type'
-import { BulkFormSchema } from '@/lib/types/schemas.type'
+import { BulkFormSchema, type BulkFormValues } from '@/lib/types/schemas.type'
 import http from '@/lib/axios'
 import { format } from 'date-fns'
-import { z } from 'zod'
-
-type BulkFormData = z.infer<typeof BulkFormSchema>
 
 interface BulkFormProps {
   initialData?: Bulk
@@ -22,7 +18,7 @@ interface BulkFormProps {
 }
 
 export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }: BulkFormProps) {
-  const form = useForm<BulkFormData>({
+  const form = useForm<BulkFormValues>({
     resolver: zodResolver(BulkFormSchema),
     defaultValues: {
       code: '',
@@ -72,65 +68,62 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
     }
   }, [initialData, isCopying, form])
 
-  const handleFormSubmit = form.handleSubmit((data: BulkFormData) => {
+  const handleFormSubmit = form.handleSubmit((data: BulkFormValues) => {
     onSubmit(data)
   })
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Thông tin lô</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="code" className="required">
-                Mã lô
-              </Label>
-              <Input
-                id="code"
-                {...form.register('code')}
-                placeholder="Nhập mã lô"
-                className={form.formState.errors.code ? 'border-red-500' : ''}
-              />
-              {form.formState.errors.code && <p className="text-sm text-red-500">{form.formState.errors.code.message}</p>}
-            </div>
+    <form onSubmit={handleFormSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="code" className="required">
+            Mã lô
+          </Label>
+          <Input
+            id="code"
+            {...form.register('code')}
+            placeholder="Nhập mã lô"
+            className={form.formState.errors.code ? 'border-red-500' : ''}
+          />
+          {form.formState.errors.code && (
+            <p className="text-sm text-red-500">{form.formState.errors.code.message}</p>
+          )}
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="name" className="required">
-                Tên lô
-              </Label>
-              <Input
-                id="name"
-                {...form.register('name')}
-                placeholder="Nhập tên lô"
-                className={form.formState.errors.name ? 'border-red-500' : ''}
-              />
-              {form.formState.errors.name && <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>}
-            </div>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="name" className="required">
+            Tên lô
+          </Label>
+          <Input
+            id="name"
+            {...form.register('name')}
+            placeholder="Nhập tên lô"
+            className={form.formState.errors.name ? 'border-red-500' : ''}
+          />
+          {form.formState.errors.name && (
+            <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+          )}
+        </div>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="note">Ghi chú</Label>
-            <Textarea
-              id="note"
-              {...form.register('note')}
-              placeholder="Nhập ghi chú (tùy chọn)"
-              rows={3}
-            />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="note">Ghi chú</Label>
+        <Textarea
+          id="note"
+          {...form.register('note')}
+          placeholder="Nhập ghi chú (tùy chọn)"
+          rows={3}
+        />
+      </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Hủy
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Đang xử lý...' : 'Tiếp tục'}
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+      <div className="flex justify-end gap-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Hủy
+        </Button>
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? 'Đang xử lý...' : 'Tiếp tục'}
+        </Button>
+      </div>
+    </form>
   )
 }

@@ -13,6 +13,7 @@ import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
 import { backPath } from '@/lib/utils'
 import { useLayout } from '@/contexts/layout'
+import { REGISTRATION_TYPES } from '@/constants/mock-data'
 
 type WorkflowStep = 'bulk-info' | 'add-procedures' | 'preview'
 
@@ -51,9 +52,9 @@ export default function BulkDetailPage() {
       try {
         const [bulkRes, proceduresRes] = await Promise.all([
           api.get(`/bulks/${id}`),
-          api.get(`/bulks/${id}/procedures`)
+          api.get(`/bulks/${id}/procedures`),
         ])
-        
+
         if (bulkRes.data) {
           setInitialData(bulkRes.data)
           setBulkData(bulkRes.data)
@@ -62,7 +63,7 @@ export default function BulkDetailPage() {
           navigate(-1)
           return
         }
-        
+
         if (proceduresRes.data) {
           setExistingProcedures(proceduresRes.data)
         }
@@ -95,7 +96,7 @@ export default function BulkDetailPage() {
     // Reset form
     setSelectedProcedure(null)
     setSelectedProcedureIndex(null)
-    toast.success('Đã lưu thủ tục vào danh sách chờ.')
+    toast.success('Đã lưu đăng ký vào danh sách chờ.')
   }
 
   const handleSelectProcedure = (index: number) => {
@@ -119,6 +120,10 @@ export default function BulkDetailPage() {
     setCurrentStep('preview')
   }
 
+  const getRegistrationType = (type: string) => {
+    return REGISTRATION_TYPES.find((e) => e.value === type)?.label || 'Chưa có'
+  }
+
   const handleSave = async () => {
     loader.show()
     try {
@@ -137,9 +142,9 @@ export default function BulkDetailPage() {
       for (const procedure of procedures) {
         const procedureData = {
           ...procedure,
-          bulkId: savedBulk._id
+          bulkId: savedBulk._id,
         }
-        
+
         if (procedure._id) {
           await api.put(`/procedures/${procedure._id}`, procedureData)
         } else {
@@ -175,9 +180,13 @@ export default function BulkDetailPage() {
   const renderAddProceduresStep = () => (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Thêm thủ tục</h2>
+        <div className="flex items-center">
+          <h2 className="text-lg font-semibold">Thêm đăng ký</h2>
+          <Badge variant="outline" className="ml-2">
+            Bước 2/3
+          </Badge>
+        </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline">Bước 2/3</Badge>
           <Button variant="ghost" onClick={handlePreview}>
             Bỏ qua
           </Button>
@@ -191,14 +200,14 @@ export default function BulkDetailPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="flex flex-col gap-6 items-start">
         {/* Form Section */}
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           <div className="flex items-center justify-between">
             <h3 className="text-md font-medium">
               {selectedProcedureIndex !== null
-                ? `Chỉnh sửa thủ tục ${selectedProcedureIndex + 1}`
-                : 'Thêm thủ tục mới'}
+                ? `Chỉnh sửa đăng ký ${selectedProcedureIndex + 1}`
+                : 'Thêm đăng ký mới'}
             </h3>
             {selectedProcedureIndex !== null && (
               <Button variant="outline" size="sm" onClick={handleAddNewProcedure}>
@@ -217,13 +226,17 @@ export default function BulkDetailPage() {
         </div>
 
         {/* List Section */}
-        <div className="space-y-4">
-          <h3 className="text-md font-medium">Danh sách thủ tục</h3>
+        <div className="space-y-4 w-full">
+          <h3 className="text-md font-medium">Danh sách đăng ký</h3>
           <div className="space-y-4">
             {procedures.map((procedure, index) => (
               <div key={index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">Thủ tục mới {index + 1}</span>
+                  <div>
+                    <span className="font-semibold">
+                      Biển số {procedure._tempRecord?.plateNumber}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Button variant="link" size="sm" onClick={() => handleSelectProcedure(index)}>
                       Sửa
@@ -237,33 +250,23 @@ export default function BulkDetailPage() {
                     </Button>
                   </div>
                 </div>
-                <div className="text-sm text-muted-foreground mt-2">
-                  Loại: {procedure.registrationType || 'Chưa có'}
-                </div>
               </div>
             ))}
             {existingProcedures.map((procedure, index) => (
               <div key={procedure._id || index} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">
-                    Thủ tục hiện có {procedures.length + index + 1}
+                    Đăng ký hiện có {procedures.length + index + 1}
                   </span>
                   <Badge variant="secondary">{procedure.status}</Badge>
                 </div>
                 <div className="text-sm text-muted-foreground mt-2">
-                  Loại: {procedure.registrationType}
+                  Loại: {getRegistrationType(procedure.registrationType)}
                 </div>
-                {typeof procedure.recordId === 'object' && procedure.recordId?.plateNumber && (
-                  <div className="text-sm text-muted-foreground">
-                    Biển số: {procedure.recordId.plateNumber}
-                  </div>
-                )}
               </div>
             ))}
             {procedures.length === 0 && existingProcedures.length === 0 && (
-              <div className="text-center text-muted-foreground py-4">
-                Chưa có thủ tục nào.
-              </div>
+              <div className="text-center text-muted-foreground py-4">Chưa có đăng ký nào.</div>
             )}
           </div>
         </div>
@@ -293,21 +296,27 @@ export default function BulkDetailPage() {
             <CardTitle>Thông tin lô</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div><strong>Mã lô:</strong> {bulkData.code}</div>
-            <div><strong>Tên lô:</strong> {bulkData.name}</div>
-            <div><strong>Ghi chú:</strong> {bulkData.note || 'Không có'}</div>
+            <div>
+              <strong>Mã lô:</strong> {bulkData.code}
+            </div>
+            <div>
+              <strong>Tên lô:</strong> {bulkData.name}
+            </div>
+            <div>
+              <strong>Ghi chú:</strong> {bulkData.note || 'Không có'}
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Thủ tục ({procedures.length})</CardTitle>
+            <CardTitle>Đăng ký ({procedures.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {procedures.map((procedure, index) => (
                 <div key={index} className="p-2 border rounded">
-                  <div className="font-medium">Thủ tục {index + 1}</div>
+                  <div className="font-medium">Đăng ký {index + 1}</div>
                   <div className="text-sm text-muted-foreground">
                     Loại: {procedure.registrationType}
                   </div>
@@ -341,4 +350,4 @@ export default function BulkDetailPage() {
       {currentStep === 'preview' && renderPreviewStep()}
     </div>
   )
-} 
+}

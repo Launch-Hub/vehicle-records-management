@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -28,20 +28,7 @@ import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { REGISTRATION_TYPES } from '@/constants/mock-data'
 import type { PaginationProps } from '@/lib/types/props'
-
-// Debounce Hook
-function useDebounce<T>(value: T, delay?: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedValue(value), delay || 500)
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
+import { useDebounce } from '@/lib/hooks/use-debounce'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -88,27 +75,30 @@ export default function ProcedureForm({
 
   const debouncedRecordSearch = useDebounce(recordSearch, 500)
 
-  const fetchRecords = async (searchQuery: string, page: number) => {
-    setIsFetchingRecords(true)
-    try {
-      const res = await api.get('/records', {
-        params: { search: searchQuery, pageIndex: page, pageSize: recordPagination.pageSize },
-      })
-      if (res.data.items) {
-        setVehicleRecords((prev) => (page === 0 ? res.data.items : [...prev, ...res.data.items]))
-        setTotalRecords(res.data.total)
-        setRecordPagination((prev) => ({ ...prev, pageIndex: page }))
+  const fetchRecords = useCallback(
+    async (searchQuery: string, page: number) => {
+      setIsFetchingRecords(true)
+      try {
+        const res = await api.get('/records', {
+          params: { search: searchQuery, pageIndex: page, pageSize: recordPagination.pageSize },
+        })
+        if (res.data.items) {
+          setVehicleRecords((prev) => (page === 0 ? res.data.items : [...prev, ...res.data.items]))
+          setTotalRecords(res.data.total)
+          setRecordPagination((prev) => ({ ...prev, pageIndex: page }))
+        }
+      } catch (error) {
+        console.error('Failed to fetch vehicle records', error)
+      } finally {
+        setIsFetchingRecords(false)
       }
-    } catch (error) {
-      console.error('Failed to fetch vehicle records', error)
-    } finally {
-      setIsFetchingRecords(false)
-    }
-  }
+    },
+    [recordPagination.pageSize]
+  )
 
   useEffect(() => {
     fetchRecords(debouncedRecordSearch, 0)
-  }, [debouncedRecordSearch])
+  }, [debouncedRecordSearch, fetchRecords])
 
   const handleLoadMoreRecords = () => {
     if (!isFetchingRecords && vehicleRecords.length < totalRecords) {
@@ -125,7 +115,8 @@ export default function ProcedureForm({
 
   const handleFormSubmit = (data: Omit<Procedure, '_id'>) => {
     const finalSteps = initialData ? steps : []
-    onSubmit({ ...data, steps: finalSteps })
+    const record = vehicleRecords.find((e) => e._id === data.recordId)
+    onSubmit({ ...data, steps: finalSteps, _tempRecord: record })
   }
 
   const addStep = () => {
@@ -150,15 +141,6 @@ export default function ProcedureForm({
     updatedSteps[index] = { ...updatedSteps[index], [field]: value }
     setSteps(updatedSteps)
   }
-
-  const statusOptions = [
-    { value: 'draft', label: 'Nháp' },
-    { value: 'processing', label: 'Đang xử lý' },
-    { value: 'completed', label: 'Đã hoàn thành' },
-    { value: 'rejected', label: 'Đã từ chối' },
-    { value: 'cancelled', label: 'Đã huỷ' },
-    { value: 'archived', label: 'Đã lưu trữ' },
-  ]
 
   const isEditing = !!initialData?._id
 
@@ -185,10 +167,7 @@ export default function ProcedureForm({
             </PopoverTrigger>
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
               <Command>
-                <CommandInput
-                  placeholder="Tìm kiếm biển số..."
-                  onValueChange={setRecordSearch}
-                />
+                <CommandInput placeholder="Tìm kiếm biển số..." onValueChange={setRecordSearch} />
                 <CommandEmpty>Không tìm thấy hồ sơ.</CommandEmpty>
                 <CommandGroup>
                   {vehicleRecords.map((record) => (
@@ -251,29 +230,10 @@ export default function ProcedureForm({
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="status">Trạng thái</Label>
-          <Select
-            value={watch('status')}
-            onValueChange={(value) => setValue('status', value as any)}
-          >
-            <SelectTrigger id="status" className="w-full">
-              <SelectValue placeholder="Chọn trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              {statusOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {isEditing && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label>Các bước thủ tục</Label>
+              <Label>Các bước đăng ký</Label>
               <Button type="button" variant="outline" size="sm" onClick={addStep}>
                 <Plus className="w-4 h-4 mr-2" />
                 Thêm bước
