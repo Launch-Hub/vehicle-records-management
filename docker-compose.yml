@@ -58,25 +58,25 @@ services:
       retries: 5
 
   # keep the frontend independent for easy development
-  # frontend:
-  #   build: ./frontend
-  #   container_name: vrm-frontend
-  #   depends_on:
-  #     backend:
-  #       condition: service_healthy
-  #       # condition: service_started
-  #   env_file:
-  #     - ./frontend/.env
-  #   environment:
-  #     - NODE_ENV=production
-  #   ports:
-  #     - "3000:80"
-  #     - "80:80" # easier for using single frontend with nginx default port
-  #   healthcheck:
-  #     test: ["CMD", "curl", "-f", "http://localhost"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
+  frontend:
+    build: ./frontend
+    container_name: vrm-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+        # condition: service_started
+    env_file:
+      - ./frontend/.env
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3000:80"
+      # - "80:80" # easier for using single frontend with nginx default port
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   mongo_data:

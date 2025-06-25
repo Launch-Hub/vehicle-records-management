@@ -3,13 +3,17 @@ name: 🚀 Deploy to Self-Hosted Ubuntu | VPS Sieu Toc
 on:
   push:
     branches:
-      - release/uat
+      - develop
+      # - release/uat
 
 jobs:
   deploy-backend:
     runs-on: [self-hosted, vpssieutoc-1]
-    if: contains(github.event.head_commit.touched, 'backend/')
+    # if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.modified, 'docker-compose.yml') || contains(github.event.head_commit.modified, '.github/workflows/')
     steps:
+      - name: Kill leftover processes
+        run: pkill -u cicd || true
+      
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -41,15 +45,18 @@ jobs:
           BUCKET_NAME=${{ secrets.BUCKET_NAME }}
           EOF
 
+      # make a clean build
       - name: Shut down existing backend containers
-        run: docker-compose -p vrm -f docker-compose.yml stop api minio || true
+        run: |
+          docker-compose -p vrm -f docker-compose.yml stop backend minio || true
+          docker-compose -p vrm -f docker-compose.yml down --remove-orphans
 
       - name: Build and start backend Docker services
-        run: docker-compose -p vrm -f docker-compose.yml up -d --build api minio
+        run: docker-compose -p vrm -f docker-compose.yml up -d --build
 
-  deploy-frontend:
-    runs-on: [self-hosted, vpssieutoc-1]
-    if: contains(github.event.head_commit.touched, 'frontend/')
+  # build on Github Ubuntu to save the resource
+  build-frontend:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -57,7 +64,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Create client .env from GitHub Secrets
+      - name: Create client frontend/.env
         run: |
           cat <<EOF > .env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
@@ -68,17 +75,35 @@ jobs:
           cd frontend
           npm install --legacy-peer-deps
           npm run build
+#          cp nginx.conf dist/
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  deploy-frontend:
+    runs-on: [self-hosted, vpssieutoc-1]
+    needs:
+      - build-frontend
+      # - deploy-backend # no need to wait for backend to deploy
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
 
       - name: Prepare nginx deploy path
         run: |
           sudo mkdir -p /var/www/vrm_app/frontend
-          sudo chown -R $USER:$USER /var/www/vrm_app/frontend
+          sudo chown -R cicd:cicd /var/www/vrm_app/frontend
 
       - name: Deploy frontend to nginx folder
         run: |
           sudo rm -rf /var/www/vrm_app/frontend/dist
-          sudo cp -r frontend/dist /var/www/vrm_app/frontend/
-          sudo cp -r nginx.conf /etc/nginx/sites-available/vrm_app
-          sudo ln -s /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
+          sudo cp -r dist /var/www/vrm_app/frontend/dist
+          sudo cp -r dist/nginx.conf /etc/nginx/sites-available/vrm_app
+          sudo ln -sf /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
           sudo nginx -t
           sudo systemctl restart nginx

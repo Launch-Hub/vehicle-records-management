@@ -11,6 +11,9 @@ jobs:
     runs-on: [self-hosted, vpssieutoc-1]
     # if: contains(github.event.head_commit.modified, 'backend/') || contains(github.event.head_commit.modified, 'docker-compose.yml') || contains(github.event.head_commit.modified, '.github/workflows/')
     steps:
+      - name: Kill leftover processes
+        run: pkill -u cicd || true
+      
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -72,7 +75,7 @@ jobs:
           cd frontend
           npm install --legacy-peer-deps
           npm run build
-          cp nginx.conf dist/
+#          cp nginx.conf dist/
 
       - name: Upload built artifacts
         uses: actions/upload-artifact@v4
@@ -82,9 +85,7 @@ jobs:
 
   deploy-frontend:
     runs-on: [self-hosted, vpssieutoc-1]
-    needs:
-      - build-frontend
-      - deploy-backend
+    needs: build-frontend
     steps:
       - uses: actions/download-artifact@v4
         with:
