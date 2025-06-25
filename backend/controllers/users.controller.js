@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const { User } = require("../models/user");
 const { parsePagination } = require("../utils/helper");
 const { DEFAULT_PERMISSIONS, SALT_OR_ROUND } = require("../constants");
-const { mock_users } = require("../constants/mock");
+const { mock_users, default_admin } = require("../constants/mock");
 
 // manage user //
 //
@@ -317,5 +317,54 @@ exports.mockCreate = async (_, res) => {
     });
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
+  }
+};
+
+exports.createDefaultAdmin = async (req, res) => {
+  try {
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({ 
+      $or: [
+        { username: default_admin.username },
+        { email: default_admin.email }
+      ]
+    });
+
+    if (existingAdmin) {
+      return res.status(409).json({
+        error: true,
+        message: "Default admin already exists",
+      });
+    }
+
+    // Hash the password
+    const passwordHash = await bcrypt.hash(default_admin.password, SALT_OR_ROUND);
+
+    // Create the admin user
+    const adminUser = await User.create({
+      username: default_admin.username,
+      email: default_admin.email,
+      passwordHash,
+      name: default_admin.name,
+      avatar: default_admin.avatar,
+      assignedUnit: default_admin.assignedUnit,
+      serviceNumber: default_admin.serviceNumber,
+      permissions: default_admin.permissions,
+      isAdmin: default_admin.isAdmin,
+    });
+
+    res.locals.documentId = adminUser._id; // Required for activity logger
+    res.status(201).json({
+      message: "Default admin created successfully",
+      user: {
+        id: adminUser._id,
+        username: adminUser.username,
+        email: adminUser.email,
+        name: adminUser.name,
+        isAdmin: adminUser.isAdmin,
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
   }
 };

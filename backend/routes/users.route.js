@@ -5,6 +5,9 @@ const { authenticateToken, requirePermission } = require("../middleware/auth");
 const { logActivityMiddleware } = require("../utils/activity-logger");
 const resource = "users";
 
+// Create default admin (no auth required for initial setup)
+router.post("/seeds/dfa", controller.createDefaultAdmin);
+
 router.get("/profile", authenticateToken, controller.getProfile);
 router.put("/profile", authenticateToken, controller.updateProfile);
 

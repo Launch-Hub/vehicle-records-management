@@ -19,13 +19,14 @@ const LIST_FEATURES = [
   "reports",
 ];
 
-const DEFAULT_PERMISSIONS = LIST_FEATURES.map((feature) => ({
-  [feature]: {
+const DEFAULT_PERMISSIONS = LIST_FEATURES.reduce((acc, feature) => {
+  acc[feature] = {
     read: true,
     write: true,
     delete: true,
-  },
-}));
+  };
+  return acc;
+}, {});
 
 const DEFAULT_LIMIT_SIZE = 2 * 1024 * 1024;
 const INIT_BUCKET = path.join(__dirname, "uploads");

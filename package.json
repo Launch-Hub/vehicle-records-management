@@ -3,6 +3,10 @@
   "version": "1.0.1.42",
   "description": "vehicle-records-management",
   "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "start:db": "start-localdb.bat",
     "stop:db": "stop-localdb.bat",

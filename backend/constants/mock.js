@@ -1,3 +1,18 @@
+const { DEFAULT_PERMISSIONS } = require(".");
+
+exports.default_admin = {
+  username: "admin",
+  email: "admin@example.com",
+  password: "mk123@",
+  name: "Admin",
+  avatar: "/images/default-avatar.png",
+  assignedUnit: "PC08",
+  serviceNumber: "CS0000",
+  roles: ["Quản Trị Viên"],
+  permissions: DEFAULT_PERMISSIONS,
+  isAdmin: true,
+};
+
 exports.mock_users = [
   {
     username: "nhanvien01",
