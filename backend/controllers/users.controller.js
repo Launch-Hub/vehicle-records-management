@@ -366,24 +366,16 @@ exports.removeDefaultAdmin = async (req, res) => {
       $or: [{ username: default_admin.username }, { email: default_admin.email }],
     });
 
-    if (existingAdmin) {
+    if (!existingAdmin) {
       return res.status(409).json({
         error: true,
         message: "Default admin not found",
       });
     }
-    await User.deleteOne({
-      $or: [{ username: default_admin.username }, { email: default_admin.email }],
-    });
+    await User.deleteOne({ _id: existingAdmin._id });
     res.status(201).json({
       message: "Default admin removed successfully",
-      user: {
-        id: adminUser._id,
-        username: adminUser.username,
-        email: adminUser.email,
-        name: adminUser.name,
-        isAdmin: adminUser.isAdmin,
-      },
+      user: existingAdmin,
     });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
