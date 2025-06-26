@@ -1,6 +1,6 @@
 const { User } = require("../models/user");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const { hashPassword } = require("../utils/helper");
 
 const {
   JWT_SECRET,
@@ -13,7 +13,7 @@ const {
 exports.register = async (req, res) => {
   const { username, email, password, roles, permissions = {} } = req.body;
 
-  const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+  const passwordHash = await hashPassword(password);
   const user = new User({ username, email, passwordHash, roles, permissions });
 
   try {

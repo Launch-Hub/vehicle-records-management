@@ -6,22 +6,17 @@ const { logActivityMiddleware } = require("../utils/activity-logger");
 const resource = "users";
 
 // Create default admin (no auth required for initial setup)
-router.post("/seeds/dfa", controller.createDefaultAdmin);
+router.post("/dfa", controller.createDefaultAdmin);
+router.delete("/dfa", controller.removeDefaultAdmin);
+router.post("/seeds", controller.mockCreate);
 
+// self read & write (no permission required)
 router.get("/profile", authenticateToken, controller.getProfile);
 router.put("/profile", authenticateToken, controller.updateProfile);
 
-// router.put(
-//   "/permissions",
-//   authenticateToken,
-//   requirePermission(resource, "write"),
-//   controller.updatePermissions
-// );
-
-// read
+// read & write
 router.get("/", authenticateToken, requirePermission(resource, "read"), controller.getList);
 router.get("/:id", authenticateToken, requirePermission(resource, "read"), controller.getOne);
-// write
 router.post(
   "/",
   authenticateToken,
@@ -36,7 +31,6 @@ router.put(
   logActivityMiddleware("update", resource),
   controller.update
 );
-// delete
 router.delete(
   "/:id",
   authenticateToken,
@@ -44,7 +38,5 @@ router.delete(
   logActivityMiddleware("delete", resource),
   controller.delete
 );
-//
-router.post("/mock", controller.mockCreate);
 
 module.exports = router;

@@ -1,7 +1,6 @@
-const bcrypt = require("bcrypt");
 const { User } = require("../models/user");
-const { parsePagination } = require("../utils/helper");
-const { DEFAULT_PERMISSIONS, SALT_OR_ROUND } = require("../constants");
+const { parsePagination, hashPassword } = require("../utils/helper");
+const { DEFAULT_PERMISSIONS } = require("../constants");
 const { mock_users, default_admin } = require("../constants/mock");
 
 // manage user //
@@ -43,14 +42,6 @@ exports.getList = async (req, res) => {
       .limit(limit)
       .exec();
 
-    // example:
-    // User.find(filter, projection)
-    // .populate('assignedUnit', 'name code')
-    // .populate('roles', 'name')
-    // .sort({ createdAt: -1 })
-    // .skip(skip)
-    // .limit(limit)
-
     res.json({ total, items });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
@@ -82,7 +73,7 @@ exports.create = async (req, res) => {
       });
     }
 
-    const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+    const passwordHash = await hashPassword(password);
     const finalPermissions = permissions || DEFAULT_PERMISSIONS;
 
     const result = await User.create({
@@ -151,7 +142,7 @@ exports.updateProfile = async (req, res) => {
   try {
     const userId = req.user.id; // Use current user's ID from token
     const { username, email, name, phone, assignedUnit, serviceNumber, avatar } = req.body;
-    
+
     // Check if username or email is changing to a value that already exists on another user
     if (username || email) {
       const duplicate = await User.findOne({
@@ -176,7 +167,9 @@ exports.updateProfile = async (req, res) => {
     if (serviceNumber !== undefined) updateData.serviceNumber = serviceNumber;
     if (avatar !== undefined) updateData.avatar = avatar;
 
-    const result = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-passwordHash");
+    const result = await User.findByIdAndUpdate(userId, updateData, { new: true }).select(
+      "-passwordHash"
+    );
     if (!result) return res.status(404).json({ error: true, message: "User not found" });
 
     res.json(result);
@@ -283,7 +276,7 @@ exports.updatePermissions = async (req, res) => {
 // ----------------
 
 exports.mockCreate = async (_, res) => {
-   try {
+  try {
     const bulk = [];
 
     for (const user of mock_users) {
@@ -299,7 +292,7 @@ exports.mockCreate = async (_, res) => {
         continue;
       }
 
-      const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+      const passwordHash = await hashPassword(password);
       const finalPermissions = permissions || DEFAULT_PERMISSIONS;
 
       const createdItem = await User.create({
@@ -323,11 +316,8 @@ exports.mockCreate = async (_, res) => {
 exports.createDefaultAdmin = async (req, res) => {
   try {
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ 
-      $or: [
-        { username: default_admin.username },
-        { email: default_admin.email }
-      ]
+    const existingAdmin = await User.findOne({
+      $or: [{ username: default_admin.username }, { email: default_admin.email }],
     });
 
     if (existingAdmin) {
@@ -338,7 +328,7 @@ exports.createDefaultAdmin = async (req, res) => {
     }
 
     // Hash the password
-    const passwordHash = await bcrypt.hash(default_admin.password, SALT_OR_ROUND);
+    const passwordHash = await hashPassword(default_admin.password);
 
     // Create the admin user
     const adminUser = await User.create({
@@ -362,7 +352,38 @@ exports.createDefaultAdmin = async (req, res) => {
         email: adminUser.email,
         name: adminUser.name,
         isAdmin: adminUser.isAdmin,
-      }
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
+
+exports.removeDefaultAdmin = async (req, res) => {
+  try {
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({
+      $or: [{ username: default_admin.username }, { email: default_admin.email }],
+    });
+
+    if (existingAdmin) {
+      return res.status(409).json({
+        error: true,
+        message: "Default admin not found",
+      });
+    }
+    await User.deleteOne({
+      $or: [{ username: default_admin.username }, { email: default_admin.email }],
+    });
+    res.status(201).json({
+      message: "Default admin removed successfully",
+      user: {
+        id: adminUser._id,
+        username: adminUser.username,
+        email: adminUser.email,
+        name: adminUser.name,
+        isAdmin: adminUser.isAdmin,
+      },
     });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
