@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { Link } from 'react-router-dom'
 import { ROUTES } from '@/routes'
-import { ArrowLeft, StepBackIcon } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

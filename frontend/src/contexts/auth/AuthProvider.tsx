@@ -51,7 +51,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // If no token or inactive too long, logout
     if (!refreshToken || !lastActive || isNaN(lastActive) || !_user) {
-      if (ROUTES.find((e) => pathname.includes(e.path))?.auth !== true) return
+      if (ROUTES.find((e) => pathname.includes(e.path))?.auth !== true) {
+        setAuthResolved(true)
+        return
+      }
       logout()
       return
     }
@@ -65,25 +68,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const res = await api.post('/auth/refresh', { refreshToken })
-      const { accessToken } = res.data
+      const { accessToken, user: refreshedUser } = res.data
 
       if (!accessToken) throw 'No access token'
-      setUser(_user)
-      storeTokens(accessToken, refreshToken)
+      setUser(refreshedUser || _user)
+      storeTokens(accessToken, refreshToken, refreshedUser || _user)
     } catch (err) {
       console.error('Session refresh failed', err)
       logout()
     } finally {
       setAuthResolved(true)
     }
-  }, [logout])
+  }, [logout, pathname])
 
   useEffect(() => {
-    if (!hasRefreshed.current) {
-      refreshSession()
-      hasRefreshed.current = true
+    // On first load, always attempt to refresh session
+    const _user = getUserLocal()
+    if (_user) {
+      setUser(_user)
+      refreshSession().then(() => {
+        // If on login page and authenticated, redirect to dashboard
+        const loginRoute = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
+        const dashboardRoute = ROUTES.find((e) => e.enPath === '/dashboard')?.path || '/dashboard'
+        if (window.location.pathname === loginRoute && _user) {
+          navigate(dashboardRoute)
+        }
+      })
+    } else {
+      setAuthResolved(true)
+      // If route requires auth, redirect to login
+      if (ROUTES.find((e) => pathname.includes(e.path))?.auth === true) {
+        logout()
+      }
     }
-  }, [refreshSession])
+    hasRefreshed.current = true
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     // Only refresh session on pathname change if user is already logged in

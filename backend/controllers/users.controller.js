@@ -332,15 +332,8 @@ exports.createDefaultAdmin = async (req, res) => {
 
     // Create the admin user
     const adminUser = await User.create({
-      username: default_admin.username,
-      email: default_admin.email,
+      ...default_admin,
       passwordHash,
-      name: default_admin.name,
-      avatar: default_admin.avatar,
-      assignedUnit: default_admin.assignedUnit,
-      serviceNumber: default_admin.serviceNumber,
-      permissions: default_admin.permissions,
-      isAdmin: default_admin.isAdmin,
     });
 
     res.locals.documentId = adminUser._id; // Required for activity logger
