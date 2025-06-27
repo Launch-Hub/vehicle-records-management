@@ -67,7 +67,7 @@ jobs:
 
       - name: Create client frontend/.env
         run: |
-          cat <<EOF > .env
+          cat <<EOF > frontend/.env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOF
 #
