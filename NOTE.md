@@ -11,7 +11,6 @@
 ### development environments
 
 - `release/uat`: testing new feature (using local VM)
-- `release/beta`:
 
 ### production environments
 
