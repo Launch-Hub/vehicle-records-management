@@ -79,6 +79,7 @@ jobs:
           # Replace placeholder with actual server name
           sed -i "s/\${NGINX_SERVER_NAME}/${{ secrets.NGINX_SERVER_NAME }}/g" nginx.conf
           cp nginx.conf dist/
+          cp .env dist/
 
       - name: Upload built artifacts
         uses: actions/upload-artifact@v4
@@ -108,3 +109,5 @@ jobs:
           sudo ln -sf /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
           sudo nginx -t
           sudo systemctl restart nginx
+          # clean up
+          rm /var/www/vrm_app/frontend/dist/nginx.conf
