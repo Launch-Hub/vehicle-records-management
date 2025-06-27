@@ -70,12 +70,14 @@ jobs:
           cat <<EOF > .env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOF
-
+#
       - name: Build frontend
         run: |
           cd frontend
           npm install --legacy-peer-deps
           npm run build
+          # Replace placeholder with actual server name
+          sed -i "s/\${NGINX_SERVER_NAME}/${{ secrets.NGINX_SERVER_NAME }}/g" nginx.conf
           cp nginx.conf dist/
 
       - name: Upload built artifacts
