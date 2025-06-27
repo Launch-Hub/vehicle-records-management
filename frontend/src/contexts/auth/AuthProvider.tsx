@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // On first load, always attempt to refresh session
     const _user = getUserLocal()
-    if (_user) {
+    if (_user && _user.id) {
       setUser(_user)
       refreshSession().then(() => {
         // If on login page and authenticated, redirect to dashboard
