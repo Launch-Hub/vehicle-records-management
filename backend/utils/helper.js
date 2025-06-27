@@ -11,7 +11,7 @@ const getClientIp = (req) => {
 };
 
 const hashPassword = async (password) => {
-  return await bcrypt.hash(password);
+  return bcrypt.hash(password, SALT_OR_ROUND);
 };
 
 const parsePagination = (pageIndex, pageSize) => {
