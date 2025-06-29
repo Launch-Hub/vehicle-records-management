@@ -4,7 +4,31 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ChevronLeft, Plus, Eye, Save } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  ChevronLeft,
+  Plus,
+  Eye,
+  Save,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  CheckCircle,
+} from 'lucide-react'
 
 import api from '@/lib/axios'
 import type { Bulk, Procedure } from '@/lib/types/tables.type'
@@ -14,6 +38,7 @@ import { useLoader } from '@/contexts/loader/use-loader'
 import { backPath } from '@/lib/utils'
 import { useLayout } from '@/contexts/layout'
 import { REGISTRATION_TYPES } from '@/constants/mock-data'
+import { getProcedureStatusLabel } from '@/constants/dictionary'
 
 type WorkflowStep = 'bulk-info' | 'add-procedures' | 'preview'
 
@@ -162,175 +187,12 @@ export default function BulkDetailPage() {
     }
   }
 
-  const renderBulkInfoStep = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Thông tin lô</h2>
-        <Badge variant="outline">Bước 1/3</Badge>
-      </div>
-      <BulkForm
-        initialData={defaultAction === 'update' ? initialData : undefined}
-        isCopying={isCopying}
-        onSubmit={handleBulkSubmit}
-        onCancel={() => navigate(backPath(location.pathname))}
-      />
-    </div>
-  )
-
-  const renderAddProceduresStep = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <h2 className="text-lg font-semibold">Thêm đăng ký</h2>
-          <Badge variant="outline" className="ml-2">
-            Bước 2/3
-          </Badge>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" onClick={handlePreview}>
-            Bỏ qua
-          </Button>
-          <Button
-            onClick={handlePreview}
-            disabled={procedures.length === 0 && existingProcedures.length === 0}
-          >
-            <Eye className="w-4 h-4 mr-2" />
-            Xem trước
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-6 items-start">
-        {/* Form Section */}
-        <div className="space-y-4 w-full">
-          <div className="flex items-center justify-between">
-            <h3 className="text-md font-medium">
-              {selectedProcedureIndex !== null
-                ? `Chỉnh sửa đăng ký ${selectedProcedureIndex + 1}`
-                : 'Thêm đăng ký mới'}
-            </h3>
-            {selectedProcedureIndex !== null && (
-              <Button variant="outline" size="sm" onClick={handleAddNewProcedure}>
-                <Plus className="w-4 h-4 mr-2" />
-                Thêm mới
-              </Button>
-            )}
-          </div>
-          <ProcedureForm
-            key={selectedProcedureIndex ?? 'new'}
-            initialData={selectedProcedure as any}
-            hideBulkId={true}
-            onSubmit={handleProcedureSubmit}
-            onCancel={selectedProcedureIndex !== null ? handleAddNewProcedure : undefined}
-          />
-        </div>
-
-        {/* List Section */}
-        <div className="space-y-4 w-full">
-          <h3 className="text-md font-medium">Danh sách đăng ký</h3>
-          <div className="space-y-4">
-            {procedures.map((procedure, index) => (
-              <div key={index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="font-semibold">
-                      Biển số {procedure._tempRecord?.plateNumber}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="link" size="sm" onClick={() => handleSelectProcedure(index)}>
-                      Sửa
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleRemoveProcedure(index)}
-                    >
-                      Xóa
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {existingProcedures.map((procedure, index) => (
-              <div key={procedure._id || index} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">
-                    Đăng ký hiện có {procedures.length + index + 1}
-                  </span>
-                  <Badge variant="secondary">{procedure.status}</Badge>
-                </div>
-                <div className="text-sm text-muted-foreground mt-2">
-                  Loại: {getRegistrationType(procedure.registrationType)}
-                </div>
-              </div>
-            ))}
-            {procedures.length === 0 && existingProcedures.length === 0 && (
-              <div className="text-center text-muted-foreground py-4">Chưa có đăng ký nào.</div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  const renderPreviewStep = () => (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Xem trước</h2>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => setCurrentStep('add-procedures')}>
-            Quay lại
-          </Button>
-          <Badge variant="outline">Bước 3/3</Badge>
-          <Button onClick={handleSave}>
-            <Save className="w-4 h-4 mr-2" />
-            Lưu lô
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Thông tin lô</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div>
-              <strong>Mã lô:</strong> {bulkData.code}
-            </div>
-            <div>
-              <strong>Tên lô:</strong> {bulkData.name}
-            </div>
-            <div>
-              <strong>Ghi chú:</strong> {bulkData.note || 'Không có'}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Đăng ký ({procedures.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {procedures.map((procedure, index) => (
-                <div key={index} className="p-2 border rounded">
-                  <div className="font-medium">Đăng ký {index + 1}</div>
-                  <div className="text-sm text-muted-foreground">
-                    Loại: {procedure.registrationType}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Trạng thái: {procedure.status}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
+  // Helper to determine completed steps
+  const isStepCompleted = {
+    'bulk-info': !!bulkData.name,
+    'add-procedures': !!bulkData.name && (procedures.length > 0 || existingProcedures.length > 0),
+    preview: false, // preview is never "completed" until save
+  }
 
   return (
     <div className="flex flex-col p-6 md:px-10">
@@ -345,9 +207,231 @@ export default function BulkDetailPage() {
         </Button>
       </div>
 
-      {currentStep === 'bulk-info' && renderBulkInfoStep()}
-      {currentStep === 'add-procedures' && renderAddProceduresStep()}
-      {currentStep === 'preview' && renderPreviewStep()}
+      <Tabs
+        value={currentStep}
+        onValueChange={(value) => setCurrentStep(value as WorkflowStep)}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsTrigger value="bulk-info">
+            {isStepCompleted['bulk-info'] && (
+              <CheckCircle className="text-green-500 w-4 h-4 mr-1" />
+            )}
+            Thông tin lần nhập
+          </TabsTrigger>
+          <TabsTrigger value="add-procedures" disabled={!bulkData.name}>
+            {isStepCompleted['add-procedures'] && (
+              <CheckCircle className="text-green-500 w-4 h-4 mr-1" />
+            )}
+            Nhập hồ sơ
+          </TabsTrigger>
+          <TabsTrigger
+            value="preview"
+            disabled={procedures.length === 0 && existingProcedures.length === 0}
+          >
+            Xem trước
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="bulk-info" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Thông tin lần nhập</h2>
+          </div>
+          <BulkForm
+            initialData={defaultAction === 'update' ? initialData : undefined}
+            isCopying={isCopying}
+            onSubmit={handleBulkSubmit}
+            onCancel={() => navigate(backPath(location.pathname))}
+          />
+        </TabsContent>
+
+        <TabsContent value="add-procedures" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Nhập hồ sơ</h2>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" onClick={handlePreview}>
+                Bỏ qua
+              </Button>
+              <Button
+                onClick={handlePreview}
+                disabled={procedures.length === 0 && existingProcedures.length === 0}
+              >
+                <Eye className="w-4 h-4 mr-2" />
+                Xem trước
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-6 items-start">
+            {/* Form Section */}
+            <div className="space-y-4 w-full">
+              <div className="flex items-center justify-between">
+                <h3 className="text-md font-medium">
+                  {selectedProcedureIndex !== null
+                    ? `Chỉnh sửa đăng ký ${selectedProcedureIndex + 1}`
+                    : 'Thêm đăng ký mới'}
+                </h3>
+                {selectedProcedureIndex !== null && (
+                  <Button variant="outline" size="sm" onClick={handleAddNewProcedure}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Thêm mới
+                  </Button>
+                )}
+              </div>
+              <ProcedureForm
+                key={selectedProcedureIndex ?? 'new'}
+                initialData={selectedProcedure as any}
+                hideBulkId={true}
+                onSubmit={handleProcedureSubmit}
+                onCancel={selectedProcedureIndex !== null ? handleAddNewProcedure : undefined}
+              />
+            </div>
+
+            {/* List Section */}
+            <div className="space-y-4 w-full">
+              <h3 className="text-md font-medium">Danh sách đăng ký</h3>
+              <div className="space-y-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Biển số</TableHead>
+                      <TableHead>Loại</TableHead>
+                      <TableHead>Ghi chú</TableHead>
+                      <TableHead className="text-center w-10">Hành động</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {procedures.map((procedure, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{procedure._tempRecord?.plateNumber}</TableCell>
+                        <TableCell>
+                          {getRegistrationType(procedure.registrationType || '')}
+                        </TableCell>
+                        <TableCell>{procedure.note}</TableCell>
+                        <TableCell className="text-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Mở menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleSelectProcedure(index)}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Sửa
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => handleRemoveProcedure(index)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Xóa
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {existingProcedures.map((procedure, index) => (
+                      <TableRow key={procedure._id || index}>
+                        <TableCell>Đăng ký hiện có {procedures.length + index + 1}</TableCell>
+                        <TableCell>
+                          {getRegistrationType(procedure.registrationType || '')}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {getProcedureStatusLabel(procedure.status || '')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>-</TableCell>
+                      </TableRow>
+                    ))}
+                    {procedures.length === 0 && existingProcedures.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground py-4">
+                          Chưa có đăng ký nào.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="preview" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Xem trước</h2>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" onClick={() => setCurrentStep('add-procedures')}>
+                Quay lại
+              </Button>
+              <Button onClick={handleSave}>
+                <Save className="w-4 h-4 mr-2" />
+                Lưu
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            {/* Bulk Info Card */}
+            <div className="flex flex-col gap-1">
+              <div>
+                <strong>Mã lô:</strong> {bulkData.code}
+              </div>
+              <div>
+                <strong>Tên lô:</strong> {bulkData.name}
+              </div>
+              <div>
+                <strong>Ghi chú:</strong> {bulkData.note || 'Không có'}
+              </div>
+            </div>
+
+            {/* Procedures Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Danh sách đăng ký ({procedures.length})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Biển số</TableHead>
+                      <TableHead>Loại</TableHead>
+                      <TableHead>Ghi chú</TableHead>
+                      <TableHead>Trạng thái</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {procedures.map((procedure, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{procedure._tempRecord?.plateNumber}</TableCell>
+                        <TableCell>
+                          {getRegistrationType(procedure.registrationType || '')}
+                        </TableCell>
+                        <TableCell>{procedure.note}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {getProcedureStatusLabel(procedure.status || '')}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {procedures.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground py-4">
+                          Chưa có đăng ký nào.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

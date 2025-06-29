@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Switch } from '@/components/ui/switch'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Copy, QrCode } from 'lucide-react'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import { getLabel } from '@/constants/dictionary'
 import { PLATE_COLORS } from '@/constants/general'
@@ -24,6 +24,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { useIsMobile } from '@/lib/hooks/use-mobile'
+import BuiltinCameraScanner from '@/components/shared/qr-code/camera-scanner'
+import { Textarea } from '@/components/ui/textarea'
 
 interface RecordFormProps {
   initialData?: VehicleRecord
@@ -39,6 +42,9 @@ export default function VehicleRecordForm({
   onCancel,
 }: RecordFormProps) {
   const [useCustomColor, setUseCustomColor] = useState(false)
+  const [showCameraScanner, setShowCameraScanner] = useState(false)
+  const [scannerError, setScannerError] = useState<string | Error | null>(null)
+  const isMobile = useIsMobile()
 
   const form = useForm<VehicleRecordFormValues>({
     resolver: zodResolver(VehicleRecordSchema),
@@ -51,9 +57,9 @@ export default function VehicleRecordForm({
       phone: '',
       email: '',
       address: '',
+      note: '',
       vehicleType: 'Xe con',
       issuerId: '',
-      note: '',
       status: 'idle',
       archiveAt: {
         storage: 'Kho A',
@@ -70,6 +76,32 @@ export default function VehicleRecordForm({
 
   const handleFormSubmit = async (data: VehicleRecordFormValues) => {
     onSubmit(data)
+  }
+
+  const handleStartCameraScanner = () => {
+    setScannerError(null)
+    setShowCameraScanner(true)
+  }
+
+  const handleStopCameraScanner = () => {
+    setShowCameraScanner(false)
+  }
+
+  const handleMobileScanSuccess = (result: string) => {
+    form.setValue('plateNumber', result.toUpperCase())
+    setScannerError(null)
+    setShowCameraScanner(false)
+  }
+
+  const handleMobileScanError = (error: string | Error) => {
+    setScannerError(error)
+  }
+
+  const copyToClipboard = (text: string) => {
+    if (!text) return
+    navigator.clipboard.writeText(text).catch((err) => {
+      console.error('Failed to copy to clipboard: ', err)
+    })
   }
 
   const renderPlate = useMemo(() => {
@@ -128,6 +160,17 @@ export default function VehicleRecordForm({
 
   const isEditing = initialData && !isCopying
 
+  // Show camera scanner overlay
+  if (showCameraScanner) {
+    return (
+      <BuiltinCameraScanner
+        onScanSuccess={handleMobileScanSuccess}
+        onScanError={handleMobileScanError}
+        onClose={handleStopCameraScanner}
+      />
+    )
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
@@ -142,12 +185,45 @@ export default function VehicleRecordForm({
                   <FormItem>
                     <FormLabel className="required">{getLabel('plateNumber')}</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
-                      />
+                      <div className="relative flex items-center">
+                        <Input
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                          placeholder={
+                            isMobile ? 'Tap icon to scan...' : 'Scan or input plate number...'
+                          }
+                          className="pr-20"
+                        />
+                        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center">
+                          {field.value && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => copyToClipboard(field.value)}
+                              className="h-8 w-8 text-gray-500 hover:text-primary"
+                              aria-label="Copy code"
+                            >
+                              <Copy className="h-5 w-5" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleStartCameraScanner}
+                            className="h-8 w-8 text-gray-500 hover:text-primary"
+                            aria-label="Start Camera Scanner"
+                          >
+                            <QrCode className="h-5 w-5" />
+                          </Button>
+                        </div>
+                      </div>
                     </FormControl>
                     <FormMessage />
+                    {scannerError && (
+                      <div className="mt-1 p-2 bg-red-100 text-red-700 border border-red-400 rounded text-sm">
+                        {scannerError instanceof Error ? scannerError.message : scannerError}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -245,14 +321,29 @@ export default function VehicleRecordForm({
                   <FormItem>
                     <FormLabel className="required">{getLabel('registrant')}</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
+                      <Input
+                        {...field}
                         onChange={(e) => {
                           const value = e.target.value
                           const capitalized = value.replace(/\b\w/g, (char) => char.toUpperCase())
                           field.onChange(capitalized)
                         }}
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="space-y-2">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{getLabel('address')}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -289,15 +380,15 @@ export default function VehicleRecordForm({
                 )}
               />
             </div>
-            <div className="space-y-2">
+            <div className="col-span-4 space-y-2">
               <FormField
                 control={form.control}
-                name="address"
+                name="note"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{getLabel('address')}</FormLabel>
+                    <FormLabel>{getLabel('note')}</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Textarea {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -109,5 +109,3 @@ jobs:
           sudo ln -sf /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
           sudo nginx -t
           sudo systemctl restart nginx
-          # clean up
-          rm /var/www/vrm_app/frontend/dist/nginx.conf

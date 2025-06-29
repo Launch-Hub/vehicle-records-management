@@ -58,7 +58,8 @@ export default function ProcedureForm({
       bulkId: undefined,
       registrationType: '',
       steps: [],
-      status: 'draft',
+      dueDate: new Date(new Date().getTime() + 48 * 60 * 60 * 1000),
+      status: 'pending',
     },
   })
 
@@ -228,6 +229,16 @@ export default function ProcedureForm({
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="note">Ghi chú</Label>
+          <Textarea
+            id="note"
+            {...register('note')}
+            placeholder="Nhập ghi chú (tùy chọn)"
+            rows={3}
+          />
         </div>
 
         {isEditing && (

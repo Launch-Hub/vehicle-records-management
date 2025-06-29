@@ -77,7 +77,11 @@ export interface ProcedureProps {
   bulkId?: string | BulkProps
   registrationType: string
   steps: ProcedureStepProps[]
-  status: 'draft' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'archived'
+  status: 'pending' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'archived'
+  note?: string
+  dueDate?: Date
+  completedAt?: Date
+  archivedAt?: Date
   createdAt?: Date
   updatedAt?: Date
   // for store in the client only

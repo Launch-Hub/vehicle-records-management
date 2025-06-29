@@ -45,7 +45,7 @@ const columns: ColumnDef<Procedure>[] = [
     cell: (info: any) => {
       const status = info.getValue()
       const statusMap: Record<string, string> = {
-        draft: 'Nháp',
+        pending: 'Đăng ký mới',
         processing: 'Đang xử lý',
         overdue: 'Đã quá hạn',
         completed: 'Đã hoàn thành',

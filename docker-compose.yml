@@ -10,10 +10,10 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio_data:/data
+      - minio_data:/mnt/minio
     env_file:
       - .env
-    command: server /data --console-address ":9001"
+    command: server /mnt/minio --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9001"]
       interval: 30s
@@ -36,6 +36,8 @@ services:
   backend:
     build: ./backend
     container_name: vrm-backend
+    ports:
+      - "5000:5000"
     volumes:
       - ./public/vrm-bucket:/app/public/vrm-bucket
     env_file:
@@ -44,8 +46,6 @@ services:
     environment:
       - NODE_ENV=production
       - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
-    ports:
-      - "5000:5000"
     depends_on:
       mongo:
         condition: service_healthy

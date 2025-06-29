@@ -22,11 +22,11 @@ export const UserFormSchema = z.object({
 export type UserFormValues = z.infer<typeof UserFormSchema>
 
 export const VehicleRecordSchema = z.object({
-  plateNumber: z.string().min(1, 'Biển số xe là bắt buộc'),
-  color: z.string().min(1, 'Màu sơn là bắt buộc'),
-  identificationNumber: z.string().min(1, 'Số khung là bắt buộc'),
-  engineNumber: z.string().min(1, 'Số máy là bắt buộc'),
-  registrant: z.string().min(1, 'Chủ xe là bắt buộc'),
+  plateNumber: z.string().min(7, 'Biển số xe tối thiểu là 7 ký tự').max(9, 'Biển số xe không được vượt quá 9 ký tự'),
+  color: z.string(),
+  identificationNumber: z.string(),
+  engineNumber: z.string(),
+  registrant: z.string().min(1, 'Tên chủ xe là bắt buộc'),
   phone: z.string().optional(),
   email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
   address: z.string().optional(),

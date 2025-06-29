@@ -1,11 +1,11 @@
 export const REGISTRATION_TYPES = [
   {
-    label: 'Đăng ký mới toàn trình (trình tại nhà)',
+    label: 'Đăng ký mới toàn trình',
     value: '6508c627e7e8a1a0a1a2a3a4',
     step: 1,
   },
   {
-    label: 'ĐKM bán toàn trình (trình tại cơ quan)',
+    label: 'Đăng ký mới bán toàn trình',
     value: '6508c627e7e8a1a0a1a2a3a5',
     step: 1,
   },
@@ -15,12 +15,12 @@ export const REGISTRATION_TYPES = [
     step: 1,
   },
   {
-    label: 'Thu hồi ĐK, BSX',
+    label: 'Thu hồi',
     value: '6508c627e7e8a1a0a1a2a3a7',
     step: 1,
   },
   {
-    label: 'Xác nhận hs gốc (đang lưu hs gốc tại cơ quan)',
+    label: 'Xác nhận hồ sơ gốc',
     value: '6508c627e7e8a1a0a1a2a3a8',
     step: 1,
   },

@@ -1,17 +1,5 @@
 import { type ComponentProps } from 'react'
 import {
-  ClipboardListIcon,
-  DatabaseIcon,
-  FileIcon,
-  HelpCircleIcon,
-  SearchIcon,
-  SettingsIcon,
-} from 'lucide-react'
-
-import { NavMain } from '@/components/shared/sidebar/nav-main'
-import { NavSecondary } from '@/components/shared/sidebar/nav-secondary'
-import { NavUser } from '@/components/shared/sidebar/nav-user'
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -19,64 +7,64 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { scrollToTop } from '@/lib/utils'
-import { useAuth } from '@/contexts/auth'
 import { ROUTES } from '@/routes'
-import { NavDocuments } from './nav-documents'
+import { scrollToTop } from '@/lib/utils'
+import { NavMain } from '@/components/shared/sidebar/nav-main'
+import { NavUser } from '@/components/shared/sidebar/nav-user'
 
-const mock_data = {
-  // navMain: [
-  //   {
-  //     title: 'Bảng điều khiển',
-  //     url: '/dashboard',
-  //     icon: LayoutDashboardIcon,
-  //   },
-  //   {
-  //     title: 'Quản lý hồ sơ',
-  //     url: '/records',
-  //     icon: FolderIcon,
-  //   },
-  //   {
-  //     title: 'Quản lý nhân viên',
-  //     url: '/users',
-  //     icon: UsersIcon,
-  //   },
-  // ],
-  navSecondary: [
-    {
-      title: 'Settings',
-      url: '#',
-      icon: SettingsIcon,
-    },
-    {
-      title: 'Get Help',
-      url: '#',
-      icon: HelpCircleIcon,
-    },
-    {
-      title: 'Search',
-      url: '#',
-      icon: SearchIcon,
-    },
-  ],
-  documents: [
-    {
-      name: 'Data Library',
-      url: '#',
-      icon: DatabaseIcon,
-    },
-    {
-      name: 'Reports',
-      url: '#',
-      icon: ClipboardListIcon,
-    },
-    {
-      name: 'Word Assistant',
-      url: '#',
-      icon: FileIcon,
-    },
-  ],
-}
+// const mock_data = {
+//   // navMain: [
+//   //   {
+//   //     title: 'Bảng điều khiển',
+//   //     url: '/dashboard',
+//   //     icon: LayoutDashboardIcon,
+//   //   },
+//   //   {
+//   //     title: 'Quản lý hồ sơ',
+//   //     url: '/records',
+//   //     icon: FolderIcon,
+//   //   },
+//   //   {
+//   //     title: 'Quản lý nhân viên',
+//   //     url: '/users',
+//   //     icon: UsersIcon,
+//   //   },
+//   // ],
+//   navSecondary: [
+//     {
+//       title: 'Settings',
+//       url: '#',
+//       icon: SettingsIcon,
+//     },
+//     {
+//       title: 'Get Help',
+//       url: '#',
+//       icon: HelpCircleIcon,
+//     },
+//     {
+//       title: 'Search',
+//       url: '#',
+//       icon: SearchIcon,
+//     },
+//   ],
+//   documents: [
+//     {
+//       name: 'Data Library',
+//       url: '#',
+//       icon: DatabaseIcon,
+//     },
+//     {
+//       name: 'Reports',
+//       url: '#',
+//       icon: ClipboardListIcon,
+//     },
+//     {
+//       name: 'Word Assistant',
+//       url: '#',
+//       icon: FileIcon,
+//     },
+//   ],
+// }
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const navMain = ROUTES.filter((e) => e.showSidebar).map((e) => mapRoute(e))

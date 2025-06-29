@@ -108,6 +108,7 @@ npm install react-router-dom
 ```bash
 npm install vite-tsconfig-paths axios
 npm install @dnd-kit/core @dnd-kit/modifiers @dnd-kit/sortable @tanstack/react-table
+npm install html5-qrcode qrcode.react
 ```
 
 **Note: Use `--legacy-peer-deps` if needed.**

@@ -14,7 +14,7 @@ export const TABLE_DICTIONARY = {
   color: 'Màu',
   identificationNumber: 'Số khung',
   engineNumber: 'Số máy',
-  registrant: 'Người đăng ký',
+  registrant: 'Tên chủ xe',
   phone: 'Số điện thoại',
   address: 'Địa chỉ',
   issuer: 'Người tiếp nhận',
@@ -67,7 +67,7 @@ export function getStatusLabel(key: string): string {
 }
 
 export const PROCEDURE_STATUS_DICTIONARY = {
-  draft: 'Nháp',
+  pending: 'Đăng ký mới',
   processing: 'Đang xử lý',
   overdue: 'Đã quá hạn',
   completed: 'Đã hoàn thành',
