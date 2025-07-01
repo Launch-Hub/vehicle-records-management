@@ -22,6 +22,7 @@ interface UserProps extends Omit<LoginUserProps, 'token'> {
   _id: string
   password?: string // for crud
   status: string // for crud
+  createdAt?: Date
 }
 export type User = UserProps
 
@@ -82,7 +83,7 @@ export interface ProcedureProps {
   dueDate?: Date
   completedAt?: Date
   archivedAt?: Date
-  createdAt?: Date
+  createdAt: Date
   updatedAt?: Date
   // for store in the client only
   _tempRecord?: VehicleRecordProps

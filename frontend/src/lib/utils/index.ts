@@ -2,7 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { toast } from 'sonner'
 import { l } from './_'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -87,29 +87,46 @@ export const processImage = (file: File, callback: (base64: string) => void) => 
   reader.readAsDataURL(file)
 }
 
-export function exportToExcel({
+export async function exportToExcel({
   data,
   filename = 'export.xlsx',
   sheetName = 'Sheet1',
   headerRows = [], // array of arrays, each sub-array is a row
   footerRows = [], // array of arrays, each sub-array is a row
+  columns = [],
 }: {
   data: any[],
   filename?: string,
   sheetName?: string,
   headerRows?: any[][],
   footerRows?: any[][],
+  columns?: { key: string, label: string }[]
 }) {
-  // Convert data to worksheet and then to 2D array
-  const ws = XLSX.utils.json_to_sheet(data, { skipHeader: false })
-  const mainRows = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][]
-  const wsData = [
-    ...headerRows,
-    ...mainRows,
-    ...footerRows,
-  ]
-  const wsFinal = XLSX.utils.aoa_to_sheet(wsData)
-  const wb = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(wb, wsFinal, sheetName)
-  XLSX.writeFile(wb, filename)
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet(sheetName)
+
+  // Add header rows
+  headerRows.forEach(row => worksheet.addRow(row))
+
+  // Add main data rows
+  if (data.length > 0) {
+    const keys = columns.map(column => column.key)
+    worksheet.addRow(keys)
+    data.forEach(item => {
+      worksheet.addRow(keys.map(k => item[k] || ''))
+    })
+  }
+
+  // Add footer rows
+  footerRows.forEach(row => worksheet.addRow(row))
+
+  // Write to file (browser)
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }

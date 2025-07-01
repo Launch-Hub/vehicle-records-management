@@ -9,6 +9,17 @@ import { joinPath, exportToExcel } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
+import { getLabel } from '@/constants/dictionary'
+
+const statusMap: Record<string, string> = {
+  pending: 'Đăng ký mới',
+  processing: 'Đang xử lý',
+  overdue: 'Đã quá hạn',
+  completed: 'Đã hoàn thành',
+  rejected: 'Đã từ chối',
+  cancelled: 'Đã huỷ',
+  archived: 'Đã lưu trữ',
+}
 
 const columns: ColumnDef<Procedure>[] = [
   {
@@ -46,15 +57,6 @@ const columns: ColumnDef<Procedure>[] = [
     header: () => <div>Trạng thái</div>,
     cell: (info: any) => {
       const status = info.getValue()
-      const statusMap: Record<string, string> = {
-        pending: 'Đăng ký mới',
-        processing: 'Đang xử lý',
-        overdue: 'Đã quá hạn',
-        completed: 'Đã hoàn thành',
-        rejected: 'Đã từ chối',
-        cancelled: 'Đã huỷ',
-        archived: 'Đã lưu trữ',
-      }
       return <span className="text-muted-foreground">{statusMap[status] || status}</span>
     },
     size: 100,
@@ -145,6 +147,29 @@ export default function ProceduresPage() {
     }
   }
 
+  const handleExport = async (
+    rows: Procedure[],
+    exportColumns: { key: string; label: string }[]
+  ) => {
+    const sortedRows = [...rows].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+    const fromDate = sortedRows[0].createdAt.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    const toDate = sortedRows[sortedRows.length - 1].createdAt.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    const filename = `danh-sach-dang-ky-${fromDate}-${toDate}.xlsx`
+    return await exportToExcel({
+      data: rows,
+      filename,
+      columns: exportColumns,
+    })
+  }
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
@@ -164,14 +189,7 @@ export default function ProceduresPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
-            onExport={(rows) => exportToExcel({
-              data: rows,
-              filename: 'procedures-export.xlsx',
-              headerRows: [[
-                'Exported Procedures', '', '', '', '', '', '', '', '', ''
-              ]], // Example header row
-              // footerRows: [["Footer row 1", "", "", ""], ["Footer row 2", "", "", ""]],
-            })}
+            onExport={handleExport}
           />
         </div>
       </div>

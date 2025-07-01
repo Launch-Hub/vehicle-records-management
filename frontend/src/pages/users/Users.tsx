@@ -5,7 +5,7 @@ import api from '@/lib/axios'
 import type { User } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { UserDataTable } from '@/components/page/users/table'
-import { getTableLabel } from '@/constants/dictionary'
+import { getLabel, getTableLabel } from '@/constants/dictionary'
 import { joinPath, exportToExcel } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -143,6 +143,15 @@ export default function UsersPage() {
     }
   }
 
+  const handleExport = async (rows: User[], exportColumns: { key: string; label: string }[]) => {
+    const filename = 'danh-sach-nguoi-dung.xlsx'
+    return await exportToExcel({
+      data: rows,
+      filename,
+      columns: exportColumns,
+    })
+  }
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
@@ -162,14 +171,7 @@ export default function UsersPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
-            onExport={(rows) => exportToExcel({
-              data: rows,
-              filename: 'users-export.xlsx',
-              headerRows: [[
-                'Exported Users', '', '', '', '', '', '', '', '', ''
-              ]], // Example header row
-              // footerRows: [["Footer row 1", "", "", ""], ["Footer row 2", "", "", ""]],
-            })}
+            onExport={handleExport}
           />
         </div>
       </div>

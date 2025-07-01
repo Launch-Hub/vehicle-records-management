@@ -53,7 +53,14 @@ import {
 } from '@/components/ui/select'
 import { getLabel } from '@/constants/dictionary'
 import { useEffect, useMemo, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { LoaderOverlay } from '@/components/shared/loader/loader-overlay'
 
@@ -68,7 +75,7 @@ interface DataTableProps<T> {
   onEdit: (item: T) => void
   onCopy: (item: T) => void
   onDelete: (id: string) => void
-  onExport?: (rows: T[]) => void
+  onExport?: (rows: T[], columns: { key: string; label: string }[]) => void
 }
 
 function DataRow<T>({ row }: { row: Row<T> }) {
@@ -107,6 +114,11 @@ export function UserDataTable<T extends Record<string, any>>({
   const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item: T | null }>({
     open: false,
     item: null,
+  })
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [selectedExportColumns, setSelectedExportColumns] = useState<string[]>(() => {
+    if (!columns) return []
+    return columns.map((col) => (typeof col.accessorKey === 'string' ? col.accessorKey : ''))
   })
 
   useEffect(() => {
@@ -226,6 +238,28 @@ export function UserDataTable<T extends Record<string, any>>({
   // Get selected rows
   const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original)
 
+  const allExportableColumns = columns?.filter((col) => typeof col.accessorKey === 'string') || []
+
+  const handleExportClick = () => {
+    setExportDialogOpen(true)
+  }
+
+  const handleExportConfirm = () => {
+    if (onExport) {
+      // Only export selected columns
+      const selectedCols = allExportableColumns.filter((col) =>
+        selectedExportColumns.includes(col.accessorKey as string)
+      )
+      // Map to { key, label }
+      const exportColumns = selectedCols.map((col) => ({
+        key: col.accessorKey as string,
+        label: getLabel(col.accessorKey as string),
+      }))
+      onExport(selectedRows, exportColumns)
+    }
+    setExportDialogOpen(false)
+  }
+
   return (
     <div className="flex w-full flex-col justify-start gap-6 relative">
       {loading && <LoaderOverlay />}
@@ -272,7 +306,7 @@ export function UserDataTable<T extends Record<string, any>>({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onExport && onExport(selectedRows)}
+            onClick={handleExportClick}
             disabled={!selectedRows.length}
             className="border-success text-success hover:border-success hover:text-success"
           >
@@ -409,6 +443,38 @@ export function UserDataTable<T extends Record<string, any>>({
               Huỷ bỏ
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chọn cột để xuất Excel</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 max-h-60 overflow-auto">
+            {allExportableColumns.map((col) => (
+              <label key={col.accessorKey as string} className="flex items-center gap-2">
+                <Checkbox
+                  checked={selectedExportColumns.includes(col.accessorKey as string)}
+                  onCheckedChange={(checked) => {
+                    setSelectedExportColumns((prev) =>
+                      checked
+                        ? [...prev, col.accessorKey as string]
+                        : prev.filter((k) => k !== col.accessorKey)
+                    )
+                  }}
+                />
+                <span>{getLabel(col.accessorKey as string)}</span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleExportConfirm} disabled={!selectedExportColumns.length}>
+              Xuất Excel
+            </Button>
+            <DialogClose asChild>
+              <Button variant="outline">Huỷ</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
