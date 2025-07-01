@@ -35,7 +35,7 @@ export const PERMISSION_DICTIONARY = {
   users: 'Quản lý người dùng',
   records: 'Quản lý Tạo mục',
   procedures: 'Quản lý đăng ký',
-  bulks: 'Quản lý Lô đăng ký',
+  bulks: 'Quản lý Lần nhập',
   action_types: 'Quản lý Tạo mục',
   activites: 'Quản lý hoạt động',
   //

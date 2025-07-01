@@ -6,8 +6,7 @@ exports.getList = async (req, res) => {
   const projection = {
     code: 1,
     name: 1,
-    initSize: 1,
-    currentSize: 1,
+    size: 1,
     note: 1,
     createdAt: 1,
     updatedAt: 1,
@@ -27,7 +26,7 @@ exports.getList = async (req, res) => {
 
     // const items = await Bulk.find(filter, projection)
     const items = await Bulk.find(filter)
-      .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
+      .sort({ updatedAt: -1, createdAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
       .exec();
@@ -101,7 +100,7 @@ exports.getProceduresByBulk = async (req, res) => {
   try {
     const { bulkId } = req.params;
     const { Procedure } = require("../models/procedure");
-    
+
     const procedures = await Procedure.find({ bulkId })
       .populate("recordId", "plateNumber registrant")
       .sort({ createdAt: -1 });

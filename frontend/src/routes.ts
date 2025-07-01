@@ -274,13 +274,13 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     resource: 'records',
     showSidebar: true,
     icon: FolderIcon,
-    path: '/records',
-    title: 'Manage Records',
+    path: '/registration-history',
+    title: 'Registration History',
     language: 'en',
     translations: [
       {
-        path: '/quan-ly-ho-so',
-        title: 'Quản lý Hồ Sơ',
+        path: '/lich-su-dang-ky',
+        title: 'Lịch sử đăng ký',
         language: 'vi',
       },
     ],

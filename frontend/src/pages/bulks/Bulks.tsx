@@ -22,14 +22,8 @@ const columns: ColumnDef<Bulk>[] = [
     size: 150,
   },
   {
-    accessorKey: 'initSize',
-    header: () => <div>Kích thước ban đầu</div>,
-    cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? 0}</span>,
-    size: 100,
-  },
-  {
-    accessorKey: 'currentSize',
-    header: () => <div>Kích thước hiện tại</div>,
+    accessorKey: 'size',
+    header: () => <div>Số lượng</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? 0}</span>,
     size: 100,
   },
@@ -126,4 +120,4 @@ export default function BulksPage() {
       </div>
     </div>
   )
-} 
+}

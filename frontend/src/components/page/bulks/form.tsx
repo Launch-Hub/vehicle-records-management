@@ -23,8 +23,7 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
     defaultValues: {
       code: '',
       name: '',
-      initSize: 0,
-      currentSize: 0,
+      size: 0, // size should be managed by the server
       note: '',
     },
   })
@@ -61,8 +60,7 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
       form.reset({
         code: isCopying ? '' : initialData.code,
         name: isCopying ? '' : initialData.name,
-        initSize: initialData.initSize || 0,
-        currentSize: initialData.currentSize || 0,
+        size: initialData.size || 0,
         note: initialData.note || '',
       })
     }
@@ -77,7 +75,7 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="code" className="required">
-            Mã lô
+            Mã lần nhập
           </Label>
           <Input
             id="code"
@@ -92,12 +90,12 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
 
         <div className="space-y-2">
           <Label htmlFor="name" className="required">
-            Tên lô
+            Tên lần nhập
           </Label>
           <Input
             id="name"
             {...form.register('name')}
-            placeholder="Nhập tên lô"
+            placeholder="Nhập tên lần nhập"
             className={form.formState.errors.name ? 'border-red-500' : ''}
           />
           {form.formState.errors.name && (

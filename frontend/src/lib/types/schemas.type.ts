@@ -22,7 +22,10 @@ export const UserFormSchema = z.object({
 export type UserFormValues = z.infer<typeof UserFormSchema>
 
 export const VehicleRecordSchema = z.object({
-  plateNumber: z.string().min(7, 'Biển số xe tối thiểu là 7 ký tự').max(9, 'Biển số xe không được vượt quá 9 ký tự'),
+  plateNumber: z
+    .string()
+    .min(7, 'Biển số xe tối thiểu là 7 ký tự')
+    .max(9, 'Biển số xe không được vượt quá 9 ký tự'),
   color: z.string(),
   identificationNumber: z.string(),
   engineNumber: z.string(),
@@ -34,21 +37,22 @@ export const VehicleRecordSchema = z.object({
   issuerId: z.string().optional(),
   note: z.string().optional(),
   status: z.string(),
-  archiveAt: z.object({
-    storage: z.string().min(1, 'Kho là bắt buộc'),
-    room: z.string().min(1, 'Phòng là bắt buộc'),
-    row: z.string().min(1, 'Dãy là bắt buộc'),
-    shelf: z.string().min(1, 'Kệ là bắt buộc'),
-    level: z.string().min(1, 'Tầng là bắt buộc'),
-  }).optional(),
+  archiveAt: z
+    .object({
+      storage: z.string().min(1, 'Kho là bắt buộc'),
+      room: z.string().min(1, 'Phòng là bắt buộc'),
+      row: z.string().min(1, 'Dãy là bắt buộc'),
+      shelf: z.string().min(1, 'Kệ là bắt buộc'),
+      level: z.string().min(1, 'Tầng là bắt buộc'),
+    })
+    .optional(),
 })
 export type VehicleRecordFormValues = z.infer<typeof VehicleRecordSchema>
 
 export const BulkFormSchema = z.object({
   code: z.string().min(1, 'Mã lô là bắt buộc'),
   name: z.string().min(1, 'Tên lô là bắt buộc'),
-  initSize: z.coerce.number().min(0, 'Kích thước ban đầu phải >= 0'),
-  currentSize: z.coerce.number().min(0, 'Kích thước hiện tại phải >= 0'),
+  size: z.coerce.number().min(0, 'Số lượng phải >= 0'),
   note: z.string().optional(),
 })
 export type BulkFormValues = z.infer<typeof BulkFormSchema>

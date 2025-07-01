@@ -94,8 +94,7 @@ export interface BulkProps {
   _id: string
   code: string
   name: string
-  initSize: number
-  currentSize: number
+  size: number
   note?: string
   createdAt?: Date
   updatedAt?: Date
