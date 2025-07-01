@@ -26,12 +26,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAuthResolved(true)
   }
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearSession()
     setUser(null)
     const loginUrl = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
     navigate(loginUrl)
-  }
+  }, [navigate])
 
   const updateProfile = async (data: Partial<User>) => {
     const response = await api.put('/users/profile', data)

@@ -73,7 +73,7 @@ export default function RecordsPage() {
   }, [search, pagination])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search || !searchTerm) return
+    if (!search && !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }

@@ -11,6 +11,7 @@ import { ROUTES } from '@/routes'
 import { scrollToTop } from '@/lib/utils'
 import { NavMain } from '@/components/shared/sidebar/nav-main'
 import { NavUser } from '@/components/shared/sidebar/nav-user'
+import { NavSecondary } from '@/components/shared/sidebar/nav-secondary'
 
 // const mock_data = {
 //   // navMain: [
@@ -67,7 +68,8 @@ import { NavUser } from '@/components/shared/sidebar/nav-user'
 // }
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
-  const navMain = ROUTES.filter((e) => e.showSidebar).map((e) => mapRoute(e))
+  const navMain = ROUTES.filter((e) => e.showSidebar && (e.nav ?? 1) === 1).map((e) => mapRoute(e))
+  const navSecondary = ROUTES.filter((e) => e.showSidebar && e.nav === 2).map((e) => mapRoute(e))
 
   function mapRoute(route: any) {
     return {
@@ -91,9 +93,15 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
+        {navSecondary.length > 0 && (
+          <NavSecondary
+            items={navSecondary}
+            className="mt-4"
+            label="Quản lý đăng ký"
+          />
+        )}
         {/* the below are currently not in use */}
         {/* <NavDocuments items={mock_data.documents} /> */}
-        {/* <NavSecondary items={mock_data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

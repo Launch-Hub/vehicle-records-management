@@ -35,5 +35,8 @@
   "homepage": "https://github.com/Launch-Hub/vehicle-records-management#readme",
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
   }
 }

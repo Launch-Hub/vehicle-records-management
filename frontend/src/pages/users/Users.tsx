@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
@@ -6,11 +6,12 @@ import type { User } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { UserDataTable } from '@/components/page/users/table'
 import { getTableLabel } from '@/constants/dictionary'
-import { joinPath } from '@/lib/utils'
+import { joinPath, exportToExcel } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { ColumnDef } from '@tanstack/react-table'
 import { USER_STATUSES } from '@/constants/general'
 import { Dot } from 'lucide-react'
+import { useLoader } from '@/contexts/loader'
 
 const columns: ColumnDef<User>[] = [
   {
@@ -73,8 +74,9 @@ export default function UsersPage() {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const loader = useLoader()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
       const response = await api.get('/users', { params: { search, ...pagination } })
@@ -89,10 +91,10 @@ export default function UsersPage() {
     } finally {
       setIsFetching(false)
     }
-  }
+  }, [search, pagination])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search || !searchTerm) return
+    if (!search && !searchTerm) return
     setSearch((_) => searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
@@ -121,13 +123,29 @@ export default function UsersPage() {
     navigate(`${joinPath(location.pathname, user._id)}?copy=true`)
   }
 
-  const handleDelete = (id: string) => {
-    // Implement as needed
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+
+    loader.show()
+    try {
+      await api.delete(`/users/${id}`)
+      toast.success('Xóa người dùng thành công.')
+      // Refresh the data
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa người dùng. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
   }
 
   useEffect(() => {
     fetchData()
-  }, [search, pagination])
+  }, [fetchData])
 
   return (
     <div className="flex flex-1 flex-col">
@@ -144,6 +162,14 @@ export default function UsersPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            onExport={(rows) => exportToExcel({
+              data: rows,
+              filename: 'users-export.xlsx',
+              headerRows: [[
+                'Exported Users', '', '', '', '', '', '', '', '', ''
+              ]], // Example header row
+              // footerRows: [["Footer row 1", "", "", ""], ["Footer row 2", "", "", ""]],
+            })}
           />
         </div>
       </div>

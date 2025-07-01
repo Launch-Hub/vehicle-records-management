@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
 import type { Procedure } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { UserDataTable } from '@/components/page/users/table'
-import { joinPath } from '@/lib/utils'
+import { joinPath, exportToExcel } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
+import { getRoute } from '@/routes'
+import { useLoader } from '@/contexts/loader'
 
 const columns: ColumnDef<Procedure>[] = [
   {
@@ -68,11 +70,18 @@ export default function ProceduresPage() {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const loader = useLoader()
 
-  const fetchData = async () => {
+  // Get the step from the route config's query field
+  const route = getRoute(location.pathname)
+  const step = route?.query?.step
+
+  const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/procedures', { params: { search, ...pagination } })
+      const response = await api.get('/procedures', {
+        params: { search, ...pagination, ...(step ? { step } : {}) },
+      })
       if (response.data) {
         const { total, items } = response.data
         setTotal(total)
@@ -84,10 +93,10 @@ export default function ProceduresPage() {
     } finally {
       setIsFetching(false)
     }
-  }
+  }, [search, pagination, step])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search || !searchTerm) return
+    if (!search && !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
@@ -116,13 +125,29 @@ export default function ProceduresPage() {
     navigate(`${joinPath(location.pathname, procedure._id)}?copy=true`)
   }
 
-  const handleDelete = () => {
-    // implement if needed
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+
+    loader.show()
+    try {
+      await api.delete(`/procedures/${id}`)
+      toast.success('Xóa đăng ký thành công.')
+      // Refresh the data
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa đăng ký. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
   }
 
   useEffect(() => {
     fetchData()
-  }, [search, pagination])
+  }, [fetchData])
 
   return (
     <div className="flex flex-1 flex-col">
@@ -139,9 +164,17 @@ export default function ProceduresPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            onExport={(rows) => exportToExcel({
+              data: rows,
+              filename: 'procedures-export.xlsx',
+              headerRows: [[
+                'Exported Procedures', '', '', '', '', '', '', '', '', ''
+              ]], // Example header row
+              // footerRows: [["Footer row 1", "", "", ""], ["Footer row 2", "", "", ""]],
+            })}
           />
         </div>
       </div>
     </div>
   )
-} 
+}

@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { toast } from 'sonner'
 import { l } from './_'
+import * as XLSX from 'xlsx'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -84,4 +85,31 @@ export const processImage = (file: File, callback: (base64: string) => void) => 
     }
   }
   reader.readAsDataURL(file)
+}
+
+export function exportToExcel({
+  data,
+  filename = 'export.xlsx',
+  sheetName = 'Sheet1',
+  headerRows = [], // array of arrays, each sub-array is a row
+  footerRows = [], // array of arrays, each sub-array is a row
+}: {
+  data: any[],
+  filename?: string,
+  sheetName?: string,
+  headerRows?: any[][],
+  footerRows?: any[][],
+}) {
+  // Convert data to worksheet and then to 2D array
+  const ws = XLSX.utils.json_to_sheet(data, { skipHeader: false })
+  const mainRows = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][]
+  const wsData = [
+    ...headerRows,
+    ...mainRows,
+    ...footerRows,
+  ]
+  const wsFinal = XLSX.utils.aoa_to_sheet(wsData)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, wsFinal, sheetName)
+  XLSX.writeFile(wb, filename)
 }

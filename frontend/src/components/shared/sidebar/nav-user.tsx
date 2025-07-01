@@ -103,8 +103,8 @@ export function NavUser() {
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer" onClick={logout}>
-                <LogOutIcon />
-                Đăng Xuất
+                <LogOutIcon className="text-destructive" />
+                <span className="text-destructive">Đăng Xuất</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

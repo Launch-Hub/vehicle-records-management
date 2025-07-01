@@ -83,7 +83,7 @@ export default function ProcedureForm({
   const [totalRecords, setTotalRecords] = useState(0)
   const [recordSearch, setRecordSearch] = useState('')
   const [isFetchingRecords, setIsFetchingRecords] = useState(false)
-  
+
   // New states for record fields
   const [recordFields, setRecordFields] = useState({
     plateNumber: '',
@@ -99,7 +99,7 @@ export default function ProcedureForm({
   })
   const [existingRecord, setExistingRecord] = useState<VehicleRecord | null>(null)
   const [isCreatingRecord, setIsCreatingRecord] = useState(false)
-  
+
   // Bulk selection states
   const [bulks, setBulks] = useState<Bulk[]>([])
   const [openBulkSelect, setOpenBulkSelect] = useState(false)
@@ -131,24 +131,21 @@ export default function ProcedureForm({
     [recordPagination.pageSize]
   )
 
-  const fetchBulks = useCallback(
-    async (searchQuery: string) => {
-      setIsFetchingBulks(true)
-      try {
-        const res = await api.get('/bulks', {
-          params: { search: searchQuery, pageIndex: 0, pageSize: 100 },
-        })
-        if (res.data.items) {
-          setBulks(res.data.items)
-        }
-      } catch (error) {
-        console.error('Failed to fetch bulks', error)
-      } finally {
-        setIsFetchingBulks(false)
+  const fetchBulks = useCallback(async (searchQuery: string) => {
+    setIsFetchingBulks(true)
+    try {
+      const res = await api.get('/bulks', {
+        params: { search: searchQuery, pageIndex: 0, pageSize: 100 },
+      })
+      if (res.data.items) {
+        setBulks(res.data.items)
       }
-    },
-    []
-  )
+    } catch (error) {
+      console.error('Failed to fetch bulks', error)
+    } finally {
+      setIsFetchingBulks(false)
+    }
+  }, [])
 
   useEffect(() => {
     fetchRecords(debouncedRecordSearch, 0)
@@ -192,7 +189,7 @@ export default function ProcedureForm({
         setExistingRecord(null)
         setValue('recordId', '')
         // Keep the plate number but clear other fields
-        setRecordFields(prev => ({
+        setRecordFields((prev) => ({
           ...prev,
           plateNumber: plateNumber,
           color: '',
@@ -215,7 +212,7 @@ export default function ProcedureForm({
     try {
       const res = await api.post('/bulks', bulkData)
       const newBulk = res.data
-      setBulks(prev => [newBulk, ...prev])
+      setBulks((prev) => [newBulk, ...prev])
       setValue('bulkId', newBulk._id)
       setShowBulkForm(false)
     } catch (error) {
@@ -233,7 +230,7 @@ export default function ProcedureForm({
   const handleFormSubmit = async (data: Omit<Procedure, '_id'>) => {
     try {
       let recordId = data.recordId
-      
+
       // If no existing record and we have record fields, create a new record
       if (!existingRecord && recordFields.plateNumber) {
         setIsCreatingRecord(true)
@@ -262,7 +259,7 @@ export default function ProcedureForm({
 
       const finalSteps = initialData ? steps : []
       const record = existingRecord || vehicleRecords.find((e) => e._id === recordId)
-      
+
       // Update bulk size if procedure is created successfully
       if (data.bulkId) {
         try {
@@ -305,143 +302,7 @@ export default function ProcedureForm({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      {/* Record Fields Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Thông tin xe</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="plateNumber" className="required">
-                {getLabel('plateNumber')}
-              </Label>
-              <Input
-                id="plateNumber"
-                value={recordFields.plateNumber}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))}
-                onBlur={handlePlateNumberBlur}
-                placeholder="Nhập biển số xe..."
-              />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="color" className="required">
-                {getLabel('color')}
-              </Label>
-              <Select
-                value={recordFields.color}
-                onValueChange={(value) => setRecordFields(prev => ({ ...prev, color: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn màu" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PLATE_COLORS.map((color) => (
-                    <SelectItem key={color.label} value={color.label}>
-                      {color.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="identificationNumber" className="required">
-                {getLabel('identificationNumber')}
-              </Label>
-              <Input
-                id="identificationNumber"
-                value={recordFields.identificationNumber}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, identificationNumber: e.target.value }))}
-                placeholder="Nhập số khung..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="engineNumber" className="required">
-                {getLabel('engineNumber')}
-              </Label>
-              <Input
-                id="engineNumber"
-                value={recordFields.engineNumber}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, engineNumber: e.target.value }))}
-                placeholder="Nhập số máy..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="registrant" className="required">
-                {getLabel('registrant')}
-              </Label>
-              <Input
-                id="registrant"
-                value={recordFields.registrant}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, registrant: e.target.value }))}
-                placeholder="Nhập tên chủ xe..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">
-                {getLabel('phone')}
-              </Label>
-              <Input
-                id="phone"
-                value={recordFields.phone}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="Nhập số điện thoại..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">
-                {getLabel('email')}
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={recordFields.email}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="Nhập email..."
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="address">
-                {getLabel('address')}
-              </Label>
-              <Input
-                id="address"
-                value={recordFields.address}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, address: e.target.value }))}
-                placeholder="Nhập địa chỉ..."
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-3">
-              <Label htmlFor="recordNote">
-                Ghi chú hồ sơ
-              </Label>
-              <Textarea
-                id="recordNote"
-                value={recordFields.note}
-                onChange={(e) => setRecordFields(prev => ({ ...prev, note: e.target.value }))}
-                placeholder="Nhập ghi chú cho hồ sơ..."
-                rows={2}
-              />
-            </div>
-          </div>
-
-          {existingRecord && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-sm text-green-700">
-                ✓ Tìm thấy hồ sơ hiện có cho biển số {existingRecord.plateNumber}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Procedure Fields Section */}
       <Card>
@@ -451,9 +312,9 @@ export default function ProcedureForm({
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {!hideBulkId && (
-              <div className="space-y-2">
+              <div className="space-y-2 w-full">
                 <Label htmlFor="bulkId">Lần nhập</Label>
-                <div className="flex gap-2">
+                <div className="w-full flex gap-2">
                   <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
                     <PopoverTrigger asChild>
                       <Button
@@ -470,7 +331,10 @@ export default function ProcedureForm({
                     </PopoverTrigger>
                     <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                       <Command>
-                        <CommandInput placeholder="Tìm kiếm lần nhập..." onValueChange={setBulkSearch} />
+                        <CommandInput
+                          placeholder="Tìm kiếm lần nhập..."
+                          onValueChange={setBulkSearch}
+                        />
                         <CommandEmpty>Không tìm thấy lần nhập.</CommandEmpty>
                         <CommandGroup>
                           {bulks.map((bulk) => (
@@ -478,7 +342,10 @@ export default function ProcedureForm({
                               key={bulk._id}
                               value={bulk._id}
                               onSelect={(currentValue) => {
-                                setValue('bulkId', currentValue === watch('bulkId') ? '' : currentValue)
+                                setValue(
+                                  'bulkId',
+                                  currentValue === watch('bulkId') ? '' : currentValue
+                                )
                                 setOpenBulkSelect(false)
                               }}
                             >
@@ -495,7 +362,7 @@ export default function ProcedureForm({
                       </Command>
                     </PopoverContent>
                   </Popover>
-                  
+
                   <Dialog open={showBulkForm} onOpenChange={setShowBulkForm}>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="icon">
@@ -518,14 +385,14 @@ export default function ProcedureForm({
 
             <div className="space-y-2">
               <Label htmlFor="registrationType" className="required">
-                Loại đăng ký
+                Hạng mục đăng ký
               </Label>
               <Select
                 value={watch('registrationType')}
                 onValueChange={(value) => setValue('registrationType', value as any)}
               >
                 <SelectTrigger id="registrationType" className="w-full">
-                  <SelectValue placeholder="Chọn loại đăng ký" />
+                  <SelectValue placeholder="Chọn hạng mục" />
                 </SelectTrigger>
                 <SelectContent>
                   {REGISTRATION_TYPES.map((option) => (
@@ -538,7 +405,7 @@ export default function ProcedureForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="note">Ghi chú đăng ký</Label>
+              <Label htmlFor="note">Ghi chú</Label>
               <Textarea
                 id="note"
                 {...register('note')}
@@ -547,6 +414,147 @@ export default function ProcedureForm({
               />
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Record Fields Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Thông tin xe</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="plateNumber" className="required">
+                {getLabel('plateNumber')}
+              </Label>
+              <Input
+                id="plateNumber"
+                value={recordFields.plateNumber}
+                onChange={(e) =>
+                  setRecordFields((prev) => ({
+                    ...prev,
+                    plateNumber: e.target.value.toUpperCase(),
+                  }))
+                }
+                onBlur={handlePlateNumberBlur}
+                placeholder="Nhập biển số xe..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="color" className="required">
+                {getLabel('color')}
+              </Label>
+              <Select
+                value={recordFields.color}
+                onValueChange={(value) => setRecordFields((prev) => ({ ...prev, color: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn màu" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PLATE_COLORS.map((color) => (
+                    <SelectItem key={color.label} value={color.label}>
+                      {color.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="identificationNumber" className="required">
+                {getLabel('identificationNumber')}
+              </Label>
+              <Input
+                id="identificationNumber"
+                value={recordFields.identificationNumber}
+                onChange={(e) =>
+                  setRecordFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
+                }
+                placeholder="Nhập số khung..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="engineNumber" className="required">
+                {getLabel('engineNumber')}
+              </Label>
+              <Input
+                id="engineNumber"
+                value={recordFields.engineNumber}
+                onChange={(e) =>
+                  setRecordFields((prev) => ({ ...prev, engineNumber: e.target.value }))
+                }
+                placeholder="Nhập số máy..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="registrant" className="required">
+                {getLabel('registrant')}
+              </Label>
+              <Input
+                id="registrant"
+                value={recordFields.registrant}
+                onChange={(e) =>
+                  setRecordFields((prev) => ({ ...prev, registrant: e.target.value }))
+                }
+                placeholder="Nhập tên chủ xe..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">{getLabel('phone')}</Label>
+              <Input
+                id="phone"
+                value={recordFields.phone}
+                onChange={(e) => setRecordFields((prev) => ({ ...prev, phone: e.target.value }))}
+                placeholder="Nhập số điện thoại..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">{getLabel('email')}</Label>
+              <Input
+                id="email"
+                type="email"
+                value={recordFields.email}
+                onChange={(e) => setRecordFields((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Nhập email..."
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="address">{getLabel('address')}</Label>
+              <Input
+                id="address"
+                value={recordFields.address}
+                onChange={(e) => setRecordFields((prev) => ({ ...prev, address: e.target.value }))}
+                placeholder="Nhập địa chỉ..."
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-3">
+              <Label htmlFor="recordNote">Ghi chú hồ sơ</Label>
+              <Textarea
+                id="recordNote"
+                value={recordFields.note}
+                onChange={(e) => setRecordFields((prev) => ({ ...prev, note: e.target.value }))}
+                placeholder="Nhập ghi chú cho hồ sơ..."
+                rows={2}
+              />
+            </div>
+          </div>
+
+          {existingRecord && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-700">
+                ✓ Tìm thấy hồ sơ hiện có cho biển số {existingRecord.plateNumber}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -623,8 +631,11 @@ export default function ProcedureForm({
           </Button>
         )}
         <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
-          {isCreatingRecord ? 'Đang tạo hồ sơ...' : 
-           initialData && !isCopying ? 'Lưu thay đổi' : 'Tạo mới'}
+          {isCreatingRecord
+            ? 'Đang tạo hồ sơ...'
+            : initialData && !isCopying
+            ? 'Lưu thay đổi'
+            : 'Tạo mới'}
         </Button>
       </div>
     </form>

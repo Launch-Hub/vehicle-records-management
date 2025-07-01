@@ -39,6 +39,7 @@ import {
   ChevronLeftIcon,
   ChevronsLeftIcon,
   SearchIcon,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { PaginationProps } from '@/lib/types/props'
@@ -67,6 +68,7 @@ interface DataTableProps<T> {
   onEdit: (item: T) => void
   onCopy: (item: T) => void
   onDelete: (id: string) => void
+  onExport?: (rows: T[]) => void
 }
 
 function DataRow<T>({ row }: { row: Row<T> }) {
@@ -90,7 +92,9 @@ export function UserDataTable<T extends Record<string, any>>({
   onPageChange,
   onCreate,
   onEdit,
+  onCopy,
   onDelete,
+  onExport,
 }: DataTableProps<T>) {
   const [data, setData] = useState<T[]>(() => initialData)
   const [rowSelection, setRowSelection] = useState({})
@@ -219,6 +223,9 @@ export function UserDataTable<T extends Record<string, any>>({
   const toNextPage = () => table.nextPage()
   const toLastPage = () => table.setPageIndex(table.getPageCount() - 1)
 
+  // Get selected rows
+  const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original)
+
   return (
     <div className="flex w-full flex-col justify-start gap-6 relative">
       {loading && <LoaderOverlay />}
@@ -261,6 +268,16 @@ export function UserDataTable<T extends Record<string, any>>({
           </DropdownMenu>
           <Button variant="outline" size="sm" onClick={onCreate}>
             <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onExport && onExport(selectedRows)}
+            disabled={!selectedRows.length}
+            className="border-success text-success hover:border-success hover:text-success"
+          >
+            <FileSpreadsheet className="mr-2 size-4" />
+            Xuất Excel
           </Button>
         </div>
       </div>

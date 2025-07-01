@@ -9,12 +9,11 @@ exports.getList = async (req, res) => {
   const projection = {
     avatar: 1,
     name: 1,
-    // username: 1,
-    // email: 1,
+    username: 1,
+    email: 1,
     phone: 1,
     assignedUnit: 1,
     serviceNumber: 1,
-    // roles: 1,
     status: 1,
   };
 

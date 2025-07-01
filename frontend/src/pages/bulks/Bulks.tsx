@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
@@ -7,6 +7,7 @@ import type { PaginationProps } from '@/lib/types/props'
 import { UserDataTable } from '@/components/page/users/table'
 import { joinPath } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
+import { useLoader } from '@/contexts/loader'
 
 const columns: ColumnDef<Bulk>[] = [
   {
@@ -44,8 +45,9 @@ export default function BulksPage() {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const loader = useLoader()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
       const response = await api.get('/bulks', { params: { search, ...pagination } })
@@ -60,10 +62,10 @@ export default function BulksPage() {
     } finally {
       setIsFetching(false)
     }
-  }
+  }, [search, pagination])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search || !searchTerm) return
+    if (!search && !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
@@ -92,13 +94,29 @@ export default function BulksPage() {
     navigate(`${joinPath(location.pathname, bulk._id)}?copy=true`)
   }
 
-  const handleDelete = () => {
-    // implement if needed
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+
+    loader.show()
+    try {
+      await api.delete(`/bulks/${id}`)
+      toast.success('Xóa lần nhập thành công.')
+      // Refresh the data
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa lần nhập. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
   }
 
   useEffect(() => {
     fetchData()
-  }, [search, pagination])
+  }, [fetchData])
 
   return (
     <div className="flex flex-1 flex-col">

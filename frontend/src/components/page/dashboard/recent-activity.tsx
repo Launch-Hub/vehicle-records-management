@@ -18,14 +18,14 @@ interface RecentActivityProps {
 
 export function RecentActivity({ stats }: RecentActivityProps) {
   const activities = [
-    {
-      icon: FileTextIcon,
-      title: 'Hồ sơ xe mới',
-      count: stats.today.records,
-      period: 'Hôm nay',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-950',
-    },
+    // {
+    //   icon: FileTextIcon,
+    //   title: 'Hồ sơ xe mới',
+    //   count: stats.today.records,
+    //   period: 'Hôm nay',
+    //   color: 'text-blue-600',
+    //   bgColor: 'bg-blue-50 dark:bg-blue-950',
+    // },
     {
       icon: PackageIcon,
       title: 'Đăng ký mới',
@@ -34,14 +34,14 @@ export function RecentActivity({ stats }: RecentActivityProps) {
       color: 'text-green-600',
       bgColor: 'bg-green-50 dark:bg-green-950',
     },
-    {
-      icon: PackageIcon,
-      title: 'Lô hồ sơ mới',
-      count: stats.today.bulks,
-      period: 'Hôm nay',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-950',
-    },
+    // {
+    //   icon: PackageIcon,
+    //   title: 'Lô hồ sơ mới',
+    //   count: stats.today.bulks,
+    //   period: 'Hôm nay',
+    //   color: 'text-purple-600',
+    //   bgColor: 'bg-purple-50 dark:bg-purple-950',
+    // },
     {
       icon: FileTextIcon,
       title: 'Hồ sơ tuần này',

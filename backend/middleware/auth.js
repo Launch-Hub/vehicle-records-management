@@ -1,5 +1,6 @@
-const { User } = require("../models/user");
 const jwt = require("jsonwebtoken");
+const { User } = require("../models/user");
+const { JWT_SECRET } = require("../constants");
 
 exports.authenticateToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
@@ -7,7 +8,7 @@ exports.authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: true, message: "No token provided" });
 
   const token = authHeader?.split(" ")[1];
-  jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
+  jwt.verify(token, JWT_SECRET, async (err, user) => {
     if (err) return res.status(403).json({ error: true, message: "Invalid token" });
     const payload = await User.findById(user.userId).select("-passwordHash");
     req.user = payload;

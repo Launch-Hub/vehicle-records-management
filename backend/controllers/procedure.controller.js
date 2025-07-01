@@ -12,13 +12,16 @@ exports.getList = async (req, res) => {
     updatedAt: 1,
   };
   try {
-    const { pageIndex, pageSize, search } = req.query;
+    const { pageIndex, pageSize, search, step } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
     const filter = {};
     if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
       filter.$or = [{ registrationType: regex }];
+    }
+    if (step) {
+      filter.currentStep = Number(step);
     }
 
     const total = await Procedure.countDocuments(filter);

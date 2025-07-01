@@ -6,6 +6,7 @@ import {
   UsersIcon,
   PackageIcon,
   type LucideIcon,
+  HistoryIcon,
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -122,8 +123,10 @@ export interface CustomRouteProps {
   resource?: string
   element: string
   showSidebar?: boolean
+  nav?: number // 1 for primary, 2 for secondary, etc.
   icon?: LucideIcon
   path: string
+  query?: Record<string, string | number | boolean>
   enPath?: string // the original path for checking data
   title: string
   language: string
@@ -195,32 +198,18 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   // authenticated routes
   {
     auth: true,
-    element: 'HomePage',
-    resource: 'general',
-    showSidebar: false,
-    path: '/',
-    title: 'Home',
-    language: 'en',
-    translations: [
-      {
-        language: 'vi',
-        title: 'Trang chủ',
-      },
-    ],
-  },
-  {
-    auth: true,
     element: 'DashboardPage',
     resource: 'general',
     showSidebar: true,
+    nav: 1,
     icon: LayoutDashboardIcon,
-    path: '/dashboard',
+    path: '/',
     title: 'Dashboard',
     language: 'en',
     translations: [
       {
-        path: '/bang-dieu-khien',
-        title: 'Bảng điều khiển',
+        path: '/',
+        title: 'Trang chủ',
         language: 'vi',
       },
     ],
@@ -230,6 +219,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     element: 'UsersPage',
     resource: 'users',
     showSidebar: true,
+    nav: 1,
     icon: UsersIcon,
     path: '/users',
     title: 'Manage Users',
@@ -237,7 +227,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/quan-ly-nguoi-dung',
-        title: 'Quản lý Người Dùng',
+        title: 'Quản lý người dùng',
         language: 'vi',
       },
     ],
@@ -273,7 +263,8 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     element: 'RecordsPage',
     resource: 'records',
     showSidebar: true,
-    icon: FolderIcon,
+    nav: 1,
+    icon: HistoryIcon,
     path: '/registration-history',
     title: 'Registration History',
     language: 'en',
@@ -312,63 +303,66 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     ],
   },
 
-  {
-    auth: true,
-    element: 'BulksPage',
-    resource: 'bulks',
-    showSidebar: true,
-    icon: PackageIcon,
-    path: '/bulks',
-    title: 'Manage Bulks',
-    language: 'en',
-    translations: [
-      {
-        path: '/quan-ly-lo',
-        title: 'Quản lý Lô Đăng Ký',
-        language: 'vi',
-      },
-    ],
-    children: [
-      {
-        element: 'BulkDetailPage',
-        path: ':id',
-        title: 'Bulk Detail',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Chỉnh sửa lô',
-          },
-        ],
-      },
-      {
-        element: 'BulkDetailPage',
-        path: 'new',
-        title: 'Create Bulk',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Tạo lô mới',
-          },
-        ],
-      },
-    ],
-  },
+  // {
+  //   auth: true,
+  //   element: 'BulksPage',
+  //   resource: 'bulks',
+  //   showSidebar: true,
+  //   nav: 1,
+  //   icon: PackageIcon,
+  //   path: '/bulks',
+  //   title: 'Manage Bulks',
+  //   language: 'en',
+  //   translations: [
+  //     {
+  //       path: '/quan-ly-lo',
+  //       title: 'Quản lý Lô Đăng Ký',
+  //       language: 'vi',
+  //     },
+  //   ],
+  //   children: [
+  //     {
+  //       element: 'BulkDetailPage',
+  //       path: ':id',
+  //       title: 'Bulk Detail',
+  //       language: 'en',
+  //       translations: [
+  //         {
+  //           language: 'vi',
+  //           title: 'Chỉnh sửa lô',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       element: 'BulkDetailPage',
+  //       path: 'new',
+  //       title: 'Create Bulk',
+  //       language: 'en',
+  //       translations: [
+  //         {
+  //           language: 'vi',
+  //           title: 'Tạo lô mới',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
 
   {
     auth: true,
     element: 'ProceduresPage',
-    resource: 'procedures',
+    resource: 'procedures-step-1',
     showSidebar: true,
+    nav: 2,
     icon: FileStackIcon,
-    path: '/procedures',
-    title: 'Manage Procedures',
+    path: '/receive-registration',
+    title: 'Receive Registration',
+    query: { step: 1 },
     language: 'en',
     translations: [
       {
-        path: '/quan-ly-thu-tuc',
-        title: 'Quản lý Đăng Ký',
+        path: '/tiep-nhan-ho-so',
+        title: 'Tiếp Nhận Hồ Sơ',
         language: 'vi',
       },
     ],
@@ -394,6 +388,41 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
           {
             language: 'vi',
             title: 'Tạo đăng ký mới',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures-step-2',
+    showSidebar: true,
+    nav: 2,
+    icon: FileStackIcon,
+    path: '/registration-processing',
+    title: 'Registration Processing',
+    query: { step: 2 },
+    language: 'en',
+    translations: [
+      {
+        path: '/xu-ly-ho-so',
+        title: 'Xử lý Hồ Sơ',
+        language: 'vi',
+      },
+    ],
+    children: [
+      // now only have detail page to process step 2
+      {
+        element: 'ProcedureDetailPage',
+        path: ':id',
+        title: 'Procedure Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Xử lý hồ sơ',
           },
         ],
       },
@@ -426,6 +455,8 @@ export const getRouteField = <K extends keyof CustomRouteProps>(
   returnKey: K,
   pathname: string
 ): CustomRouteProps[K] | undefined => {
+  if (pathname === '/') return ROUTES.find((route) => route.path === '/')?.[returnKey]
+
   const path = pathname.replace('/', '')
   const route = ROUTES.find((route) => route.path.includes(path))
   if (!route) return undefined
