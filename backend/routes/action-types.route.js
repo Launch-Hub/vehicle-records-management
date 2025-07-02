@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const actionTypeController = require("../controllers/action-type.controller");
+const actionTypeController = require("../controllers/action-types.controller");
 const { authenticateToken } = require("../middleware/auth");
 const { logActivityMiddleware } = require("../utils/activity-logger");
 
@@ -11,26 +11,26 @@ router.get("/:id", authenticateToken, actionTypeController.getOne);
 router.post(
   "/",
   authenticateToken,
-  logActivityMiddleware("create", "action-type"),
+  logActivityMiddleware("create", "action-types"),
   actionTypeController.create
 );
 router.post(
   "/bulk",
   authenticateToken,
-  logActivityMiddleware("create", "action-type"),
+  logActivityMiddleware("create", "action-types"),
   actionTypeController.createBulk
 );
 router.put(
   "/:id",
   authenticateToken,
-  logActivityMiddleware("update", "action-type"),
+  logActivityMiddleware("update", "action-types"),
   actionTypeController.update
 );
 // delete
 router.delete(
   "/:id",
   authenticateToken,
-  logActivityMiddleware("delete", "action-type"),
+  logActivityMiddleware("delete", "action-types"),
   actionTypeController.delete
 );
 
