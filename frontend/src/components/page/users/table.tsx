@@ -118,7 +118,7 @@ export function UserDataTable<T extends Record<string, any>>({
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [selectedExportColumns, setSelectedExportColumns] = useState<string[]>(() => {
     if (!columns) return []
-    return columns.map((col) => (typeof col.accessorKey === 'string' ? col.accessorKey : ''))
+    return columns.map((col: any) => (typeof col.accessorKey === 'string' ? col.accessorKey : ''))
   })
 
   useEffect(() => {
@@ -238,7 +238,7 @@ export function UserDataTable<T extends Record<string, any>>({
   // Get selected rows
   const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original)
 
-  const allExportableColumns = columns?.filter((col) => typeof col.accessorKey === 'string') || []
+  const allExportableColumns = columns?.filter((col: any) => typeof col.accessorKey === 'string') || []
 
   const handleExportClick = () => {
     setExportDialogOpen(true)
@@ -247,11 +247,11 @@ export function UserDataTable<T extends Record<string, any>>({
   const handleExportConfirm = () => {
     if (onExport) {
       // Only export selected columns
-      const selectedCols = allExportableColumns.filter((col) =>
+      const selectedCols = allExportableColumns.filter((col: any) =>
         selectedExportColumns.includes(col.accessorKey as string)
       )
       // Map to { key, label }
-      const exportColumns = selectedCols.map((col) => ({
+      const exportColumns = selectedCols.map((col: any) => ({
         key: col.accessorKey as string,
         label: getLabel(col.accessorKey as string),
       }))
@@ -451,7 +451,7 @@ export function UserDataTable<T extends Record<string, any>>({
             <DialogTitle>Chọn cột để xuất Excel</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2 max-h-60 overflow-auto">
-            {allExportableColumns.map((col) => (
+            {allExportableColumns.map((col: any) => (
               <label key={col.accessorKey as string} className="flex items-center gap-2">
                 <Checkbox
                   checked={selectedExportColumns.includes(col.accessorKey as string)}
