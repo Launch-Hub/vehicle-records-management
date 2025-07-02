@@ -37,7 +37,6 @@ import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
 import { backPath } from '@/lib/utils'
 import { useLayout } from '@/contexts/layout'
-import { REGISTRATION_TYPES } from '@/constants/mock-data'
 import { getProcedureStatusLabel } from '@/constants/dictionary'
 
 type WorkflowStep = 'bulk-info' | 'add-procedures' | 'preview'
@@ -60,6 +59,7 @@ export default function BulkDetailPage() {
   const [existingProcedures, setExistingProcedures] = useState<Procedure[]>([])
   const [selectedProcedure, setSelectedProcedure] = useState<Partial<Procedure> | null>(null)
   const [selectedProcedureIndex, setSelectedProcedureIndex] = useState<number | null>(null)
+  const [actionTypes, setActionTypes] = useState<any[]>([])
 
   useEffect(() => {
     const resource = 'lô'
@@ -70,6 +70,10 @@ export default function BulkDetailPage() {
         ? `Sao chép ${resource}`
         : `Chỉnh sửa ${resource}`
     )
+    
+    // Fetch action types for registration type display
+    fetchActionTypes()
+    
     if (isCreating) return
 
     const fetchDetail = async () => {
@@ -145,8 +149,21 @@ export default function BulkDetailPage() {
     setCurrentStep('preview')
   }
 
+  const fetchActionTypes = async () => {
+    try {
+      const res = await api.get('/action-types', {
+        params: { step: 1, pageIndex: 0, pageSize: 100 },
+      })
+      if (res.data.items) {
+        setActionTypes(res.data.items)
+      }
+    } catch (error) {
+      console.error('Failed to fetch action types', error)
+    }
+  }
+
   const getRegistrationType = (type: string) => {
-    return REGISTRATION_TYPES.find((e) => e.value === type)?.label || 'Chưa có'
+    return actionTypes.find((actionType) => actionType.name === type)?.name || 'Không xác định'
   }
 
   const handleSave = async () => {

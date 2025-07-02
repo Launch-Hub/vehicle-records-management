@@ -102,3 +102,15 @@ export interface BulkProps {
 }
 
 export type Bulk = BulkProps
+
+export interface ActionTypeProps {
+  _id: string
+  order: number
+  name: string
+  step: number
+  toStep: number
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export type ActionType = ActionTypeProps

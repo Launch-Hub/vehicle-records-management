@@ -4,10 +4,10 @@ import { toast } from 'sonner'
 import api from '@/lib/axios'
 import type { Bulk } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
-import { UserDataTable } from '@/components/page/users/table'
 import { joinPath } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useLoader } from '@/contexts/loader'
+import { DataTable } from '@/components/shared/list-view/table'
 
 const columns: ColumnDef<Bulk>[] = [
   {
@@ -122,7 +122,7 @@ export default function BulksPage() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <UserDataTable
+          <DataTable
             loading={isFetching}
             total={total}
             data={data}

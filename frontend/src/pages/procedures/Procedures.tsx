@@ -4,12 +4,12 @@ import { toast } from 'sonner'
 import api from '@/lib/axios'
 import type { Procedure } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
-import { UserDataTable } from '@/components/page/users/table'
 import { joinPath, exportToExcel } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
 import { getLabel } from '@/constants/dictionary'
+import { DataTable } from '@/components/shared/list-view/table'
 
 const statusMap: Record<string, string> = {
   pending: 'Đăng ký mới',
@@ -48,7 +48,7 @@ const columns: ColumnDef<Procedure>[] = [
   },
   {
     accessorKey: 'registrationType',
-    header: () => <div>Loại đăng ký</div>,
+    header: () => <div>Hạng mục đăng ký</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 120,
   },
@@ -178,7 +178,7 @@ export default function ProceduresPage() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <UserDataTable
+          <DataTable
             loading={isFetching}
             total={total}
             data={data}

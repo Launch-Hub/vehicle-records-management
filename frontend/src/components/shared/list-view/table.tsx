@@ -39,6 +39,7 @@ import {
   ChevronLeftIcon,
   ChevronsLeftIcon,
   SearchIcon,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import type { PaginationProps } from '@/lib/types/props'
@@ -52,7 +53,14 @@ import {
 } from '@/components/ui/select'
 import { getLabel } from '@/constants/dictionary'
 import { useEffect, useMemo, useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { LoaderOverlay } from '@/components/shared/loader/loader-overlay'
 
@@ -60,14 +68,14 @@ interface DataTableProps<T> {
   loading: boolean
   total: number
   data: T[]
-  columns?: ColumnDef<T>[]
-  resource: string
+  columns: ColumnDef<T>[]
   onSearch: (term: string) => void
   onPageChange: (pagination: PaginationProps) => void
   onCreate: () => void
   onEdit: (item: T) => void
   onCopy: (item: T) => void
   onDelete: (id: string) => void
+  onExport?: (rows: T[], columns: { key: string; label: string }[]) => void
 }
 
 function DataRow<T>({ row }: { row: Row<T> }) {
@@ -87,12 +95,13 @@ export function DataTable<T extends Record<string, any>>({
   data: initialData,
   loading,
   columns,
-  resource,
   onSearch,
   onPageChange,
   onCreate,
   onEdit,
+  onCopy,
   onDelete,
+  onExport,
 }: DataTableProps<T>) {
   const [data, setData] = useState<T[]>(() => initialData)
   const [rowSelection, setRowSelection] = useState({})
@@ -105,6 +114,11 @@ export function DataTable<T extends Record<string, any>>({
   const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item: T | null }>({
     open: false,
     item: null,
+  })
+  const [exportDialogOpen, setExportDialogOpen] = useState(false)
+  const [selectedExportColumns, setSelectedExportColumns] = useState<string[]>(() => {
+    if (!columns) return []
+    return columns.map((col: any) => (typeof col.accessorKey === 'string' ? col.accessorKey : ''))
   })
 
   useEffect(() => {
@@ -180,7 +194,7 @@ export function DataTable<T extends Record<string, any>>({
       : []
 
     return [selectColumn, ...dataColumns, actionColumn]
-  }, [columns, initialData])
+  }, [selectColumn, actionColumn, columns, initialData])
 
   const table = useReactTable({
     // Use a default pageSize for pageCount calculation
@@ -221,6 +235,32 @@ export function DataTable<T extends Record<string, any>>({
   const toNextPage = () => table.nextPage()
   const toLastPage = () => table.setPageIndex(table.getPageCount() - 1)
 
+  // Get selected rows
+  const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original)
+
+  const allExportableColumns =
+    columns?.filter((col: any) => typeof col.accessorKey === 'string') || []
+
+  const handleExportClick = () => {
+    setExportDialogOpen(true)
+  }
+
+  const handleExportConfirm = () => {
+    if (onExport) {
+      // Only export selected columns
+      const selectedCols = allExportableColumns.filter((col: any) =>
+        selectedExportColumns.includes(col.accessorKey as string)
+      )
+      // Map to { key, label }
+      const exportColumns = selectedCols.map((col: any) => ({
+        key: col.accessorKey as string,
+        label: getLabel(col.accessorKey as string),
+      }))
+      onExport(selectedRows, exportColumns)
+    }
+    setExportDialogOpen(false)
+  }
+
   return (
     <div className="flex w-full flex-col justify-start gap-6 relative">
       {loading && <LoaderOverlay />}
@@ -256,13 +296,25 @@ export function DataTable<T extends Record<string, any>>({
                     checked={col.getIsVisible()}
                     onCheckedChange={() => col.toggleVisibility()}
                   >
-                    {getLabel(col.id)}
+                    {typeof col.columnDef.header === 'string'
+                      ? col.columnDef.header
+                      : col.id}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
           </DropdownMenu>
           <Button variant="outline" size="sm" onClick={onCreate}>
             <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportClick}
+            disabled={!selectedRows.length}
+            className="border-success text-success hover:border-success hover:text-success"
+          >
+            <FileSpreadsheet className="mr-2 size-4" />
+            Xuất Excel
           </Button>
         </div>
       </div>
@@ -376,7 +428,7 @@ export function DataTable<T extends Record<string, any>>({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Bạn chắc chắn muốn xoá {resource} này chứ?</DialogTitle>
+            <DialogTitle>Bạn chắc chắn muốn xoá người dùng này chứ?</DialogTitle>
           </DialogHeader>
           <div className="flex justify-end gap-2 pt-4">
             <Button
@@ -394,6 +446,38 @@ export function DataTable<T extends Record<string, any>>({
               Huỷ bỏ
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Chọn cột để xuất Excel</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-2 max-h-60 overflow-auto">
+            {allExportableColumns.map((col: any) => (
+              <label key={col.accessorKey as string} className="flex items-center gap-2">
+                <Checkbox
+                  checked={selectedExportColumns.includes(col.accessorKey as string)}
+                  onCheckedChange={(checked) => {
+                    setSelectedExportColumns((prev) =>
+                      checked
+                        ? [...prev, col.accessorKey as string]
+                        : prev.filter((k) => k !== col.accessorKey)
+                    )
+                  }}
+                />
+                <span>{getLabel(col.accessorKey as string)}</span>
+              </label>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleExportConfirm} disabled={!selectedExportColumns.length}>
+              Xuất Excel
+            </Button>
+            <DialogClose asChild>
+              <Button variant="outline">Huỷ</Button>
+            </DialogClose>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

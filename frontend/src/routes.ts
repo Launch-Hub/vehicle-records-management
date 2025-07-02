@@ -7,6 +7,8 @@ import {
   PackageIcon,
   type LucideIcon,
   HistoryIcon,
+  SettingsIcon,
+  ListTodoIcon,
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -23,6 +25,8 @@ import ProceduresPage from '@/pages/procedures/Procedures'
 import ProcedureDetailPage from '@/pages/procedures/ProcedureDetail'
 import BulksPage from '@/pages/bulks/Bulks'
 import BulkDetailPage from '@/pages/bulks/BulkDetail'
+import ActionTypesPage from '@/pages/action-types/ActionTypes'
+import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import { DEFAULT_LANG } from './constants/env'
 
 export type PageComponent =
@@ -108,6 +112,16 @@ export const PAGE_MAP = {
   BulkDetailPage: {
     lazy: lazy(() => import('@/pages/bulks/BulkDetail')), // lazy-loaded
     component: BulkDetailPage,
+    default: 'eager',
+  },
+  ActionTypesPage: {
+    lazy: lazy(() => import('@/pages/action-types/ActionTypes')), // lazy-loaded
+    component: ActionTypesPage,
+    default: 'eager',
+  },
+  ActionTypeDetailPage: {
+    lazy: lazy(() => import('@/pages/action-types/ActionTypeDetail')), // lazy-loaded
+    component: ActionTypeDetailPage,
     default: 'eager',
   },
 }
@@ -347,6 +361,51 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //     },
   //   ],
   // },
+
+  {
+    auth: true,
+    element: 'ActionTypesPage',
+    resource: 'action-types',
+    showSidebar: true,
+    nav: 1,
+    icon: ListTodoIcon,
+    path: '/action-types',
+    title: 'Manage Action Types',
+    language: 'en',
+    translations: [
+      {
+        path: '/quan-ly-hang-muc',
+        title: 'Quản lý hạng mục',
+        language: 'vi',
+      },
+    ],
+    children: [
+      {
+        element: 'ActionTypeDetailPage',
+        path: ':id',
+        title: 'Action Type Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Chỉnh sửa hạng mục',
+          },
+        ],
+      },
+      {
+        element: 'ActionTypeDetailPage',
+        path: 'new',
+        title: 'Create Action Type',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo hạng mục mới',
+          },
+        ],
+      },
+    ],
+  },
 
   {
     auth: true,

@@ -18,7 +18,7 @@ export const TABLE_DICTIONARY = {
   phone: 'Số điện thoại',
   address: 'Địa chỉ',
   issuer: 'Người tiếp nhận',
-  registrationType: 'Loại đăng ký',
+  registrationType: 'Hạng mục đăng ký',
   attachmentUrls: 'Tài liệu đính kèm',
   archiveAt: 'Vị trí lưu trữ',
   description: 'Mô tả',

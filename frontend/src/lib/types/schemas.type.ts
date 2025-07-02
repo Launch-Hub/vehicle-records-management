@@ -56,3 +56,31 @@ export const BulkFormSchema = z.object({
   note: z.string().optional(),
 })
 export type BulkFormValues = z.infer<typeof BulkFormSchema>
+
+export const ProcedureFormSchema = z.object({
+  recordId: z.string(),
+  bulkId: z.string().optional(),
+  plateNumber: z.string().optional(),
+  color: z.string().optional(),
+  identificationNumber: z.string().optional(),
+  registrationType: z.string().min(1, 'Hạng mục đăng ký là bắt buộc'),
+  note: z.string().optional(),
+  dueDate: z.date(),
+  status: z.string(),
+  steps: z.array(z.object({
+    order: z.coerce.number(),
+    step: z.coerce.number(),
+    title: z.string(),
+    action: z.string(),
+    note: z.string().optional(),
+  })),
+})
+export type ProcedureFormValues = z.infer<typeof ProcedureFormSchema>
+
+export const ActionTypeFormSchema = z.object({
+  name: z.string().min(1, 'Hạng mục là bắt buộc'),
+  step: z.coerce.number().min(1, 'Bước phải lớn hơn 0'),
+  toStep: z.coerce.number().min(1, 'Bước phải lớn hơn 0'),
+  order: z.coerce.number(),
+})
+export type ActionTypeFormValues = z.infer<typeof ActionTypeFormSchema>

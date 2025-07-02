@@ -135,7 +135,6 @@ export default function RecordsPage() {
             total={total}
             data={data}
             columns={columns}
-            resource="hồ sơ"
             onPageChange={handleChangePage}
             onCreate={handleCreate}
             onEdit={handleEdit}

@@ -26,7 +26,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { REGISTRATION_TYPES } from '@/constants/mock-data'
 import { PLATE_COLORS } from '@/constants/general'
 import { getLabel } from '@/constants/dictionary'
 import type { PaginationProps } from '@/lib/types/props'
@@ -107,6 +106,10 @@ export default function ProcedureForm({
   const [isFetchingBulks, setIsFetchingBulks] = useState(false)
   const [showBulkForm, setShowBulkForm] = useState(false)
 
+  // Action types states
+  const [actionTypes, setActionTypes] = useState<any[]>([])
+  const [isFetchingActionTypes, setIsFetchingActionTypes] = useState(false)
+
   const debouncedRecordSearch = useDebounce(recordSearch, 500)
   const debouncedBulkSearch = useDebounce(bulkSearch, 500)
 
@@ -147,6 +150,22 @@ export default function ProcedureForm({
     }
   }, [])
 
+  const fetchActionTypes = useCallback(async () => {
+    setIsFetchingActionTypes(true)
+    try {
+      const res = await api.get('/action-types', {
+        params: { step: 1, pageIndex: 0, pageSize: 100 },
+      })
+      if (res.data.items) {
+        setActionTypes(res.data.items)
+      }
+    } catch (error) {
+      console.error('Failed to fetch action types', error)
+    } finally {
+      setIsFetchingActionTypes(false)
+    }
+  }, [])
+
   useEffect(() => {
     fetchRecords(debouncedRecordSearch, 0)
   }, [debouncedRecordSearch, fetchRecords])
@@ -154,6 +173,10 @@ export default function ProcedureForm({
   useEffect(() => {
     fetchBulks(debouncedBulkSearch)
   }, [debouncedBulkSearch, fetchBulks])
+
+  useEffect(() => {
+    fetchActionTypes()
+  }, [fetchActionTypes])
 
   const handleLoadMoreRecords = () => {
     if (!isFetchingRecords && vehicleRecords.length < totalRecords) {
@@ -302,8 +325,6 @@ export default function ProcedureForm({
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-
-
       {/* Procedure Fields Section */}
       <Card>
         <CardHeader>
@@ -395,9 +416,9 @@ export default function ProcedureForm({
                   <SelectValue placeholder="Chọn hạng mục" />
                 </SelectTrigger>
                 <SelectContent>
-                  {REGISTRATION_TYPES.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                  {actionTypes.map((actionType) => (
+                    <SelectItem key={actionType._id} value={actionType.name}>
+                      {actionType.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
