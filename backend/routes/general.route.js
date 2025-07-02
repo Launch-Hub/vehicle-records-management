@@ -13,7 +13,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/v", (req, res) => {
-  res.json({ code: 200, version: "1.0.2" });
+  res.json({ code: 200, version: "1.1.8" });
 });
 
 module.exports = router;

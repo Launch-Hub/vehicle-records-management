@@ -1,6 +1,6 @@
 {
   "name": "vehicle-records-management",
-  "version": "1.1.2",
+  "version": "1.1.8",
   "description": "vehicle-records-management",
   "private": true,
   "workspaces": [

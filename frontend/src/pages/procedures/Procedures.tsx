@@ -8,8 +8,8 @@ import { joinPath, exportToExcel } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
-import { getLabel } from '@/constants/dictionary'
 import { DataTable } from '@/components/shared/list-view/table'
+import { procedureService } from '@/lib/services/procedures'
 
 const statusMap: Record<string, string> = {
   pending: 'Đăng ký mới',
@@ -81,11 +81,14 @@ export default function ProceduresPage() {
   const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/procedures', {
-        params: { search, ...pagination, ...(step ? { step } : {}) },
+      const stepParam = step !== undefined ? Number(step) : undefined
+      const response = await procedureService.getList({
+        search,
+        ...pagination,
+        ...(stepParam !== undefined ? { step: stepParam } : {}),
       })
-      if (response.data) {
-        const { total, items } = response.data
+      if (response) {
+        const { total, items } = response
         setTotal(total)
         setData(items)
       }
@@ -135,7 +138,7 @@ export default function ProceduresPage() {
 
     loader.show()
     try {
-      await api.delete(`/procedures/${id}`)
+      await procedureService.delete(id)
       toast.success('Xóa đăng ký thành công.')
       // Refresh the data
       fetchData()

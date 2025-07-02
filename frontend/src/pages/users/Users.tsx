@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import api from '@/lib/axios'
+import { userService } from '@/lib/services/users'
 import type { User } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { getLabel, getTableLabel } from '@/constants/dictionary'
@@ -79,9 +79,9 @@ export default function UsersPage() {
   const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/users', { params: { search, ...pagination } })
-      if (response.data) {
-        const { total, items } = response.data
+      const response = await userService.getList({ search, ...pagination })
+      if (response) {
+        const { total, items } = response
         setTotal(total)
         setData(items)
       }
@@ -131,7 +131,7 @@ export default function UsersPage() {
 
     loader.show()
     try {
-      await api.delete(`/users/${id}`)
+      await userService.delete(id)
       toast.success('Xóa người dùng thành công.')
       // Refresh the data
       fetchData()

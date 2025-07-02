@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import api from '@/lib/axios'
+import { bulkService } from '@/lib/services/bulks'
 import type { Bulk } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { joinPath } from '@/lib/utils'
@@ -50,9 +50,9 @@ export default function BulksPage() {
   const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/bulks', { params: { search, ...pagination } })
-      if (response.data) {
-        const { total, items } = response.data
+      const response = await bulkService.getList({ search, ...pagination })
+      if (response) {
+        const { total, items } = response
         setTotal(total)
         setData(items)
       }
@@ -102,7 +102,7 @@ export default function BulksPage() {
 
     loader.show()
     try {
-      await api.delete(`/bulks/${id}`)
+      await bulkService.delete(id)
       toast.success('Xóa lần nhập thành công.')
       // Refresh the data
       fetchData()

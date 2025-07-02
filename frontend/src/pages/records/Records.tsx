@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import api from '@/lib/axios'
+import { recordService } from '@/lib/services/records'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { joinPath } from '@/lib/utils'
@@ -58,9 +58,9 @@ export default function RecordsPage() {
   const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/records', { params: { search, ...pagination } })
-      if (response.data) {
-        const { total, items } = response.data
+      const response = await recordService.getList({ search, ...pagination })
+      if (response) {
+        const { total, items } = response
         setTotal(total)
         setData(items)
       }
@@ -110,7 +110,7 @@ export default function RecordsPage() {
 
     loader.show()
     try {
-      await api.delete(`/records/${id}`)
+      await recordService.delete(id)
       toast.success('Xóa hồ sơ thành công.')
       // Refresh the data
       fetchData()
