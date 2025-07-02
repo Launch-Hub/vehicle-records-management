@@ -13,7 +13,7 @@ const vehicleRecordSchema = new mongoose.Schema(
     color: { type: String },
     identificationNumber: { type: String, unique: true, required: true }, // Vehicle Identification Number (VIN)
     engineNumber: { type: String, required: true },
-    vehicleType: { type: String, default: "Xe con" },
+    vehicleType: { type: String, default: "Ô tô" },
     registrant: { type: String, required: true },
     // the object registrant should be used later
     // registrant: { type: mongoose.Schema.Types.ObjectId, ref: "registrant", required: true },

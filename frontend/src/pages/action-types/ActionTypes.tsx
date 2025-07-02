@@ -10,6 +10,9 @@ import { joinPath, exportToExcel } from '@/lib/utils'
 import type { ColumnDef } from '@tanstack/react-table'
 import { useLoader } from '@/contexts/loader'
 import { DataTable } from '@/components/shared/list-view/table'
+import BulkCreateActionTypes from '@/components/page/action-types/bulk-create'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 const columns: ColumnDef<ActionType>[] = [
   {
@@ -60,6 +63,7 @@ export default function ActionTypesPage() {
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const [stepFilter, setStepFilter] = useState<string>('all')
+  const [bulkDialogOpen, setBulkDialogOpen] = useState(false)
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -159,8 +163,8 @@ export default function ActionTypesPage() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           {/* Step Tabs */}
-          <div className="px-4 lg:px-6">
-            <Tabs value={stepFilter} onValueChange={handleStepTabChange} className="mb-2">
+          <div className="px-4 lg:px-6 flex items-center justify-between mb-2">
+            <Tabs value={stepFilter} onValueChange={handleStepTabChange} className="">
               <TabsList>
                 {STEP_TABS.map((tab) => (
                   <TabsTrigger
@@ -173,6 +177,17 @@ export default function ActionTypesPage() {
                 ))}
               </TabsList>
             </Tabs>
+            <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">Tạo nhiều loại hành động</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Tạo nhiều loại hành động</DialogTitle>
+                </DialogHeader>
+                <BulkCreateActionTypes onSuccess={() => { setBulkDialogOpen(false); fetchData(); }} />
+              </DialogContent>
+            </Dialog>
           </div>
 
           <DataTable

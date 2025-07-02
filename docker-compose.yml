@@ -46,7 +46,7 @@ services:
       - ./backend/.env # Backend-specific
     environment:
       - NODE_ENV=production
-      # - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
+      - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
     depends_on:
       mongo:
         condition: service_healthy

@@ -8,6 +8,7 @@ const resource = "users";
 // Create default admin (no auth required for initial setup)
 router.post("/dfa", controller.createDefaultAdmin);
 router.delete("/dfa", controller.removeDefaultAdmin);
+// seed data
 router.post("/seeds", controller.mockCreate);
 
 // self read & write (no permission required)

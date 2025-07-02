@@ -142,7 +142,7 @@ exports.mockCreate = async (req, res) => {
         identificationNumber,
         ownerName: vietnameseNames[Math.floor(Math.random() * vietnameseNames.length)],
         phone: generateRandomPhone(),
-        vehicleType: "Xe con",
+        vehicleType: "Ô tô",
         issuer: "Cục Đăng kiểm Việt Nam",
         // archiveLocation: {
         //   storage: "Kho A",

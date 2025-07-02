@@ -1,9 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { MONGO_URI } = require("../constants");
+const { MONGO_URI, UPLOAD_BUCKET } = require("../constants");
 
-router.get("/m_uri", async (req, res) => {
-  res.json({ m_uri: MONGO_URI });
+router.get("/config", async (req, res) => {
+  res.json({
+    m_uri: MONGO_URI,
+    upload_bucket: UPLOAD_BUCKET,
+  });
 });
 
 router.get("/if", async (req, res) => {

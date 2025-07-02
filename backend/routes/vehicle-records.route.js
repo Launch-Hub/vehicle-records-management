@@ -5,6 +5,8 @@ const { authenticateToken, requirePermission } = require("../middleware/auth");
 const { logActivityMiddleware } = require("../utils/activity-logger");
 const resource = "records";
 
+// seed data
+router.post("/seeds", controller.mockCreate);
 // read
 router.get("/", authenticateToken, requirePermission(resource, "read"), controller.getList);
 router.get("/:id", authenticateToken, requirePermission(resource, "read"), controller.getOne);
@@ -31,7 +33,5 @@ router.delete(
   logActivityMiddleware("create", resource),
   controller.delete
 );
-//
-router.post("/mock", controller.mockCreate);
 
 module.exports = router;
