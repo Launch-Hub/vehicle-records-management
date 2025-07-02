@@ -21,18 +21,18 @@ services:
   #     timeout: 10s
   #     retries: 5
 
-  # mongo:
-  #   image: mongo:8
-  #   container_name: vrm-mongo
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo_data:/data/db
-  #   healthcheck:
-  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 5
+  mongo:
+    image: mongo:8
+    container_name: vrm-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   backend:
     build: ./backend
@@ -46,7 +46,7 @@ services:
       - ./backend/.env # Backend-specific
     environment:
       - NODE_ENV=production
-      - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
+      # - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
     depends_on:
       mongo:
         condition: service_healthy
@@ -80,7 +80,7 @@ services:
   #     retries: 5
 
 volumes:
-  # mongo_data:
-  #   external: true
+  mongo_data:
+    external: true
   # minio_data:
   #   external: true

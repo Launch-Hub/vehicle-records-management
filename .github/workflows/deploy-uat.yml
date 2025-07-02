@@ -46,10 +46,17 @@ jobs:
           BUCKET_NAME=${{ secrets.BUCKET_NAME }}
           EOF
 
-      # make a clean build
+      # Backup MongoDB
+      # - name: Backup MongoDB
+      #   run: |
+      #     mkdir -p /home/cicd/backups
+      #     docker exec vrm-mongo mongodump --archive=/data/db/backup.archive
+      #     docker cp vrm-mongo:/data/db/backup.archive /home/cicd/backups/backup-$(date +%Y%m%d%H%M%S).archive
+
+      # Make a clean build
       - name: Shut down existing backend containers
         run: |
-          docker-compose -p vrm -f docker-compose.yml stop backend minio || true
+          docker-compose -p vrm -f docker-compose.yml stop backend || true
           docker-compose -p vrm -f docker-compose.yml down --remove-orphans
 
       - name: Build and start backend Docker services
@@ -70,7 +77,7 @@ jobs:
           cat <<EOF > frontend/.env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOF
-#
+      #
       - name: Build frontend
         run: |
           cd frontend

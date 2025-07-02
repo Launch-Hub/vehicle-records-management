@@ -38,6 +38,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import BulkForm from '@/components/page/bulks/form'
+import { uploadService } from '@/lib/services/upload'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -109,6 +110,11 @@ export default function ProcedureForm({
   // Action types states
   const [actionTypes, setActionTypes] = useState<any[]>([])
   const [isFetchingActionTypes, setIsFetchingActionTypes] = useState(false)
+
+  // State for step 1 image upload
+  const [step1Image, setStep1Image] = useState<File | null>(null)
+  const [step1ImageUrl, setStep1ImageUrl] = useState<string | null>(null)
+  const [isUploadingStep1Image, setIsUploadingStep1Image] = useState(false)
 
   const debouncedRecordSearch = useDebounce(recordSearch, 500)
   const debouncedBulkSearch = useDebounce(bulkSearch, 500)
@@ -250,6 +256,22 @@ export default function ProcedureForm({
     }
   }, [initialData, reset])
 
+  // Handle step 1 image upload
+  const handleStep1ImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setIsUploadingStep1Image(true)
+    try {
+      const res = await uploadService.uploadImage(file)
+      setStep1Image(file)
+      setStep1ImageUrl(res.file.storedName)
+    } catch (error) {
+      console.error('Failed to upload image', error)
+    } finally {
+      setIsUploadingStep1Image(false)
+    }
+  }
+
   const handleFormSubmit = async (data: Omit<Procedure, '_id'>) => {
     try {
       let recordId = data.recordId
@@ -280,7 +302,21 @@ export default function ProcedureForm({
         }
       }
 
-      const finalSteps = initialData ? steps : []
+      // Prepare step 1 with attachment if creating
+      let finalSteps = initialData ? steps : []
+      if (!initialData) {
+        finalSteps = [
+          {
+            order: 1,
+            step: 1,
+            title: '',
+            action: '',
+            note: '',
+            attachments: step1ImageUrl ? [step1ImageUrl] : [],
+            isCompleted: false,
+          },
+        ]
+      }
       const record = existingRecord || vehicleRecords.find((e) => e._id === recordId)
 
       // Update bulk size if procedure is created successfully
@@ -644,6 +680,34 @@ export default function ProcedureForm({
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Ảnh minh chứng cho bước 1 (nếu có)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="step1Image">Tải lên ảnh cho bước 1</Label>
+            <Input
+              id="step1Image"
+              type="file"
+              accept="image/*"
+              onChange={handleStep1ImageChange}
+              disabled={isUploadingStep1Image}
+            />
+            {isUploadingStep1Image && <div>Đang tải lên...</div>}
+            {step1ImageUrl && (
+              <div className="mt-2">
+                <img
+                  src={`/uploads/du/${step1ImageUrl}`}
+                  alt="Ảnh bước 1"
+                  className="max-h-40 rounded border"
+                />
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="flex justify-end gap-2">
         {onCancel && (
