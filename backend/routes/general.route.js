@@ -2,14 +2,16 @@ const express = require("express");
 const router = express.Router();
 const { MONGO_URI } = require("../constants");
 
-router.get("/", async (req, res) => {
-  const result = { code: 200, from: req.ip };
-  if (req.query.if == true) {
-    result.m_uri = MONGO_URI;
-    const info = await fetch("ifconfig.me");
-    result.ifconfig = info;
-  }
-  res.json(result);
+router.get("/m_uri", async (req, res) => {
+  res.json({ m_uri: MONGO_URI });
+});
+
+router.get("/if", async (req, res) => {
+  const ipv4 = await fetch("https://api.ipify.org?format=json");
+  res.json({
+    from: req.ip,
+    ipv4: await ipv4.json(),
+  });
 });
 
 router.get("/v", (req, res) => {
