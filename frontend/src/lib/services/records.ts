@@ -20,4 +20,16 @@ export const recordService = {
   delete: async (id: string): Promise<void> => {
     await api.delete(`/records/${id}`)
   },
+  getOne: async (id: string): Promise<VehicleRecord> => {
+    const response = await api.get(`/records/${id}`)
+    return response.data
+  },
+  create: async (data: Partial<VehicleRecord>): Promise<VehicleRecord> => {
+    const response = await api.post('/records', data)
+    return response.data
+  },
+  update: async (id: string, data: Partial<VehicleRecord>): Promise<VehicleRecord> => {
+    const response = await api.put(`/records/${id}`, data)
+    return response.data
+  },
 } 

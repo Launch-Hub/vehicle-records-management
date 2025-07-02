@@ -38,6 +38,8 @@ import { useLoader } from '@/contexts/loader/use-loader'
 import { backPath } from '@/lib/utils'
 import { useLayout } from '@/contexts/layout'
 import { getProcedureStatusLabel } from '@/constants/dictionary'
+import { bulkService } from '@/lib/services/bulks'
+import { procedureService } from '@/lib/services/procedures'
 
 type WorkflowStep = 'bulk-info' | 'add-procedures' | 'preview'
 
@@ -80,13 +82,13 @@ export default function BulkDetailPage() {
       loader.show()
       try {
         const [bulkRes, proceduresRes] = await Promise.all([
-          api.get(`/bulks/${id}`),
+          bulkService.getOne(id!),
           api.get(`/bulks/${id}/procedures`),
         ])
 
-        if (bulkRes.data) {
-          setInitialData(bulkRes.data)
-          setBulkData(bulkRes.data)
+        if (bulkRes) {
+          setInitialData(bulkRes)
+          setBulkData(bulkRes)
         } else {
           toast.error('Không tìm thấy dữ liệu.')
           navigate(-1)
@@ -173,11 +175,9 @@ export default function BulkDetailPage() {
 
       // Save bulk first
       if (defaultAction === 'create') {
-        const bulkRes = await api.post('/bulks', bulkData)
-        savedBulk = bulkRes.data
+        savedBulk = await bulkService.create(bulkData)
       } else {
-        const bulkRes = await api.put(`/bulks/${id}`, bulkData)
-        savedBulk = bulkRes.data
+        savedBulk = await bulkService.update(id!, bulkData)
       }
 
       // Save procedures
@@ -188,9 +188,9 @@ export default function BulkDetailPage() {
         }
 
         if (procedure._id) {
-          await api.put(`/procedures/${procedure._id}`, procedureData)
+          await procedureService.update(procedure._id as string, procedureData)
         } else {
-          await api.post('/procedures', procedureData)
+          await procedureService.create(procedureData)
         }
       }
 

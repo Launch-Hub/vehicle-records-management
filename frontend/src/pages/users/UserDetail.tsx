@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import api from '@/lib/axios'
+import { userService } from '@/lib/services/users'
 import type { User } from '@/lib/types/tables.type'
 import UserForm from '@/components/page/users/form'
 import { useLoader } from '@/contexts/loader/use-loader'
@@ -33,9 +33,9 @@ export default function UserDetailPage() {
     const fetchDetail = async () => {
       loader.show()
       try {
-        const res = await api.get(`/users/${id}`)
-        if (res.data) {
-          setInitialData(res.data)
+        const res = await userService.getOne(id!)
+        if (res) {
+          setInitialData(res)
         } else {
           toast.error('Không tìm thấy dữ liệu.')
           navigate(-1)
@@ -55,10 +55,10 @@ export default function UserDetailPage() {
     loader.show()
     try {
       if (action === 'create') {
-        await api.post('/users', data)
+        await userService.create(data)
         toast.success('Tạo người dùng thành công.')
       } else {
-        await api.put(`/users/${id}`, data)
+        await userService.update(id!, data)
         toast.success('Cập nhật người dùng thành công.')
       }
       navigate(-1)

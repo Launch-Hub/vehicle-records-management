@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import api from '@/lib/axios'
+import { recordService } from '@/lib/services/records'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import VehicleRecordForm from '@/components/page/records/form'
 import { useLoader } from '@/contexts/loader/use-loader'
@@ -38,9 +38,9 @@ export default function VehicleRecordDetailPage() {
     const fetchDetail = async () => {
       loader.show()
       try {
-        const res = await api.get(`/records/${id}`)
-        if (res.data) {
-          setInitialData(res.data)
+        const res = await recordService.getOne(id!)
+        if (res) {
+          setInitialData(res)
         } else {
           toast.error('Không tìm thấy dữ liệu.')
           navigate(-1)
@@ -63,10 +63,10 @@ export default function VehicleRecordDetailPage() {
     loader.show()
     try {
       if (action === 'create') {
-        await api.post('/records', data)
+        await recordService.create(data)
         toast.success('Tạo hồ sơ thành công.')
       } else {
-        await api.put(`/records/${id}`, data)
+        await recordService.update(id!, data)
         toast.success('Cập nhật hồ sơ thành công.')
       }
       navigate(-1)

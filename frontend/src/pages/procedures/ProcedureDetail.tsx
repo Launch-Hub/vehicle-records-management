@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import api from '@/lib/axios'
+import { procedureService } from '@/lib/services/procedures'
 import type { Procedure } from '@/lib/types/tables.type'
 import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
@@ -38,9 +38,9 @@ export default function ProcedureDetailPage() {
     const fetchDetail = async () => {
       loader.show()
       try {
-        const res = await api.get(`/procedures/${id}`)
-        if (res.data) {
-          setInitialData(res.data)
+        const res = await procedureService.getOne(id!)
+        if (res) {
+          setInitialData(res)
         } else {
           toast.error('Không tìm thấy dữ liệu.')
           navigate(-1)
@@ -63,10 +63,10 @@ export default function ProcedureDetailPage() {
     loader.show()
     try {
       if (action === 'create') {
-        await api.post('/procedures', data)
+        await procedureService.create(data)
         toast.success('Tạo đăng ký thành công.')
       } else {
-        await api.put(`/procedures/${id}`, data)
+        await procedureService.update(id!, data)
         toast.success('Cập nhật đăng ký thành công.')
       }
       navigate(-1)
