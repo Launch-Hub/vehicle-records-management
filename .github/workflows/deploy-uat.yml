@@ -50,7 +50,7 @@ jobs:
       - name: Shut down existing backend containers
         run: |
           docker-compose -p vrm -f docker-compose.yml stop backend || true
-      #    docker-compose -p vrm -f docker-compose.yml down --remove-orphans
+          docker-compose -p vrm -f docker-compose.yml down --remove-orphans
       - name: Build and start backend Docker service only
         run: docker-compose -p vrm -f docker-compose.yml up -d --build backend
 
