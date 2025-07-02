@@ -32,9 +32,6 @@ const bcrypt = require("bcrypt");
 userSchema.methods.comparePassword = function (password) {
   return bcrypt.compare(password, this.passwordHash);
 };
-userSchema.methods.hashPassword = function (password) {
-  return bcrypt.hash(password);
-};
 
 const User = mongoose.model("User", userSchema);
 

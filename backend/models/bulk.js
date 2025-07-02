@@ -2,10 +2,9 @@ const mongoose = require("mongoose");
 
 const bulkSchema = new mongoose.Schema(
   {
-    code: { Type: String, require: true, unique: true },
-    name: { Type: String, require: true },
-    initSize: { Type: Number, default: 0 },
-    currentSize: { Type: Number, default: 0 },
+    code: { type: String, require: true, unique: true },
+    name: { type: String, require: true },
+    size: { type: Number, default: 0 },
     note: String,
     // timestamp has both props
     // createdAt: { type: Date, default: Date.now },

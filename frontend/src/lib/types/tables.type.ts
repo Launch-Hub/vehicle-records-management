@@ -22,6 +22,7 @@ interface UserProps extends Omit<LoginUserProps, 'token'> {
   _id: string
   password?: string // for crud
   status: string // for crud
+  createdAt?: Date
 }
 export type User = UserProps
 
@@ -43,15 +44,73 @@ export interface VehicleRecordProps {
   identificationNumber: string
   engineNumber: string
   registrant: string
-  issuer: string
+  vehicleType?: string
   phone?: string
   email?: string
   address?: string
-  registerType: string
-  attachmentUrls: string[]
   archiveAt?: ArchiveLocationProps
+  issuerId?: string
   description?: string
   note?: string
   status: string
+  createdAt?: Date
+  updatedAt?: Date
 }
 export type VehicleRecord = VehicleRecordProps
+
+export interface ProcedureStepProps {
+  _id?: string
+  order: number
+  step: number
+  title: string
+  action: string // ActionType ID
+  note?: string
+  attachments: string[]
+  isCompleted: boolean
+  completedAt?: Date
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export interface ProcedureProps {
+  _id: string
+  recordId: string | VehicleRecordProps
+  bulkId?: string | BulkProps
+  registrationType: string
+  steps: ProcedureStepProps[]
+  status: 'pending' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'archived'
+  note?: string
+  dueDate?: Date
+  completedAt?: Date
+  archivedAt?: Date
+  createdAt: Date
+  updatedAt?: Date
+  // for store in the client only
+  _tempRecord?: VehicleRecordProps
+}
+
+export type Procedure = ProcedureProps
+
+export interface BulkProps {
+  _id: string
+  code: string
+  name: string
+  size: number
+  note?: string
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export type Bulk = BulkProps
+
+export interface ActionTypeProps {
+  _id: string
+  order: number
+  name: string
+  step: number
+  toStep: number
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+export type ActionType = ActionTypeProps

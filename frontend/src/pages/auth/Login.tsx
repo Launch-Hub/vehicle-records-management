@@ -21,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault()
     try {
       loader.show()
-      const redirectURL = ROUTES.find((e) => e.enPath === '/dashboard')?.path || '/'
+      const redirectURL = ROUTES.find((e) => e.enPath === '/')?.path || '/'
       await login(email, password, redirectURL)
     } catch (error: any) {
       if (error.response) {

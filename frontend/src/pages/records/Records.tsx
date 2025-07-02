@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import api from '@/lib/axios'
+import { recordService } from '@/lib/services/records'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
-import { RecordDataTable } from '@/components/page/records/table'
 import { joinPath } from '@/lib/utils'
 import { getTableLabel } from '@/constants/dictionary'
 import type { ColumnDef } from '@tanstack/react-table'
-import { UserDataTable } from '@/components/page/users/table'
+import { DataTable } from '@/components/shared/list-view/table'
+import { useLoader } from '@/contexts/loader/use-loader'
 
 const columns: ColumnDef<VehicleRecord>[] = [
   {
@@ -53,13 +53,14 @@ export default function RecordsPage() {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const loader = useLoader()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/records', { params: { search, ...pagination } })
-      if (response.data) {
-        const { total, items } = response.data
+      const response = await recordService.getList({ search, ...pagination })
+      if (response) {
+        const { total, items } = response
         setTotal(total)
         setData(items)
       }
@@ -69,11 +70,11 @@ export default function RecordsPage() {
     } finally {
       setIsFetching(false)
     }
-  }
+  }, [search, pagination])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search && !searchTerm) return
-    setSearch((_) => searchTerm)
+    if (!search && !searchTerm) return
+    setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
 
@@ -101,19 +102,35 @@ export default function RecordsPage() {
     navigate(`${joinPath(location.pathname, record._id)}?copy=true`)
   }
 
-  const handleDelete = (id: string) => {
-    // implement if needed
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+
+    loader.show()
+    try {
+      await recordService.delete(id)
+      toast.success('Xóa hồ sơ thành công.')
+      // Refresh the data
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa hồ sơ. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
   }
 
   useEffect(() => {
     fetchData()
-  }, [search, pagination])
+  }, [fetchData])
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <UserDataTable
+          <DataTable
             loading={isFetching}
             total={total}
             data={data}

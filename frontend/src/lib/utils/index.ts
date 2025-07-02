@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { toast } from 'sonner'
 import { l } from './_'
+import ExcelJS from 'exceljs'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -84,4 +85,48 @@ export const processImage = (file: File, callback: (base64: string) => void) => 
     }
   }
   reader.readAsDataURL(file)
+}
+
+export async function exportToExcel({
+  data,
+  filename = 'export.xlsx',
+  sheetName = 'Sheet1',
+  headerRows = [], // array of arrays, each sub-array is a row
+  footerRows = [], // array of arrays, each sub-array is a row
+  columns = [],
+}: {
+  data: any[],
+  filename?: string,
+  sheetName?: string,
+  headerRows?: any[][],
+  footerRows?: any[][],
+  columns?: { key: string, label: string }[]
+}) {
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet(sheetName)
+
+  // Add header rows
+  headerRows.forEach(row => worksheet.addRow(row))
+
+  // Add main data rows
+  if (data.length > 0) {
+    const keys = columns.map(column => column.key)
+    worksheet.addRow(keys)
+    data.forEach(item => {
+      worksheet.addRow(keys.map(k => item[k] || ''))
+    })
+  }
+
+  // Add footer rows
+  footerRows.forEach(row => worksheet.addRow(row))
+
+  // Write to file (browser)
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const link = document.createElement('a')
+  link.href = URL.createObjectURL(blob)
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }

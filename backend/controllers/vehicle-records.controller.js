@@ -37,7 +37,7 @@ exports.getList = async (req, res) => {
     if (total === 0) return res.json({ total, items: [] });
 
     const items = await VehicleRecord.find(filter, projection)
-      // .populate("registerType")
+      // .populate("registrationType")
       .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
       .skip(skip)
       .limit(limit)
@@ -142,7 +142,7 @@ exports.mockCreate = async (req, res) => {
         identificationNumber,
         ownerName: vietnameseNames[Math.floor(Math.random() * vietnameseNames.length)],
         phone: generateRandomPhone(),
-        vehicleType: "Xe con",
+        vehicleType: "Ô tô",
         issuer: "Cục Đăng kiểm Việt Nam",
         // archiveLocation: {
         //   storage: "Kho A",

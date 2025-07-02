@@ -3,25 +3,26 @@
 version: "3.8"
 
 services:
-  minio:
-    image: minio/minio
-    container_name: vrm-minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
-    env_file:
-      - .env
-    command: server /data --console-address ":9001"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9001"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+  # minio is not used for now, but keep it here for future reference
+  # minio:
+  #   image: minio/minio
+  #   container_name: vrm-minio
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   volumes:
+  #     - minio_data:/public/vrm-bucket/minio
+  #   env_file:
+  #     - .env
+  #   command: server /public/vrm-bucket/minio --console-address ":9001"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:9001"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
 
   mongo:
-    image: mongo:6
+    image: mongo:8
     container_name: vrm-mongo
     ports:
       - "27017:27017"
@@ -36,28 +37,28 @@ services:
   backend:
     build: ./backend
     container_name: vrm-backend
+    ports:
+      - "5000:5000"
     volumes:
-      - ./public/vrm-bucket:/app/public/vrm-bucket
+      - /var/www/uploads:/app/public/vrm-bucket
     env_file:
       - .env # Global (project root)
       - ./backend/.env # Backend-specific
     environment:
       - NODE_ENV=production
       - MONGO_URI=mongodb://vrm-mongo:27017/vehicle_records_db
-    ports:
-      - "5000:5000"
     depends_on:
       mongo:
         condition: service_healthy
-      minio:
-        condition: service_healthy
+    #   minio:
+    #     condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      test: ["CMD", "curl", "-f", "http://vrm-backend:5000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 5
 
-  # keep the frontend independent for easy development
+  # add nginx to serve the frontend
   # frontend:
   #   build: ./frontend
   #   container_name: vrm-frontend
@@ -71,7 +72,7 @@ services:
   #     - NODE_ENV=production
   #   ports:
   #     - "3000:80"
-  #     - "80:80" # easier for using single frontend with nginx default port
+  #     # - "80:80" # easier for using single frontend with nginx default port
   #   healthcheck:
   #     test: ["CMD", "curl", "-f", "http://localhost"]
   #     interval: 30s
@@ -80,4 +81,6 @@ services:
 
 volumes:
   mongo_data:
-  minio_data:
+    external: true
+  # minio_data:
+  #   external: true

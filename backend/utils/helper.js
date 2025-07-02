@@ -1,3 +1,6 @@
+const bcrypt = require("bcrypt");
+const { SALT_OR_ROUND } = require("../constants");
+
 const getClientIp = (req) => {
   const xForwardedFor = req.headers["x-forwarded-for"];
   if (xForwardedFor) {
@@ -5,6 +8,10 @@ const getClientIp = (req) => {
     return xForwardedFor.split(",")[0].trim();
   }
   return req.connection.remoteAddress;
+};
+
+const hashPassword = async (password) => {
+  return bcrypt.hash(password, SALT_OR_ROUND);
 };
 
 const parsePagination = (pageIndex, pageSize) => {
@@ -35,6 +42,7 @@ const fillNumber = (number, totalLength = 7, fillChar = "0") => {
 
 module.exports = {
   getClientIp,
+  hashPassword,
   parsePagination,
   //
   nomalizeText,

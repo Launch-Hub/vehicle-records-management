@@ -8,6 +8,9 @@ const resource = "bulks";
 // read
 router.get("/", authenticateToken, requirePermission(resource, "read"), controller.getList);
 router.get("/:id", authenticateToken, requirePermission(resource, "read"), controller.getOne);
+router.get("/:bulkId/procedures", authenticateToken, requirePermission(resource, "read"), controller.getProceduresByBulk);
+router.get("/count/today", controller.getTodaysCount);
+router.get("/search", controller.getList);
 // write
 router.post(
   "/",

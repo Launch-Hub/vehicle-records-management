@@ -7,7 +7,7 @@ exports.getList = async (req, res) => {
     order: 1,
     name: 1,
     step: 1,
-    toNextStep: 1,
+    toStep: 1,
   };
   try {
     const { pageIndex, pageSize, search, step } = req.query;
@@ -53,7 +53,7 @@ exports.create = async (req, res) => {
   try {
     const { name, step } = req.body;
 
-    const existingItem = await User.findOne({
+    const existingItem = await ActionType.findOne({
       $and: [{ name }, { step }],
     });
 
@@ -68,6 +68,53 @@ exports.create = async (req, res) => {
 
     res.locals.documentId = result._id; // ✅ required for activity logger
     res.status(201).json(result);
+  } catch (err) {
+    res.status(400).json({ error: true, message: err.message });
+  }
+};
+
+exports.createBulk = async (req, res) => {
+  try {
+    const { actionTypes } = req.body;
+
+    if (!Array.isArray(actionTypes) || actionTypes.length === 0) {
+      return res.status(400).json({
+        error: true,
+        message: "Danh sách loại hành động không hợp lệ.",
+      });
+    }
+
+    // Validate each action type
+    for (const actionType of actionTypes) {
+      if (!actionType.name || !actionType.step || !actionType.toStep || !actionType.order) {
+        return res.status(400).json({
+          error: true,
+          message: "Thiếu thông tin bắt buộc cho loại hành động.",
+        });
+      }
+    }
+
+    // Check for duplicates
+    const existingItems = await ActionType.find({
+      $or: actionTypes.map(({ name, step }) => ({ name, step }))
+    });
+
+    if (existingItems.length > 0) {
+      const duplicateNames = existingItems.map(item => `${item.name} (bước ${item.step})`);
+      return res.status(409).json({
+        error: true,
+        message: `Các loại hành động sau đã tồn tại: ${duplicateNames.join(', ')}`,
+      });
+    }
+
+    // Create all action types
+    const results = await ActionType.insertMany(actionTypes);
+
+    res.locals.documentId = results.map(r => r._id); // ✅ required for activity logger
+    res.status(201).json({
+      message: `Đã tạo thành công ${results.length} loại hành động.`,
+      items: results
+    });
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
   }

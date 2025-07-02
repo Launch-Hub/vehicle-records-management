@@ -3,13 +3,18 @@ name: 🚀 Deploy to Self-Hosted Ubuntu | VPS Sieu Toc
 on:
   push:
     branches:
-      - release/uat
+      - develop
+      # - release/uat
 
 jobs:
   deploy-backend:
     runs-on: [self-hosted, vpssieutoc-1]
-    if: contains(github.event.head_commit.touched, 'backend/')
     steps:
+      - name: Fix permissions
+        run: |
+          sudo chown -R cicd:cicd /home/cicd/actions-runner/_work
+          sudo chmod -R u+rwX /home/cicd/actions-runner/_work
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -41,18 +46,17 @@ jobs:
           BUCKET_NAME=${{ secrets.BUCKET_NAME }}
           EOF
 
-      # make a clean build
+      # Make a clean build
       - name: Shut down existing backend containers
         run: |
-          docker-compose -p vrm -f docker-compose.yml stop backend minio || true
-          docker-compose -p vrm -f docker-compose.yml down --remove-orphans
+          docker-compose -p vrm -f docker-compose.yml stop backend || true
+      #    docker-compose -p vrm -f docker-compose.yml down --remove-orphans
+      - name: Build and start backend Docker service only
+        run: docker-compose -p vrm -f docker-compose.yml up -d --build backend
 
-      - name: Build and start backend Docker services
-        run: docker-compose -p vrm -f docker-compose.yml up -d --build backend minio
-
-  deploy-frontend:
-    runs-on: [self-hosted, vpssieutoc-1]
-    if: contains(github.event.head_commit.touched, 'frontend/')
+  # build on Github Ubuntu to save the resource
+  build-frontend:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -60,28 +64,47 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Create client .env from GitHub Secrets
+      - name: Create client frontend/.env
         run: |
-          cat <<EOF > .env
+          cat <<EOF > frontend/.env
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOF
-
+      #
       - name: Build frontend
         run: |
           cd frontend
           npm install --legacy-peer-deps
           npm run build
+          # Replace placeholder with actual server name
+          sed -i "s/\${NGINX_SERVER_NAME}/${{ secrets.NGINX_SERVER_NAME }}/g" nginx.conf
+          cp nginx.conf dist/
+          cp .env dist/
+
+      - name: Upload built artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+  deploy-frontend:
+    runs-on: [self-hosted, vpssieutoc-1]
+    needs: build-frontend
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
 
       - name: Prepare nginx deploy path
         run: |
           sudo mkdir -p /var/www/vrm_app/frontend
-          sudo chown -R $USER:$USER /var/www/vrm_app/frontend
+          sudo chown -R cicd:cicd /var/www/vrm_app/frontend
 
       - name: Deploy frontend to nginx folder
         run: |
           sudo rm -rf /var/www/vrm_app/frontend/dist
-          sudo cp -r frontend/dist /var/www/vrm_app/frontend/
-          sudo cp -r nginx.conf /etc/nginx/sites-available/vrm_app
-          sudo ln -s /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
+          sudo cp -r dist /var/www/vrm_app/frontend/dist
+          sudo cp -r dist/nginx.conf /etc/nginx/sites-available/vrm_app
+          sudo ln -sf /etc/nginx/sites-available/vrm_app /etc/nginx/sites-enabled/
           sudo nginx -t
           sudo systemctl restart nginx

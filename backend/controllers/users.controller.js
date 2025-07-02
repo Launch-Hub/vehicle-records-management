@@ -1,8 +1,7 @@
-const bcrypt = require("bcrypt");
 const { User } = require("../models/user");
-const { parsePagination } = require("../utils/helper");
-const { DEFAULT_PERMISSIONS, SALT_OR_ROUND } = require("../constants");
-const { mock_users } = require("../constants/mock");
+const { parsePagination, hashPassword } = require("../utils/helper");
+const { DEFAULT_PERMISSIONS } = require("../constants");
+const { mock_users, default_admin } = require("../constants/mock");
 
 // manage user //
 //
@@ -10,12 +9,11 @@ exports.getList = async (req, res) => {
   const projection = {
     avatar: 1,
     name: 1,
-    // username: 1,
-    // email: 1,
+    username: 1,
+    email: 1,
     phone: 1,
     assignedUnit: 1,
     serviceNumber: 1,
-    // roles: 1,
     status: 1,
   };
 
@@ -42,14 +40,6 @@ exports.getList = async (req, res) => {
       .skip(skip)
       .limit(limit)
       .exec();
-
-    // example:
-    // User.find(filter, projection)
-    // .populate('assignedUnit', 'name code')
-    // .populate('roles', 'name')
-    // .sort({ createdAt: -1 })
-    // .skip(skip)
-    // .limit(limit)
 
     res.json({ total, items });
   } catch (err) {
@@ -82,7 +72,7 @@ exports.create = async (req, res) => {
       });
     }
 
-    const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+    const passwordHash = await hashPassword(password);
     const finalPermissions = permissions || DEFAULT_PERMISSIONS;
 
     const result = await User.create({
@@ -144,17 +134,47 @@ exports.delete = async (req, res) => {
 
 // manage profile
 exports.getProfile = async (req, res) => {
-  const { user } = await User.findById(req.user.id).select("-passwordHash");
+  const user = await User.findById(req.user.id).select("-passwordHash");
   res.json(user);
 };
 exports.updateProfile = async (req, res) => {
-  const { userId, username, email } = req.body;
-  const { user } = await User.findById(userId);
-  if (!user) return res.status(404).json({ message: "User not found" });
-  if (username) user.username = username;
-  if (email) user.email = email;
-  await user.save();
-  res.json({ message: "Profile updated" });
+  try {
+    const userId = req.user.id; // Use current user's ID from token
+    const { username, email, name, phone, assignedUnit, serviceNumber, avatar } = req.body;
+
+    // Check if username or email is changing to a value that already exists on another user
+    if (username || email) {
+      const duplicate = await User.findOne({
+        _id: { $ne: userId }, // exclude current user
+        $or: [...(username ? [{ username }] : []), ...(email ? [{ email }] : [])],
+      });
+
+      if (duplicate) {
+        return res.status(409).json({
+          error: true,
+          message: "Username or email already in use by another user",
+        });
+      }
+    }
+
+    const updateData = {};
+    if (username !== undefined) updateData.username = username;
+    if (email !== undefined) updateData.email = email;
+    if (name !== undefined) updateData.name = name;
+    if (phone !== undefined) updateData.phone = phone;
+    if (assignedUnit !== undefined) updateData.assignedUnit = assignedUnit;
+    if (serviceNumber !== undefined) updateData.serviceNumber = serviceNumber;
+    if (avatar !== undefined) updateData.avatar = avatar;
+
+    const result = await User.findByIdAndUpdate(userId, updateData, { new: true }).select(
+      "-passwordHash"
+    );
+    if (!result) return res.status(404).json({ error: true, message: "User not found" });
+
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ error: true, message: err.message });
+  }
 };
 exports.updateAvatar = async (req, res) => {
   const { userId, avatar } = req.body;
@@ -255,7 +275,7 @@ exports.updatePermissions = async (req, res) => {
 // ----------------
 
 exports.mockCreate = async (_, res) => {
-   try {
+  try {
     const bulk = [];
 
     for (const user of mock_users) {
@@ -271,7 +291,7 @@ exports.mockCreate = async (_, res) => {
         continue;
       }
 
-      const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+      const passwordHash = await hashPassword(password);
       const finalPermissions = permissions || DEFAULT_PERMISSIONS;
 
       const createdItem = await User.create({
@@ -289,5 +309,67 @@ exports.mockCreate = async (_, res) => {
     });
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
+  }
+};
+
+exports.createDefaultAdmin = async (req, res) => {
+  try {
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({
+      $or: [{ username: default_admin.username }, { email: default_admin.email }],
+    });
+
+    if (existingAdmin) {
+      return res.status(409).json({
+        error: true,
+        message: "Default admin already exists",
+      });
+    }
+
+    // Hash the password
+    const passwordHash = await hashPassword(default_admin.password);
+
+    // Create the admin user
+    const adminUser = await User.create({
+      ...default_admin,
+      passwordHash,
+    });
+
+    res.locals.documentId = adminUser._id; // Required for activity logger
+    res.status(201).json({
+      message: "Default admin created successfully",
+      user: {
+        id: adminUser._id,
+        username: adminUser.username,
+        email: adminUser.email,
+        name: adminUser.name,
+        isAdmin: adminUser.isAdmin,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
+  }
+};
+
+exports.removeDefaultAdmin = async (req, res) => {
+  try {
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({
+      $or: [{ username: default_admin.username }, { email: default_admin.email }],
+    });
+
+    if (!existingAdmin) {
+      return res.status(409).json({
+        error: true,
+        message: "Default admin not found",
+      });
+    }
+    await User.deleteOne({ _id: existingAdmin._id });
+    res.status(201).json({
+      message: "Default admin removed successfully",
+      user: existingAdmin,
+    });
+  } catch (err) {
+    res.status(500).json({ error: true, message: err.message });
   }
 };

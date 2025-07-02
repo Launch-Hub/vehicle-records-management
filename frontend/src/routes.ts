@@ -1,5 +1,15 @@
 import { lazy } from 'react'
-import { FileStackIcon, FolderIcon, LayoutDashboardIcon, UsersIcon, type LucideIcon } from 'lucide-react'
+import {
+  FileStackIcon,
+  FolderIcon,
+  LayoutDashboardIcon,
+  UsersIcon,
+  PackageIcon,
+  type LucideIcon,
+  HistoryIcon,
+  SettingsIcon,
+  ListTodoIcon,
+} from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
 import HomePage from '@/pages/Home'
@@ -11,6 +21,12 @@ import ForbiddenPage from '@/pages/system/Forbidden'
 import NotFoundPage from '@/pages/system/NotFound'
 import RecordsPage from './pages/records/Records'
 import RecordDetailPage from './pages/records/RecordDetail'
+import ProceduresPage from '@/pages/procedures/Procedures'
+import ProcedureDetailPage from '@/pages/procedures/ProcedureDetail'
+import BulksPage from '@/pages/bulks/Bulks'
+import BulkDetailPage from '@/pages/bulks/BulkDetail'
+import ActionTypesPage from '@/pages/action-types/ActionTypes'
+import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import { DEFAULT_LANG } from './constants/env'
 
 export type PageComponent =
@@ -78,6 +94,36 @@ export const PAGE_MAP = {
     component: RecordDetailPage,
     default: 'eager',
   },
+  ProceduresPage: {
+    lazy: lazy(() => import('@/pages/procedures/Procedures')), // lazy-loaded
+    component: ProceduresPage,
+    default: 'eager',
+  },
+  ProcedureDetailPage: {
+    lazy: lazy(() => import('@/pages/procedures/ProcedureDetail')), // lazy-loaded
+    component: ProcedureDetailPage,
+    default: 'eager',
+  },
+  BulksPage: {
+    lazy: lazy(() => import('@/pages/bulks/Bulks')), // lazy-loaded
+    component: BulksPage,
+    default: 'eager',
+  },
+  BulkDetailPage: {
+    lazy: lazy(() => import('@/pages/bulks/BulkDetail')), // lazy-loaded
+    component: BulkDetailPage,
+    default: 'eager',
+  },
+  ActionTypesPage: {
+    lazy: lazy(() => import('@/pages/action-types/ActionTypes')), // lazy-loaded
+    component: ActionTypesPage,
+    default: 'eager',
+  },
+  ActionTypeDetailPage: {
+    lazy: lazy(() => import('@/pages/action-types/ActionTypeDetail')), // lazy-loaded
+    component: ActionTypeDetailPage,
+    default: 'eager',
+  },
 }
 
 interface RouteTranslationProps {
@@ -91,8 +137,10 @@ export interface CustomRouteProps {
   resource?: string
   element: string
   showSidebar?: boolean
+  nav?: number // 1 for primary, 2 for secondary, etc.
   icon?: LucideIcon
   path: string
+  query?: Record<string, string | number | boolean>
   enPath?: string // the original path for checking data
   title: string
   language: string
@@ -164,32 +212,18 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   // authenticated routes
   {
     auth: true,
-    element: 'HomePage',
-    resource: 'general',
-    showSidebar: false,
-    path: '/',
-    title: 'Home',
-    language: 'en',
-    translations: [
-      {
-        language: 'vi',
-        title: 'Trang chủ',
-      },
-    ],
-  },
-  {
-    auth: true,
     element: 'DashboardPage',
     resource: 'general',
     showSidebar: true,
+    nav: 1,
     icon: LayoutDashboardIcon,
-    path: '/dashboard',
+    path: '/',
     title: 'Dashboard',
     language: 'en',
     translations: [
       {
-        path: '/bang-dieu-khien',
-        title: 'Bảng điều khiển',
+        path: '/',
+        title: 'Trang chủ',
         language: 'vi',
       },
     ],
@@ -199,6 +233,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     element: 'UsersPage',
     resource: 'users',
     showSidebar: true,
+    nav: 1,
     icon: UsersIcon,
     path: '/users',
     title: 'Manage Users',
@@ -206,7 +241,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/quan-ly-nguoi-dung',
-        title: 'Quản lý Người Dùng',
+        title: 'Quản lý người dùng',
         language: 'vi',
       },
     ],
@@ -242,14 +277,15 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     element: 'RecordsPage',
     resource: 'records',
     showSidebar: true,
-    icon: FolderIcon,
-    path: '/records',
-    title: 'Manage Records',
+    nav: 1,
+    icon: HistoryIcon,
+    path: '/registration-history',
+    title: 'Registration History',
     language: 'en',
     translations: [
       {
-        path: '/quan-ly-ho-so',
-        title: 'Quản lý Hồ Sơ',
+        path: '/lich-su-dang-ky',
+        title: 'Lịch sử đăng ký',
         language: 'vi',
       },
     ],
@@ -280,45 +316,172 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
       },
     ],
   },
-  
+
+  // {
+  //   auth: true,
+  //   element: 'BulksPage',
+  //   resource: 'bulks',
+  //   showSidebar: true,
+  //   nav: 1,
+  //   icon: PackageIcon,
+  //   path: '/bulks',
+  //   title: 'Manage Bulks',
+  //   language: 'en',
+  //   translations: [
+  //     {
+  //       path: '/quan-ly-lo',
+  //       title: 'Quản lý Lô Đăng Ký',
+  //       language: 'vi',
+  //     },
+  //   ],
+  //   children: [
+  //     {
+  //       element: 'BulkDetailPage',
+  //       path: ':id',
+  //       title: 'Bulk Detail',
+  //       language: 'en',
+  //       translations: [
+  //         {
+  //           language: 'vi',
+  //           title: 'Chỉnh sửa lô',
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       element: 'BulkDetailPage',
+  //       path: 'new',
+  //       title: 'Create Bulk',
+  //       language: 'en',
+  //       translations: [
+  //         {
+  //           language: 'vi',
+  //           title: 'Tạo lô mới',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  // },
+
   {
     auth: true,
-    element: 'ProcedurePage',
-    resource: 'procedures',
+    element: 'ActionTypesPage',
+    resource: 'action-types',
     showSidebar: true,
-    icon: FileStackIcon,
-    path: '/procedures',
-    title: 'Manage Procedures',
+    nav: 1,
+    icon: ListTodoIcon,
+    path: '/action-types',
+    title: 'Manage Action Types',
     language: 'en',
     translations: [
       {
-        path: '/quan-ly-thu-tuc',
-        title: 'Thủ tục Đăng ký',
+        path: '/quan-ly-hang-muc',
+        title: 'Quản lý hạng mục',
         language: 'vi',
       },
     ],
     children: [
       {
-        element: 'RecordDetailPage',
+        element: 'ActionTypeDetailPage',
         path: ':id',
-        title: 'Record Detail',
+        title: 'Action Type Detail',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            title: 'Chỉnh sửa hồ sơ',
+            title: 'Chỉnh sửa hạng mục',
           },
         ],
       },
       {
-        element: 'RecordDetailPage',
+        element: 'ActionTypeDetailPage',
         path: 'new',
-        title: 'Create Record',
+        title: 'Create Action Type',
         language: 'en',
         translations: [
           {
             language: 'vi',
-            title: 'Tạo hồ sơ mới',
+            title: 'Tạo hạng mục mới',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures-step-1',
+    showSidebar: true,
+    nav: 2,
+    icon: FileStackIcon,
+    path: '/receive-registration',
+    title: 'Receive Registration',
+    query: { step: 1 },
+    language: 'en',
+    translations: [
+      {
+        path: '/tiep-nhan-ho-so',
+        title: 'Tiếp Nhận Hồ Sơ',
+        language: 'vi',
+      },
+    ],
+    children: [
+      {
+        element: 'ProcedureDetailPage',
+        path: ':id',
+        title: 'Procedure Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Chỉnh sửa đăng ký',
+          },
+        ],
+      },
+      {
+        element: 'ProcedureDetailPage',
+        path: 'new',
+        title: 'Create Procedure',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo đăng ký mới',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures-step-2',
+    showSidebar: true,
+    nav: 2,
+    icon: FileStackIcon,
+    path: '/registration-processing',
+    title: 'Registration Processing',
+    query: { step: 2 },
+    language: 'en',
+    translations: [
+      {
+        path: '/xu-ly-ho-so',
+        title: 'Xử lý Hồ Sơ',
+        language: 'vi',
+      },
+    ],
+    children: [
+      // now only have detail page to process step 2
+      {
+        element: 'ProcedureDetailPage',
+        path: ':id',
+        title: 'Procedure Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Xử lý hồ sơ',
           },
         ],
       },
@@ -351,6 +514,8 @@ export const getRouteField = <K extends keyof CustomRouteProps>(
   returnKey: K,
   pathname: string
 ): CustomRouteProps[K] | undefined => {
+  if (pathname === '/') return ROUTES.find((route) => route.path === '/')?.[returnKey]
+
   const path = pathname.replace('/', '')
   const route = ROUTES.find((route) => route.path.includes(path))
   if (!route) return undefined

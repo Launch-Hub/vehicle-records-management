@@ -1,8 +1,12 @@
 {
   "name": "vehicle-records-management",
-  "version": "1.0.1.42",
+  "version": "1.1.8",
   "description": "vehicle-records-management",
   "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "start:db": "start-localdb.bat",
     "stop:db": "stop-localdb.bat",
@@ -31,5 +35,8 @@
   "homepage": "https://github.com/Launch-Hub/vehicle-records-management#readme",
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
   }
 }

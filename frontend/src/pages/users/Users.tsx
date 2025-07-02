@@ -1,16 +1,17 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import api from '@/lib/axios'
+import { userService } from '@/lib/services/users'
 import type { User } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
-import { UserDataTable } from '@/components/page/users/table'
-import { getTableLabel } from '@/constants/dictionary'
-import { joinPath } from '@/lib/utils'
+import { getLabel, getTableLabel } from '@/constants/dictionary'
+import { joinPath, exportToExcel } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { ColumnDef } from '@tanstack/react-table'
 import { USER_STATUSES } from '@/constants/general'
 import { Dot } from 'lucide-react'
+import { useLoader } from '@/contexts/loader'
+import { DataTable } from '@/components/shared/list-view/table'
 
 const columns: ColumnDef<User>[] = [
   {
@@ -73,13 +74,14 @@ export default function UsersPage() {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const loader = useLoader()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const response = await api.get('/users', { params: { search, ...pagination } })
-      if (response.data) {
-        const { total, items } = response.data
+      const response = await userService.getList({ search, ...pagination })
+      if (response) {
+        const { total, items } = response
         setTotal(total)
         setData(items)
       }
@@ -89,10 +91,10 @@ export default function UsersPage() {
     } finally {
       setIsFetching(false)
     }
-  }
+  }, [search, pagination])
 
   const handleSearch = (searchTerm: string) => {
-    if (searchTerm === search && !searchTerm) return
+    if (!search && !searchTerm) return
     setSearch((_) => searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
   }
@@ -121,19 +123,44 @@ export default function UsersPage() {
     navigate(`${joinPath(location.pathname, user._id)}?copy=true`)
   }
 
-  const handleDelete = (id: string) => {
-    // Implement as needed
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+
+    loader.show()
+    try {
+      await userService.delete(id)
+      toast.success('Xóa người dùng thành công.')
+      // Refresh the data
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa người dùng. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
+  }
+
+  const handleExport = async (rows: User[], exportColumns: { key: string; label: string }[]) => {
+    const filename = 'danh-sach-nguoi-dung.xlsx'
+    return await exportToExcel({
+      data: rows,
+      filename,
+      columns: exportColumns,
+    })
   }
 
   useEffect(() => {
     fetchData()
-  }, [search, pagination])
+  }, [fetchData])
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <UserDataTable
+          <DataTable
             loading={isFetching}
             total={total}
             data={data}
@@ -144,6 +171,7 @@ export default function UsersPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            onExport={handleExport}
           />
         </div>
       </div>

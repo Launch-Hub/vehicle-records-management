@@ -1,19 +1,13 @@
 const { User } = require("../models/user");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+const { hashPassword } = require("../utils/helper");
 
-const {
-  JWT_SECRET,
-  JWT_REFRESH_SECRET,
-  JWT_EXPIRY,
-  JWT_REFRESH_EXPIRY,
-  SALT_OR_ROUND,
-} = require("../constants");
+const { JWT_SECRET, JWT_REFRESH_SECRET, JWT_EXPIRY, JWT_REFRESH_EXPIRY } = require("../constants");
 
 exports.register = async (req, res) => {
   const { username, email, password, roles, permissions = {} } = req.body;
 
-  const passwordHash = await bcrypt.hash(password, SALT_OR_ROUND);
+  const passwordHash = await hashPassword(password);
   const user = new User({ username, email, passwordHash, roles, permissions });
 
   try {
@@ -48,8 +42,12 @@ exports.login = async (req, res) => {
       id: user._id,
       name: user.name,
       avatar: user.avatar,
+      username: user.username,
       email: user.email,
-      roles: user.roles,
+      phone: user.phone,
+      assignedUnit: user.assignedUnit,
+      serviceNumber: user.serviceNumber,
+      // roles: user.roles,
       permissions: user.permissions,
       isAdmin: user.isAdmin,
     },
@@ -69,7 +67,22 @@ exports.refresh = async (req, res) => {
       expiresIn: JWT_EXPIRY,
     });
 
-    res.json({ accessToken: newAccessToken });
+    res.json({
+      accessToken: newAccessToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        username: user.username,
+        email: user.email,
+        phone: user.phone,
+        assignedUnit: user.assignedUnit,
+        serviceNumber: user.serviceNumber,
+        // roles: user.roles,
+        permissions: user.permissions,
+        isAdmin: user.isAdmin,
+      },
+    });
   } catch (err) {
     return res.status(401).json({ error: "Invalid or expired refresh token." });
   }
