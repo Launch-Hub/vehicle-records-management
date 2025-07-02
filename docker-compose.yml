@@ -40,7 +40,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - /var/www/uploads:/app/public/vrm-bucket
+      - uploads_data:/app/public/vrm-bucket
     env_file:
       - .env # Global (project root)
       - ./backend/.env # Backend-specific
@@ -81,6 +81,8 @@ services:
 
 volumes:
   mongo_data:
+    external: true
+  uploads_data:
     external: true
   # minio_data:
   #   external: true
