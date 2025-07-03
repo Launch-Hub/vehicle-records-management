@@ -11,7 +11,13 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { useLoader } from '@/contexts/loader'
 import { DataTable } from '@/components/shared/list-view/table'
 import BulkCreateActionTypes from '@/components/page/action-types/bulk-create'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 
 const columns: ColumnDef<ActionType>[] = [
@@ -131,11 +137,11 @@ export default function ActionTypesPage() {
     loader.show()
     try {
       await actionTypeService.delete(id)
-      toast.success('Xóa loại hành động thành công.')
+      toast.success('Xóa hạng mục thành công.')
       fetchData()
     } catch (error) {
       console.error(error)
-      toast.error('Không thể xóa loại hành động. Vui lòng thử lại sau.')
+      toast.error('Không thể xóa hạng mục. Vui lòng thử lại sau.')
     } finally {
       loader.hide()
     }
@@ -179,13 +185,18 @@ export default function ActionTypesPage() {
             </Tabs>
             <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
               <DialogTrigger asChild>
-                <Button variant="outline">Tạo nhiều loại hành động</Button>
+                <Button variant="outline">Tạo hàng loạt</Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="min-w-[90%] lg:min-w-[80%] xl:min-w-[60%] !max-w-2xl">
                 <DialogHeader>
-                  <DialogTitle>Tạo nhiều loại hành động</DialogTitle>
+                  <DialogTitle>Tạo hạng mục hàng loạt</DialogTitle>
                 </DialogHeader>
-                <BulkCreateActionTypes onSuccess={() => { setBulkDialogOpen(false); fetchData(); }} />
+                <BulkCreateActionTypes
+                  onSuccess={() => {
+                    setBulkDialogOpen(false)
+                    fetchData()
+                  }}
+                />
               </DialogContent>
             </Dialog>
           </div>

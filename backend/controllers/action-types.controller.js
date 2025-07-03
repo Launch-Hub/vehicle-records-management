@@ -80,7 +80,7 @@ exports.createBulk = async (req, res) => {
     if (!Array.isArray(actionTypes) || actionTypes.length === 0) {
       return res.status(400).json({
         error: true,
-        message: "Danh sách loại hành động không hợp lệ.",
+        message: "Danh sách hạng mục không hợp lệ.",
       });
     }
 
@@ -89,7 +89,7 @@ exports.createBulk = async (req, res) => {
       if (!actionType.name || !actionType.step || !actionType.toStep || !actionType.order) {
         return res.status(400).json({
           error: true,
-          message: "Thiếu thông tin bắt buộc cho loại hành động.",
+          message: "Thiếu thông tin bắt buộc cho hạng mục.",
         });
       }
     }
@@ -103,7 +103,7 @@ exports.createBulk = async (req, res) => {
       const duplicateNames = existingItems.map(item => `${item.name} (bước ${item.step})`);
       return res.status(409).json({
         error: true,
-        message: `Các loại hành động sau đã tồn tại: ${duplicateNames.join(', ')}`,
+        message: `Các hạng mục sau đã tồn tại: ${duplicateNames.join(', ')}`,
       });
     }
 
@@ -112,7 +112,7 @@ exports.createBulk = async (req, res) => {
 
     res.locals.documentId = results.map(r => r._id); // ✅ required for activity logger
     res.status(201).json({
-      message: `Đã tạo thành công ${results.length} loại hành động.`,
+      message: `Đã tạo thành công ${results.length} hạng mục.`,
       items: results
     });
   } catch (err) {

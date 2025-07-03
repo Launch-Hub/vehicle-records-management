@@ -26,7 +26,7 @@ export default function ActionTypeDetailPage() {
 
   useEffect(() => {
     setTitle(
-      isCreating ? 'Tạo loại hành động mới' : isCopying ? 'Sao chép loại hành động' : 'Chỉnh sửa loại hành động'
+      isCreating ? 'Tạo hạng mục mới' : isCopying ? 'Sao chép hạng mục' : 'Chỉnh sửa hạng mục'
     )
     if (isCreating) return
 
@@ -42,7 +42,7 @@ export default function ActionTypeDetailPage() {
         }
       } catch (err) {
         console.error(err)
-        toast.error('Lỗi khi tải dữ liệu loại hành động.')
+        toast.error('Lỗi khi tải dữ liệu hạng mục.')
         navigate(-1)
       } finally {
         loader.hide()
@@ -56,10 +56,10 @@ export default function ActionTypeDetailPage() {
     try {
       if (action === 'create') {
         await api.post('/action-types', data)
-        toast.success('Tạo loại hành động thành công.')
+        toast.success('Tạo hạng mục thành công.')
       } else {
         await api.put(`/action-types/${id}`, data)
-        toast.success('Cập nhật loại hành động thành công.')
+        toast.success('Cập nhật hạng mục thành công.')
       }
       navigate(-1)
     } catch (err) {

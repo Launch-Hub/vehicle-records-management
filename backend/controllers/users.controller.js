@@ -279,7 +279,7 @@ exports.mockCreate = async (_, res) => {
     const bulk = [];
 
     for (const user of mock_users) {
-      const { username, email } = user;
+      const { username, email, password } = user;
 
       // Check for duplicates by username or email
       const exists = await User.findOne({
