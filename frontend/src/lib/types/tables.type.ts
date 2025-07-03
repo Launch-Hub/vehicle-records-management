@@ -58,7 +58,7 @@ export interface VehicleRecordProps {
 }
 export type VehicleRecord = VehicleRecordProps
 
-export interface ProcedureStepProps {
+interface ProcedureStepProps {
   _id?: string
   order: number
   step: number
@@ -71,14 +71,16 @@ export interface ProcedureStepProps {
   createdAt?: Date
   updatedAt?: Date
 }
+export type ProcedureStep = ProcedureStepProps
 
-export interface ProcedureProps {
+interface ProcedureProps {
   _id: string
-  recordId: string | VehicleRecordProps
-  bulkId?: string | BulkProps
+  recordId: string
+  bulkId?: string
   registrationType: string
-  steps: ProcedureStepProps[]
-  status: 'pending' | 'processing' | 'completed' | 'rejected' | 'cancelled' | 'archived'
+  steps: ProcedureStep[]
+  currentStep: number
+  status: 'pending' | 'processing' | 'completed' | 'cancelled'
   note?: string
   dueDate?: Date
   completedAt?: Date
@@ -87,8 +89,8 @@ export interface ProcedureProps {
   updatedAt?: Date
   // for store in the client only
   _tempRecord?: VehicleRecordProps
+  _tempBulk?: BulkProps
 }
-
 export type Procedure = ProcedureProps
 
 export interface BulkProps {
@@ -100,10 +102,9 @@ export interface BulkProps {
   createdAt?: Date
   updatedAt?: Date
 }
-
 export type Bulk = BulkProps
 
-export interface ActionTypeProps {
+interface ActionTypeProps {
   _id: string
   order: number
   name: string
@@ -112,5 +113,4 @@ export interface ActionTypeProps {
   createdAt?: Date
   updatedAt?: Date
 }
-
 export type ActionType = ActionTypeProps

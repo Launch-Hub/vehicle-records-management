@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Trash2, PlusCircle } from 'lucide-react'
-import type { Procedure, ProcedureStepProps, VehicleRecord, Bulk } from '@/lib/types/tables.type'
+import type { Procedure, ProcedureStep, VehicleRecord, Bulk } from '@/lib/types/tables.type'
 import api from '@/lib/axios'
 import {
   Command,
@@ -67,13 +67,14 @@ export default function ProcedureForm({
       recordId: '',
       bulkId: undefined,
       registrationType: '',
+      currentStep: 1,
       steps: [],
       dueDate: new Date(new Date().getTime() + 48 * 60 * 60 * 1000),
       status: 'pending',
     },
   })
 
-  const [steps, setSteps] = useState<ProcedureStepProps[]>(initialData?.steps || [])
+  const [steps, setSteps] = useState<ProcedureStep[]>(initialData?.steps || [])
   const [vehicleRecords, setVehicleRecords] = useState<VehicleRecord[]>([])
   const [openRecordSelect, setOpenRecordSelect] = useState(false)
   const [recordPagination, setRecordPagination] = useState<PaginationProps>({
@@ -95,7 +96,7 @@ export default function ProcedureForm({
     email: '',
     address: '',
     note: '',
-    vehicleType: 'Xe con',
+    vehicleType: 'Ô tô',
   })
   const [existingRecord, setExistingRecord] = useState<VehicleRecord | null>(null)
   const [isCreatingRecord, setIsCreatingRecord] = useState(false)
@@ -212,7 +213,7 @@ export default function ProcedureForm({
           email: record.email || '',
           address: record.address || '',
           note: record.note || '',
-          vehicleType: record.vehicleType || 'Xe con',
+          vehicleType: record.vehicleType || 'Ô tô',
         })
       } else {
         setExistingRecord(null)
@@ -229,7 +230,7 @@ export default function ProcedureForm({
           email: '',
           address: '',
           note: '',
-          vehicleType: 'Xe con',
+          vehicleType: 'Ô tô',
         }))
       }
     } catch (error) {
@@ -335,7 +336,7 @@ export default function ProcedureForm({
   }
 
   const addStep = () => {
-    const newStep: ProcedureStepProps = {
+    const newStep: ProcedureStep = {
       order: steps.length + 1,
       step: steps.length + 1,
       title: '',
@@ -351,7 +352,7 @@ export default function ProcedureForm({
     setSteps(steps.filter((_, i) => i !== index))
   }
 
-  const updateStep = (index: number, field: keyof ProcedureStepProps, value: any) => {
+  const updateStep = (index: number, field: keyof ProcedureStep, value: any) => {
     const updatedSteps = [...steps]
     updatedSteps[index] = { ...updatedSteps[index], [field]: value }
     setSteps(updatedSteps)
@@ -368,6 +369,27 @@ export default function ProcedureForm({
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="registrationType" className="required">
+                Hạng mục đăng ký
+              </Label>
+              <Select
+                value={watch('registrationType')}
+                onValueChange={(value) => setValue('registrationType', value as any)}
+              >
+                <SelectTrigger id="registrationType" className="w-full">
+                  <SelectValue placeholder="Chọn hạng mục" />
+                </SelectTrigger>
+                <SelectContent>
+                  {actionTypes.map((actionType) => (
+                    <SelectItem key={actionType._id} value={actionType.name}>
+                      {actionType.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {!hideBulkId && (
               <div className="space-y-2 w-full">
                 <Label htmlFor="bulkId">Lần nhập</Label>
@@ -378,7 +400,7 @@ export default function ProcedureForm({
                         variant="outline"
                         role="combobox"
                         aria-expanded={openBulkSelect}
-                        className="w-full justify-between"
+                        className="flex-1 justify-between"
                       >
                         {watch('bulkId')
                           ? bulks.find((b) => b._id === watch('bulkId'))?.name
@@ -439,27 +461,6 @@ export default function ProcedureForm({
                 </div>
               </div>
             )}
-
-            <div className="space-y-2">
-              <Label htmlFor="registrationType" className="required">
-                Hạng mục đăng ký
-              </Label>
-              <Select
-                value={watch('registrationType')}
-                onValueChange={(value) => setValue('registrationType', value as any)}
-              >
-                <SelectTrigger id="registrationType" className="w-full">
-                  <SelectValue placeholder="Chọn hạng mục" />
-                </SelectTrigger>
-                <SelectContent>
-                  {actionTypes.map((actionType) => (
-                    <SelectItem key={actionType._id} value={actionType.name}>
-                      {actionType.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="space-y-2">
               <Label htmlFor="note">Ghi chú</Label>

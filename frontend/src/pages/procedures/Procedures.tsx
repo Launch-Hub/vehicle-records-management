@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import api from '@/lib/axios'
@@ -10,6 +10,8 @@ import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
 import { DataTable } from '@/components/shared/list-view/table'
 import { procedureService } from '@/lib/services/procedures'
+import { recordService } from '@/lib/services/records'
+import { bulkService } from '@/lib/services/bulks'
 
 const statusMap: Record<string, string> = {
   pending: 'Đăng ký mới',
@@ -21,29 +23,67 @@ const statusMap: Record<string, string> = {
   archived: 'Đã lưu trữ',
 }
 
+// Utility hook to fetch and cache record details by ID
+function useRecordDetails(recordId?: string) {
+  const [record, setRecord] = useState<null | { plateNumber: string }>(null)
+  const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    if (!recordId) return
+    let mounted = true
+    setLoading(true)
+    recordService.getOne(recordId)
+      .then((data) => { if (mounted) setRecord(data) })
+      .catch(() => { if (mounted) setRecord(null) })
+      .finally(() => { if (mounted) setLoading(false) })
+    return () => { mounted = false }
+  }, [recordId])
+  return { record, loading }
+}
+
+// Utility hook to fetch and cache bulk details by ID
+function useBulkDetails(bulkId?: string) {
+  const [bulk, setBulk] = useState<null | { name: string }>(null)
+  const [loading, setLoading] = useState(false)
+  useEffect(() => {
+    if (!bulkId) return
+    let mounted = true
+    setLoading(true)
+    bulkService.getOne(bulkId)
+      .then((data) => { if (mounted) setBulk(data) })
+      .catch(() => { if (mounted) setBulk(null) })
+      .finally(() => { if (mounted) setLoading(false) })
+    return () => { mounted = false }
+  }, [bulkId])
+  return { bulk, loading }
+}
+
+// Utility cell component for record
+function TableRecordCell({ recordId }: { recordId?: string }) {
+  const { record, loading } = useRecordDetails(recordId)
+  if (loading) return <span className="text-muted-foreground">Đang tải...</span>
+  if (record && record.plateNumber) return <span className="text-muted-foreground">{record.plateNumber}</span>
+  return <span className="text-muted-foreground">-</span>
+}
+
+// Utility cell component for bulk
+function TableBulkCell({ bulkId }: { bulkId?: string }) {
+  const { bulk, loading } = useBulkDetails(bulkId)
+  if (loading) return <span className="text-muted-foreground">Đang tải...</span>
+  if (bulk && bulk.name) return <span className="text-muted-foreground">{bulk.name}</span>
+  return <span className="text-muted-foreground">-</span>
+}
+
 const columns: ColumnDef<Procedure>[] = [
   {
     accessorKey: 'recordId',
     header: () => <div>Hồ sơ</div>,
-    cell: (info: any) => {
-      const record = info.getValue()
-      if (typeof record === 'object' && record?.plateNumber) {
-        return <span className="text-muted-foreground">{record.plateNumber}</span>
-      }
-      return <span className="text-muted-foreground">-</span>
-    },
+    cell: (info: any) => <TableRecordCell recordId={info.getValue() as string} />,
     minSize: 120,
   },
   {
     accessorKey: 'bulkId',
     header: () => <div>Lô</div>,
-    cell: (info: any) => {
-      const bulk = info.getValue()
-      if (typeof bulk === 'object' && bulk?.name) {
-        return <span className="text-muted-foreground">{bulk.name}</span>
-      }
-      return <span className="text-muted-foreground">-</span>
-    },
+    cell: (info: any) => <TableBulkCell bulkId={info.getValue() as string} />,
     size: 100,
   },
   {

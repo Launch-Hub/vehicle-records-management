@@ -58,7 +58,7 @@ export default function VehicleRecordForm({
       email: '',
       address: '',
       note: '',
-      vehicleType: 'Xe con',
+      vehicleType: 'Ô tô',
       issuerId: '',
       status: 'idle',
       archiveAt: {
