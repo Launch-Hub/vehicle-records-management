@@ -19,7 +19,7 @@ export const TABLE_DICTIONARY = {
   address: 'Địa chỉ',
   issuer: 'Người tiếp nhận',
   registrationType: 'Hạng mục đăng ký',
-  attachmentUrls: 'Tài liệu đính kèm',
+  vehicleType: 'Phân loại xe',
   archiveAt: 'Vị trí lưu trữ',
   description: 'Mô tả',
   note: 'Ghi chú',
@@ -56,6 +56,7 @@ export function getPermissionLabel(key: string): string {
 export const DICTIONARY = {
   ...TABLE_DICTIONARY,
   // User
+  attachments: 'Tài liệu đính kèm',
   avatar: 'Ảnh đại diện',
 }
 export function getLabel(key: string): string {

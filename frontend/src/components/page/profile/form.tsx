@@ -10,7 +10,7 @@ import type { User } from '@/lib/types/tables.type'
 import { processImage } from '@/lib/utils'
 
 interface ProfileFormProps {
-  initialData: User
+  initialData?: User
   isCopying?: boolean
   isSelfEdit?: boolean
   onSubmit: (data: Omit<User, '_id'>) => void

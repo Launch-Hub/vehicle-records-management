@@ -542,6 +542,24 @@ export default function ProcedureForm({
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="vehicleType" className="required">
+                {getLabel('vehicleType')}
+              </Label>
+              <Input
+                id="vehicleType"
+                value={recordFields.vehicleType}
+                onChange={(e) =>
+                  setRecordFields((prev) => ({
+                    ...prev,
+                    vehicleType: e.target.value,
+                  }))
+                }
+                onBlur={handlePlateNumberBlur}
+                placeholder="Nhập biển số xe (chỉ bao gồm chữ và số)..."
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="color" className="w-full flex justify-between items-center mb-[2px]">
                 <span>{getLabel('color')}</span>
                 <div className="flex items-center space-x-2">
@@ -647,7 +665,7 @@ export default function ProcedureForm({
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
+            <div className="space-y-2">
               <Label htmlFor="address">{getLabel('address')}</Label>
               <Input
                 id="address"
