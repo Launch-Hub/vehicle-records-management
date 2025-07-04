@@ -1,13 +1,10 @@
 import { lazy } from 'react'
 import {
   FileStackIcon,
-  FolderIcon,
   LayoutDashboardIcon,
   UsersIcon,
-  PackageIcon,
   type LucideIcon,
   HistoryIcon,
-  SettingsIcon,
   ListTodoIcon,
   HandCoinsIcon,
   FileClockIcon,
@@ -31,7 +28,7 @@ import BulksPage from '@/pages/bulks/Bulks'
 import BulkDetailPage from '@/pages/bulks/BulkDetail'
 import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
-import LogsPage from '@/pages/logs/Logs'
+import LogsPage from '@/pages/activities/Logs'
 import { DEFAULT_LANG } from './constants/env'
 
 export type PageComponent =
@@ -130,7 +127,7 @@ export const PAGE_MAP = {
     default: 'eager',
   },
   LogsPage: {
-    lazy: lazy(() => import('@/pages/logs/Logs')), // lazy-loaded
+    lazy: lazy(() => import('@/pages/activities/Logs')), // lazy-loaded
     component: LogsPage,
     default: 'eager',
   },

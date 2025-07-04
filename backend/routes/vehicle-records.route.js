@@ -10,6 +10,12 @@ router.post("/seeds", controller.mockCreate);
 // read
 router.get("/", authenticateToken, requirePermission(resource, "read"), controller.getList);
 router.get("/:id", authenticateToken, requirePermission(resource, "read"), controller.getOne);
+router.get(
+  "/search",
+  authenticateToken,
+  requirePermission(resource, "read"),
+  controller.searchByPlateNumber
+);
 // write
 router.post(
   "/",

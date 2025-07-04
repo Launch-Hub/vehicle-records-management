@@ -165,3 +165,19 @@ exports.mockCreate = async (req, res) => {
     res.status(400).json({ error: true, message: err.message });
   }
 };
+
+exports.searchByPlateNumber = async (req, res) => {
+  try {
+    const { plateNumber } = req.query;
+    if (!plateNumber) {
+      return res.status(400).json({ message: "plateNumber is required" });
+    }
+    const record = await VehicleRecord.findOne({ plateNumber });
+    if (!record) {
+      return res.status(404).json({ message: "Record not found" });
+    }
+    res.json(record);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
