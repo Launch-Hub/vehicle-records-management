@@ -9,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import clsx from 'clsx'
 
 export function NavSecondary({
   items,
@@ -27,16 +28,30 @@ export function NavSecondary({
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
-                  <item.icon />
-                  <span>{item.title}</span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const isActive =
+              item.url === '/'
+                ? location.pathname == item.url
+                : location.pathname.startsWith(item.url)
+            return (
+              <SidebarMenuItem
+                key={item.title}
+                className={clsx(
+                  'flex w-full items-center justify-between rounded-md text-sm transition-colors duration-300 ease-in-out',
+                  isActive
+                    ? 'bg-primary text-primary-foreground font-semibold'
+                    : 'hover:bg-muted/50'
+                )}
+              >
+                <SidebarMenuButton asChild>
+                  <a href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

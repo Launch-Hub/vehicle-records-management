@@ -1,4 +1,4 @@
-const { Procedure } = require("../models/procedure");
+const { Procedure, procedureStatuses } = require("../models/procedure");
 const { parsePagination } = require("../utils/helper");
 
 exports.getList = async (req, res) => {
@@ -67,13 +67,14 @@ exports.create = async (req, res) => {
     if (existingItem) {
       return res.status(409).json({
         error: true,
-        message: "Đăng ký này đã tồn tại cho hồ sơ và lô này.",
+        message: "Đăng ký này đã tồn tại cho hồ sơ và Lần nhập này.",
       });
     }
 
     const result = await Procedure.create(req.body);
 
     res.locals.documentId = result._id; // ✅ required for activity logger
+    res.locals.activityDescription = `Tạo hồ sơ ${result.registrationType} - trạng thái: ${procedureStatuses[result.status] || result.status}`;
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
@@ -82,10 +83,21 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
+    // Get the old document to compare status
+    const oldDoc = await Procedure.findById(req.params.id);
+    if (!oldDoc) return res.status(404).json({ error: true, message: "Not found" });
+
     const result = await Procedure.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
+    
+    // Create description with old and new status if status changed
+    const oldStatus = procedureStatuses[oldDoc.status] || oldDoc.status;
+    const newStatus = procedureStatuses[result.status] || result.status;
+    const statusChange = oldDoc.status !== result.status ? ` từ ${oldStatus}` : '';
+    res.locals.activityDescription = `Chỉnh sửa hồ sơ ${result.registrationType} - trạng thái: ${newStatus}${statusChange}`;
+    
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
@@ -98,6 +110,7 @@ exports.delete = async (req, res) => {
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
+    res.locals.activityDescription = `Xoá hồ sơ ${result.registrationType} - trạng thái: ${procedureStatuses[result.status] || result.status}`;
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });

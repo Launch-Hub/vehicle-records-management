@@ -16,7 +16,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { User } from '@/lib/types/tables.type'
-import { $generalPerms, ROLES } from '@/constants/general'
+import { $generalPerms, $permissionOrigin, DEFAULT_PERMISSION } from '@/constants/general'
 import { processImage } from '@/lib/utils'
 import {
   Form,
@@ -53,7 +53,7 @@ export default function UserForm({
       serviceNumber: '',
       password: '',
       avatar: '',
-      permissions: ROLES.find((e) => e.name === 'default')?.permissions || {},
+      permissions: Object.fromEntries(DEFAULT_PERMISSION.map((perm) => [perm.key, perm.default])),
       status: 'active',
       ...initialData,
     },
@@ -61,6 +61,9 @@ export default function UserForm({
 
   const [showPassword, setShowPassword] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(initialData?.avatar || null)
+  const [selectedResources, setSelectedResources] = useState<string[]>(
+    Object.keys(initialData?.permissions || {})
+  )
 
   const handleAvatarChange = (file: File) => {
     processImage(file, (base64) => {
@@ -82,8 +85,18 @@ export default function UserForm({
     if (initialData) {
       form.reset(initialData)
       setAvatarPreview(initialData.avatar || null)
+      setSelectedResources(Object.keys(initialData.permissions || {}))
     }
   }, [initialData, form])
+
+  // Update permissions in form when selectedResources changes
+  useEffect(() => {
+    const perms: Record<string, { read: boolean; write: boolean; delete: boolean }> = {}
+    selectedResources.forEach((resource) => {
+      perms[resource] = { read: true, write: true, delete: true }
+    })
+    form.setValue('permissions', perms)
+  }, [selectedResources])
 
   const isEditing = initialData && !isCopying
 
@@ -125,22 +138,6 @@ export default function UserForm({
                 Xoá
               </Button>
             )}
-          </div>
-
-          <div className="col-span-2 space-y-2">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{getLabel('name')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
 
           <div className="space-y-2">
@@ -200,6 +197,22 @@ export default function UserForm({
           <div className="space-y-2">
             <FormField
               control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{getLabel('name')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
@@ -222,6 +235,38 @@ export default function UserForm({
                   <FormLabel className="required">{getLabel('phone')}</FormLabel>
                   <FormControl>
                     <Input type="phone" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="assignedUnit"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="required">{getLabel('assignedUnit')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormField
+              control={form.control}
+              name="serviceNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="required">{getLabel('serviceNumber')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -258,76 +303,31 @@ export default function UserForm({
               />
             </div>
           )}
-
-          <div className="space-y-2">
-            <FormField
-              control={form.control}
-              name="assignedUnit"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="required">{getLabel('assignedUnit')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <FormField
-              control={form.control}
-              name="serviceNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="required">{getLabel('serviceNumber')}</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
         </div>
 
         {/* Permissions Section */}
         <div className="space-y-4">
-          <Label>Quyền truy cập</Label>
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(form.watch('permissions') || {})
-              .filter(([module]) => !$generalPerms.includes(module))
-              .map(([module, perms]) => (
-                <div key={module} className="space-y-2 p-4 rounded-lg bg-muted">
-                  <Label className="capitalize text-secondary font-semibold">
-                    {getPermissionLabel(module) || module}
-                  </Label>
-                  <div className="flex flex-col gap-2">
-                    {Object.entries(perms)
-                      .filter(([p]) => p !== '_id')
-                      .map(([perm, value]) => (
-                        <div key={perm} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`${module}-${perm}`}
-                            checked={!!value}
-                            onCheckedChange={(checked) => {
-                              form.setValue(
-                                `permissions.${module}.${perm as 'read' | 'write' | 'delete'}`,
-                                !!checked
-                              )
-                            }}
-                          />
-                          <label
-                            htmlFor={`${module}-${perm}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {getPermissionLabel(perm) ||
-                              perm.charAt(0).toUpperCase() + perm.slice(1)}
-                          </label>
-                        </div>
-                      ))}
-                  </div>
+          <Label>Quyền thực hiện</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {$permissionOrigin
+              .filter((resource) => !$generalPerms.includes(resource))
+              .map((resource) => (
+                <div key={resource} className="flex items-center space-x-2 p-2 bg-muted rounded">
+                  <Checkbox
+                    id={`resource-${resource}`}
+                    checked={selectedResources.includes(resource)}
+                    onCheckedChange={(checked) => {
+                      setSelectedResources((prev) =>
+                        checked ? [...prev, resource] : prev.filter((r) => r !== resource)
+                      )
+                    }}
+                  />
+                  <label
+                    htmlFor={`resource-${resource}`}
+                    className="capitalize text-secondary font-semibold"
+                  >
+                    {getPermissionLabel(resource) || resource}
+                  </label>
                 </div>
               ))}
           </div>

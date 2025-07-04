@@ -129,6 +129,12 @@ export default function UsersPage() {
       return
     }
 
+    const isAdmin = data.find((u) => u._id === id)?.isAdmin
+    if (isAdmin) {
+      toast.error('Quản trị viên không thể bị xoá!')
+      return
+    }
+    
     loader.show()
     try {
       await userService.delete(id)

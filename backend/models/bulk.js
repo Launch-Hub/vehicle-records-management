@@ -15,4 +15,4 @@ const bulkSchema = new mongoose.Schema(
 
 const Bulk = mongoose.model("Bulk", bulkSchema);
 
-module.exports = { bulkSchema, Bulk }; // Lô Hồ sơ Đăng ký
+module.exports = { bulkSchema, Bulk }; // Lần nhập Hồ sơ Đăng ký

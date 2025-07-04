@@ -64,7 +64,7 @@ export default function BulkDetailPage() {
   const [actionTypes, setActionTypes] = useState<any[]>([])
 
   useEffect(() => {
-    const resource = 'lô'
+    const resource = 'Lần nhập'
     setTitle(
       isCreating
         ? `Tạo ${resource} mới`
@@ -194,7 +194,7 @@ export default function BulkDetailPage() {
         }
       }
 
-      toast.success(defaultAction === 'create' ? 'Tạo lô thành công.' : 'Cập nhật lô thành công.')
+      toast.success(defaultAction === 'create' ? 'Tạo Lần nhập thành công.' : 'Cập nhật Lần nhập thành công.')
       navigate(-1)
     } catch (err) {
       console.error(err)
@@ -395,10 +395,10 @@ export default function BulkDetailPage() {
             {/* Bulk Info Card */}
             <div className="flex flex-col gap-1">
               <div>
-                <strong>Mã lô:</strong> {bulkData.code}
+                <strong>Mã Lần nhập:</strong> {bulkData.code}
               </div>
               <div>
-                <strong>Tên lô:</strong> {bulkData.name}
+                <strong>Tên Lần nhập:</strong> {bulkData.name}
               </div>
               <div>
                 <strong>Ghi chú:</strong> {bulkData.note || 'Không có'}

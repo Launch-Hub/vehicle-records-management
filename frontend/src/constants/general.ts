@@ -20,113 +20,57 @@ export const USER_STATUSES = [
     value: 'inactive',
   },
 ]
-const PermissionOrigin = [
-  'general',
-  'settings',
-  'users',
+
+export const $adminOnlyPerms = ['users']
+export const $generalPerms = ['general', 'settings', 'reports']
+export const $permissionOrigin = [
+  // 'general',
+  // 'settings',
+  // 'users',
   'records',
-  'procedures',
   'bulks',
   'action_types',
   'activites',
+  'procedures',
+  //
+  'procedures_1',
+  'procedures_2',
+  'procedures_3',
+  'procedures_4',
+  'procedures_5',
 ]
-export const $generalPerms = ['general', 'settings', 'reports']
-export const PERMISSIONS = PermissionOrigin.map((e) => {
-  if ($generalPerms.includes(e))
+
+export const DEFAULT_PERMISSION = [...$permissionOrigin, ...$adminOnlyPerms, ...$generalPerms].map(
+  (e) => {
+    if ($generalPerms.includes(e) || $adminOnlyPerms.includes(e))
+      return {
+        key: e,
+        label: getPermissionLabel(e),
+        canChange: false,
+        default: $adminOnlyPerms.includes(e)
+          ? {
+              read: false,
+              write: false,
+              delete: false,
+            }
+          : {
+              read: true,
+              write: true,
+              delete: true,
+            },
+      }
     return {
       key: e,
       label: getPermissionLabel(e),
-      canChange: false,
+      canChange: true,
       default: {
         read: true,
         write: true,
         delete: true,
       },
     }
-  return {
-    key: e,
-    label: getPermissionLabel(e),
-    canChange: true,
-    default: {
-      read: true,
-      write: true,
-      delete: true,
-    },
   }
-})
-
-export const ROLES = [
-  // {
-  //   name: 'admin',
-  //   permissions: {
-  //     general: {
-  //       read: true,
-  //       write: true,
-  //       delete: true,
-  //     },
-  //     users: {
-  //       read: true,
-  //       write: true,
-  //       delete: true,
-  //     },
-  //     settings: {
-  //       read: true,
-  //       write: true,
-  //       delete: true,
-  //     },
-  //     records: {
-  //       read: true,
-  //       write: true,
-  //       delete: true,
-  //     },
-  //     procedures: {
-  //       read: true,
-  //       write: true,
-  //       delete: true,
-  //     },
-  //     reports: {
-  //       read: true,
-  //       write: true,
-  //       delete: true,
-  //     },
-  //   },
-  // },
-  {
-    name: 'default',
-    permissions: {
-      general: {
-        read: true,
-        write: true,
-        delete: true,
-      },
-      users: {
-        read: false,
-        write: false,
-        delete: false,
-      },
-      settings: {
-        read: true,
-        write: true,
-        delete: true,
-      },
-      records: {
-        read: true,
-        write: true,
-        delete: true,
-      },
-      procedures: {
-        read: true,
-        write: true,
-        delete: true,
-      },
-      reports: {
-        read: true,
-        write: true,
-        delete: true,
-      },
-    },
-  },
-]
+)
 
 export const STEP_TABS = [
   { value: 1, label: 'Tiếp nhận', color: 'bg-blue-500' },

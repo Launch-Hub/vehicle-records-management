@@ -69,6 +69,7 @@ interface DataTableProps<T> {
   total: number
   data: T[]
   columns: ColumnDef<T>[]
+  // actionColumns: [],
   onSearch: (term: string) => void
   onPageChange: (pagination: PaginationProps) => void
   onCreate: () => void
@@ -277,7 +278,7 @@ export function DataTable<T extends Record<string, any>>({
           />
         </div>
         <div className="flex items-center gap-2">
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger
               disabled={!table.getAllColumns().filter((col) => col.getCanHide()).length}
               asChild
@@ -302,7 +303,7 @@ export function DataTable<T extends Record<string, any>>({
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
           <Button variant="outline" size="sm" onClick={onCreate}>
             <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
           </Button>

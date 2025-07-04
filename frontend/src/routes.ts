@@ -27,6 +27,7 @@ import BulksPage from '@/pages/bulks/Bulks'
 import BulkDetailPage from '@/pages/bulks/BulkDetail'
 import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
+import LogsPage from '@/pages/logs/Logs'
 import { DEFAULT_LANG } from './constants/env'
 
 export type PageComponent =
@@ -122,6 +123,11 @@ export const PAGE_MAP = {
   ActionTypeDetailPage: {
     lazy: lazy(() => import('@/pages/action-types/ActionTypeDetail')), // lazy-loaded
     component: ActionTypeDetailPage,
+    default: 'eager',
+  },
+  LogsPage: {
+    lazy: lazy(() => import('@/pages/logs/Logs')), // lazy-loaded
+    component: LogsPage,
     default: 'eager',
   },
 }
@@ -330,7 +336,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //   translations: [
   //     {
   //       path: '/quan-ly-lo',
-  //       title: 'Quản lý Lô Đăng Ký',
+  //       title: 'Quản lý Lần nhập Đăng Ký',
   //       language: 'vi',
   //     },
   //   ],
@@ -343,7 +349,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //       translations: [
   //         {
   //           language: 'vi',
-  //           title: 'Chỉnh sửa lô',
+  //           title: 'Chỉnh sửa Lần nhập',
   //         },
   //       ],
   //     },
@@ -355,7 +361,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //       translations: [
   //         {
   //           language: 'vi',
-  //           title: 'Tạo lô mới',
+  //           title: 'Tạo Lần nhập mới',
   //         },
   //       ],
   //     },
@@ -365,7 +371,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   {
     auth: true,
     element: 'ActionTypesPage',
-    resource: 'action-types',
+    resource: 'action_types',
     showSidebar: true,
     nav: 1,
     icon: ListTodoIcon,
@@ -410,7 +416,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   {
     auth: true,
     element: 'ProceduresPage',
-    resource: 'procedures-step-1',
+    resource: 'procedures_1',
     showSidebar: true,
     nav: 2,
     icon: FileStackIcon,
@@ -421,7 +427,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/tiep-nhan-ho-so',
-        title: 'Tiếp Nhận Hồ Sơ',
+        title: 'Tiếp nhận hồ sơ',
         language: 'vi',
       },
     ],
@@ -434,7 +440,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         translations: [
           {
             language: 'vi',
-            title: 'Chỉnh sửa đăng ký',
+            title: 'Chỉnh sửa tiếp nhận',
           },
         ],
       },
@@ -446,7 +452,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         translations: [
           {
             language: 'vi',
-            title: 'Tạo đăng ký mới',
+            title: 'Tạo hồ sơ mới',
           },
         ],
       },
@@ -456,7 +462,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   {
     auth: true,
     element: 'ProceduresPage',
-    resource: 'procedures-step-2',
+    resource: 'procedures_2',
     showSidebar: true,
     nav: 2,
     icon: FileStackIcon,
@@ -466,24 +472,49 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     language: 'en',
     translations: [
       {
-        path: '/xu-ly-ho-so',
-        title: 'Xử lý Hồ Sơ',
+        path: '/phan-loai-ho-so',
+        title: 'Phân loại hồ sơ',
         language: 'vi',
       },
     ],
-    children: [
-      // now only have detail page to process step 2
+    children: [],
+  },
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures_3',
+    showSidebar: true,
+    nav: 2,
+    icon: FileStackIcon,
+    path: '/payment-process',
+    title: 'Payment Process',
+    query: { step: 3 },
+    language: 'en',
+    translations: [
       {
-        element: 'ProcedureDetailPage',
-        path: ':id',
-        title: 'Procedure Detail',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Xử lý hồ sơ',
-          },
-        ],
+        path: '/thu-phi',
+        title: 'Thu phí',
+        language: 'vi',
+      },
+    ],
+    children: [],
+  },
+
+  {
+    auth: true,
+    element: 'LogsPage',
+    resource: 'activities',
+    showSidebar: true,
+    nav: 1,
+    icon: HistoryIcon,
+    path: '/logs',
+    title: 'Activity Logs',
+    language: 'en',
+    translations: [
+      {
+        path: '/nhat-ky-hoat-dong',
+        title: 'Nhật ký hoạt động',
+        language: 'vi',
       },
     ],
   },
@@ -506,8 +537,16 @@ export const ROUTES = GLOBAL_ROUTES.map((e) => {
   }
 })
 
-export const getRoute = (pathname: string): CustomRouteProps | null => {
-  return ROUTES.find((route) => pathname.startsWith(route.path)) ?? null
+export const getRoute = (
+  pathname: string,
+  queryParams: Record<string, string | number | boolean> = {}
+): CustomRouteProps | undefined => {
+  if (pathname === '/') return ROUTES.find((route) => route.path === '/')
+
+  const path = pathname.replace('/', '')
+  const route = ROUTES.find((route) => route.path.includes(path))
+  if (!route) return undefined
+  return route
 }
 
 export const getRouteField = <K extends keyof CustomRouteProps>(

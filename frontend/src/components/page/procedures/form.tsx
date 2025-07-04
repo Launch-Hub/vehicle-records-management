@@ -329,7 +329,7 @@ export default function ProcedureForm({
         }
       }
 
-      onSubmit({ ...data, recordId, steps: finalSteps, _tempRecord: record })
+      onSubmit({ ...data, recordId, steps: finalSteps })
     } catch (error) {
       console.error('Failed to submit procedure', error)
     }
@@ -501,7 +501,7 @@ export default function ProcedureForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="color" className="required">
+              <Label htmlFor="color">
                 {getLabel('color')}
               </Label>
               <Select
@@ -522,7 +522,7 @@ export default function ProcedureForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="identificationNumber" className="required">
+              <Label htmlFor="identificationNumber">
                 {getLabel('identificationNumber')}
               </Label>
               <Input
@@ -536,7 +536,7 @@ export default function ProcedureForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="engineNumber" className="required">
+              <Label htmlFor="engineNumber">
                 {getLabel('engineNumber')}
               </Label>
               <Input
@@ -684,7 +684,7 @@ export default function ProcedureForm({
 
       <Card>
         <CardHeader>
-          <CardTitle>Ảnh minh chứng cho bước 1 (nếu có)</CardTitle>
+          <CardTitle>Thêm hình ảnh</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

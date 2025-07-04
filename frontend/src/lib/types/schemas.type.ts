@@ -50,8 +50,8 @@ export const VehicleRecordSchema = z.object({
 export type VehicleRecordFormValues = z.infer<typeof VehicleRecordSchema>
 
 export const BulkFormSchema = z.object({
-  code: z.string().min(1, 'Mã lô là bắt buộc'),
-  name: z.string().min(1, 'Tên lô là bắt buộc'),
+  code: z.string().min(1, 'Mã Lần nhập là bắt buộc'),
+  name: z.string().min(1, 'Tên Lần nhập là bắt buộc'),
   size: z.coerce.number().min(0, 'Số lượng phải >= 0'),
   note: z.string().optional(),
 })

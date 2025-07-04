@@ -15,6 +15,7 @@ exports.getList = async (req, res) => {
     assignedUnit: 1,
     serviceNumber: 1,
     status: 1,
+    isAdmin: 1,
   };
 
   try {

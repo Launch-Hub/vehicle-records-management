@@ -1,4 +1,4 @@
-const { DEFAULT_PERMISSIONS } = require(".");
+const { ADMIN_PERMISSIONS } = require(".");
 
 exports.default_admin = {
   username: "admin",
@@ -9,7 +9,7 @@ exports.default_admin = {
   assignedUnit: "PC08",
   serviceNumber: "CS0000",
   roles: ["Quản Trị Viên"],
-  permissions: DEFAULT_PERMISSIONS,
+  permissions: ADMIN_PERMISSIONS,
   isAdmin: true,
 };
 

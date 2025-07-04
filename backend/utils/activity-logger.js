@@ -23,6 +23,7 @@ exports.logActivityMiddleware = (action, resource) => {
           documentId,
           userId: req.user?._id,
           changes: req.body,
+          description: res.locals.activityDescription,
         });
       }
     });

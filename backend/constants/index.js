@@ -12,18 +12,40 @@ const JWT_REFRESH_EXPIRY = "7d"; // refresh token
 const SALT_OR_ROUND = 10; // salt for encrypt
 
 const LIST_FEATURES = [
-  "general",
   "users",
+  "general",
   "settings",
   "records",
   "bulks",
-  "procedures",
   "action_types",
-  "activity_logs",
-  "reports",
+  "activites",
+  "procedures",
+  //
+  "procedures_1",
+  "procedures_2",
+  "procedures_3",
+  "procedures_4",
+  "procedures_5",
 ];
 
 const DEFAULT_PERMISSIONS = LIST_FEATURES.reduce((acc, feature) => {
+  if (feature === "users") {
+    acc[feature] = {
+      read: false,
+      write: false,
+      delete: false,
+    };
+  } else {
+    acc[feature] = {
+      read: true,
+      write: true,
+      delete: true,
+    };
+  }
+  return acc;
+}, {});
+
+const ADMIN_PERMISSIONS = LIST_FEATURES.reduce((acc, feature) => {
   acc[feature] = {
     read: true,
     write: true,

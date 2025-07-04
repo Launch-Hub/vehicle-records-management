@@ -10,6 +10,7 @@ const activityLogSchema = new mongoose.Schema({
   },
   resource: { type: String, required: true },
   documentId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  description: String,
   changes: { type: Object }, // optional: store diffs or full snapshot
   userId: {
     type: mongoose.Schema.Types.ObjectId,

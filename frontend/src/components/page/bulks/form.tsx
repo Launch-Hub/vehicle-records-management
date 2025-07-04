@@ -40,7 +40,7 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
           const dailyIndex = data.count + 1
 
           form.setValue('code', `${codeDate}-${dailyIndex}`)
-          form.setValue('name', `Lô ${dailyIndex} ngày ${nameDate}`)
+          form.setValue('name', `Lần nhập ${dailyIndex} ngày ${nameDate}`)
         } catch (error) {
           console.error('Failed to fetch todays bulk count:', error)
           // Fallback to a random code or let user input manually
@@ -48,7 +48,7 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
           const codeDate = format(now, 'yyyyMMdd')
           const nameDate = format(now, 'dd/MM/yyyy')
           form.setValue('code', `${codeDate}-1`)
-          form.setValue('name', `Lô 1 ngày ${nameDate}`)
+          form.setValue('name', `Lần nhập 1 ngày ${nameDate}`)
         }
       }
       generateDefaultFields()
@@ -80,7 +80,7 @@ export default function BulkForm({ initialData, isCopying, onSubmit, onCancel }:
           <Input
             id="code"
             {...form.register('code')}
-            placeholder="Nhập mã lô"
+            placeholder="Nhập mã Lần nhập"
             className={form.formState.errors.code ? 'border-red-500' : ''}
           />
           {form.formState.errors.code && (

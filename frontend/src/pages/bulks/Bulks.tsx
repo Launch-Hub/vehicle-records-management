@@ -12,13 +12,13 @@ import { DataTable } from '@/components/shared/list-view/table'
 const columns: ColumnDef<Bulk>[] = [
   {
     accessorKey: 'code',
-    header: () => <div>Mã lô</div>,
+    header: () => <div>Mã Lần nhập</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     minSize: 120,
   },
   {
     accessorKey: 'name',
-    header: () => <div>Tên lô</div>,
+    header: () => <div>Tên Lần nhập</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 150,
   },

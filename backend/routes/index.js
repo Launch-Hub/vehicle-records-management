@@ -11,6 +11,7 @@ const bulkRoutes = require("./bulks.route");
 const procedureRoutes = require("./procedures.route");
 const dashboardRoutes = require("./dashboard.route");
 const actionTypeRoutes = require("./action-types.route");
+const logRoutes = require("./log.route");
 
 // Mount routes on the sub-paths
 router.use("/g", generalRoutes);
@@ -22,5 +23,6 @@ router.use("/bulks", bulkRoutes);
 router.use("/procedures", procedureRoutes);
 router.use("/dashboard", dashboardRoutes);
 router.use("/action-types", actionTypeRoutes);
+router.use("/logs", logRoutes);
 
 module.exports = router;

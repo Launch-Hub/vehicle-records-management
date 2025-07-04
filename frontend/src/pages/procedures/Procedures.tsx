@@ -31,11 +31,20 @@ function useRecordDetails(recordId?: string) {
     if (!recordId) return
     let mounted = true
     setLoading(true)
-    recordService.getOne(recordId)
-      .then((data) => { if (mounted) setRecord(data) })
-      .catch(() => { if (mounted) setRecord(null) })
-      .finally(() => { if (mounted) setLoading(false) })
-    return () => { mounted = false }
+    recordService
+      .getOne(recordId)
+      .then((data) => {
+        if (mounted) setRecord(data)
+      })
+      .catch(() => {
+        if (mounted) setRecord(null)
+      })
+      .finally(() => {
+        if (mounted) setLoading(false)
+      })
+    return () => {
+      mounted = false
+    }
   }, [recordId])
   return { record, loading }
 }
@@ -48,11 +57,20 @@ function useBulkDetails(bulkId?: string) {
     if (!bulkId) return
     let mounted = true
     setLoading(true)
-    bulkService.getOne(bulkId)
-      .then((data) => { if (mounted) setBulk(data) })
-      .catch(() => { if (mounted) setBulk(null) })
-      .finally(() => { if (mounted) setLoading(false) })
-    return () => { mounted = false }
+    bulkService
+      .getOne(bulkId)
+      .then((data) => {
+        if (mounted) setBulk(data)
+      })
+      .catch(() => {
+        if (mounted) setBulk(null)
+      })
+      .finally(() => {
+        if (mounted) setLoading(false)
+      })
+    return () => {
+      mounted = false
+    }
   }, [bulkId])
   return { bulk, loading }
 }
@@ -61,7 +79,8 @@ function useBulkDetails(bulkId?: string) {
 function TableRecordCell({ recordId }: { recordId?: string }) {
   const { record, loading } = useRecordDetails(recordId)
   if (loading) return <span className="text-muted-foreground">Đang tải...</span>
-  if (record && record.plateNumber) return <span className="text-muted-foreground">{record.plateNumber}</span>
+  if (record && record.plateNumber)
+    return <span className="text-muted-foreground">{record.plateNumber}</span>
   return <span className="text-muted-foreground">-</span>
 }
 
@@ -78,18 +97,18 @@ const columns: ColumnDef<Procedure>[] = [
     accessorKey: 'recordId',
     header: () => <div>Hồ sơ</div>,
     cell: (info: any) => <TableRecordCell recordId={info.getValue() as string} />,
-    minSize: 120,
-  },
-  {
-    accessorKey: 'bulkId',
-    header: () => <div>Lô</div>,
-    cell: (info: any) => <TableBulkCell bulkId={info.getValue() as string} />,
-    size: 100,
+    minSize: 200,
   },
   {
     accessorKey: 'registrationType',
     header: () => <div>Hạng mục đăng ký</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
+    size: 150,
+  },
+  {
+    accessorKey: 'bulkId',
+    header: () => <div>Lần nhập</div>,
+    cell: (info: any) => <TableBulkCell bulkId={info.getValue() as string} />,
     size: 120,
   },
   {
@@ -114,9 +133,17 @@ export default function ProceduresPage() {
   const navigate = useNavigate()
   const loader = useLoader()
 
-  // Get the step from the route config's query field
-  const route = getRoute(location.pathname)
-  const step = route?.query?.step
+  // Parse query params from the address bar
+  const searchParams = new URLSearchParams(location.search)
+  const queryParams: Record<string, string> = {}
+  searchParams.forEach((value, key) => {
+    queryParams[key] = value
+  })
+
+  // Get the step from the merged route config and query params
+  const step = getRoute(location.pathname)?.query?.step ?? -1
+
+  console.log(step)
 
   const fetchData = useCallback(async () => {
     try {

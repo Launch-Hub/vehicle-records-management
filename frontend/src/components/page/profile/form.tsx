@@ -4,22 +4,13 @@ import { CameraIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { getLabel, getPermissionLabel } from '@/constants/dictionary'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
+import { getLabel } from '@/constants/dictionary'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { User } from '@/lib/types/tables.type'
-import { $generalPerms, ROLES } from '@/constants/general'
 import { processImage } from '@/lib/utils'
 
 interface ProfileFormProps {
-  initialData?: User
+  initialData: User
   isCopying?: boolean
   isSelfEdit?: boolean
   onSubmit: (data: Omit<User, '_id'>) => void
@@ -29,7 +20,6 @@ interface ProfileFormProps {
 export default function ProfileForm({
   initialData,
   isCopying = false,
-  isSelfEdit = false,
   onSubmit,
   onCancel,
 }: ProfileFormProps) {
@@ -37,21 +27,9 @@ export default function ProfileForm({
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { isSubmitting },
   } = useForm<Omit<User, '_id'>>({
-    defaultValues: initialData || {
-      username: '',
-      email: '',
-      name: '',
-      phone: '',
-      assignedUnit: '',
-      serviceNumber: '',
-      password: '',
-      avatar: '',
-      permissions: ROLES.find((e) => e.name === 'default')?.permissions,
-      status: 'active',
-    },
+    defaultValues: initialData,
   })
 
   const [showPassword, setShowPassword] = useState(false)
@@ -175,25 +153,6 @@ export default function ProfileForm({
           <Input id="phone" type="phone" {...register('phone', { required: true })} />
         </div>
 
-        {isEditing && !isSelfEdit && (
-          <div className="space-y-2">
-            <Label htmlFor="status">{getLabel('status')}</Label>
-            <Select value={watch('status')} onValueChange={(value) => setValue('status', value)}>
-              <SelectTrigger id="status" className="w-full">
-                <SelectValue placeholder="Chọn trạng thái" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">
-                  <span className="text-success">Hoạt động</span>
-                </SelectItem>
-                <SelectItem value="inactive">
-                  <span className="text-destructive">Ngưng hoạt động</span>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        )}
-
         <div className="space-y-2">
           <Label htmlFor="assignedUnit" className="required">
             {getLabel('assignedUnit')}
@@ -208,61 +167,6 @@ export default function ProfileForm({
           <Input id="serviceNumber" {...register('serviceNumber')} />
         </div>
       </div>
-
-      {/* Permissions Section */}
-      {!isSelfEdit && (
-        <div className="space-y-4">
-          <Label>Quyền truy cập</Label>
-          {/* <Select
-            value={JSON.stringify(watch('permissions'))}
-            onValueChange={(value) => {
-              const selectedRole = ROLES.find((role) => JSON.stringify(role.permissions) === value)
-              if (selectedRole) {
-                setValue('permissions', selectedRole.permissions)
-              }
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Chọn vai trò" />
-            </SelectTrigger>
-            <SelectContent>
-              {ROLES.map((role) => (
-                <SelectItem key={role.name} value={JSON.stringify(role.permissions)}>
-                  {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select> */}
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(watch('permissions') || {})
-              .filter(([module]) => !$generalPerms.includes(module))
-              .map(([module, perms]) => (
-                <div key={module} className="space-y-2 p-4 rounded-lg bg-muted">
-                  <Label className="capitalize text-secondary font-semibold">
-                    {getPermissionLabel(module) || module}
-                  </Label>
-                  <div className="flex flex-col gap-2">
-                    {Object.entries(perms).map(([perm, value]) => (
-                      <div key={perm} className="flex items-center gap-2">
-                        <Checkbox
-                          id={`${module}-${perm}`}
-                          checked={value}
-                          className="data-[state=checked]:bg-secondary data-[state=checked]:border-secondary"
-                          onCheckedChange={(checked) => {
-                            setValue(`permissions.${module}.${perm}` as any, !!checked)
-                          }}
-                        />
-                        <Label htmlFor={`${module}-${perm}`}>
-                          {getPermissionLabel(perm) || perm.charAt(0).toUpperCase() + perm.slice(1)}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
 
       <div className="mt-8 flex justify-end gap-2">
         {onCancel && (

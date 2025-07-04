@@ -94,26 +94,48 @@ exports.createBulk = async (req, res) => {
       }
     }
 
-    // Check for duplicates
+    // Check for duplicates by name and step
     const existingItems = await ActionType.find({
-      $or: actionTypes.map(({ name, step }) => ({ name, step }))
+      $or: [...actionTypes.map(({ name }) => ({ name }))],
     });
 
-    if (existingItems.length > 0) {
-      const duplicateNames = existingItems.map(item => `${item.name} (bước ${item.step})`);
-      return res.status(409).json({
-        error: true,
-        message: `Các hạng mục sau đã tồn tại: ${duplicateNames.join(', ')}`,
-      });
+    // Filter out duplicates and prepare for creation
+    const duplicates = [];
+    const itemsToCreate = actionTypes.filter((actionType, index) => {
+      // Check against existing items in database
+      const isDuplicateName = existingItems.some((existing) => existing.name === actionType.name);
+
+      // Check against other items in the input array
+      const isDuplicateNameInInput = actionTypes.some(
+        (item, i) => i !== index && item.name === actionType.name
+      );
+
+      if (isDuplicateName || isDuplicateNameInInput) {
+        if (isDuplicateName || isDuplicateNameInInput) {
+          duplicates.push(`${actionType.name} - tên đã tồn tại`);
+        }
+        return false;
+      }
+      return true;
+    });
+
+    // Create non-duplicate action types
+    let results = [];
+    if (itemsToCreate.length > 0) {
+      results = await ActionType.insertMany(itemsToCreate);
+      res.locals.documentId = results.map((r) => r._id); // ✅ required for activity logger
     }
 
-    // Create all action types
-    const results = await ActionType.insertMany(actionTypes);
+    // Prepare response message
+    let message = `Đã tạo thành công ${results.length} hạng mục.`;
+    if (duplicates.length > 0) {
+      message += ` Bỏ qua ${duplicates.length} hạng mục đã tồn tại: ${duplicates.join(", ")}.`;
+    }
 
-    res.locals.documentId = results.map(r => r._id); // ✅ required for activity logger
     res.status(201).json({
-      message: `Đã tạo thành công ${results.length} hạng mục.`,
-      items: results
+      message,
+      items: results,
+      skipped: duplicates,
     });
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });

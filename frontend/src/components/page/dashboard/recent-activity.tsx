@@ -36,7 +36,7 @@ export function RecentActivity({ stats }: RecentActivityProps) {
     },
     // {
     //   icon: PackageIcon,
-    //   title: 'Lô hồ sơ mới',
+    //   title: 'Lần nhập hồ sơ mới',
     //   count: stats.today.bulks,
     //   period: 'Hôm nay',
     //   color: 'text-purple-600',
