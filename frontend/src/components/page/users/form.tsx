@@ -340,7 +340,7 @@ export default function UserForm({
             </Button>
           )}
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {isEditing ? 'Lưu thay đổi' : 'Tạo mới'}
+            Lưu
           </Button>
         </div>
       </form>

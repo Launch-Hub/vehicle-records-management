@@ -210,7 +210,7 @@ export default function ActionTypeForm({ initialData, onSubmit, onCancel }: Acti
             Hủy
           </Button>
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Đang xử lý...' : isEditing ? 'Cập nhật' : 'Tạo mới'}
+            {isLoading ? 'Đang xử lý...' : 'Lưu'}
           </Button>
         </div>
       </form>

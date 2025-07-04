@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, PlusCircle } from 'lucide-react'
+import { Plus, Trash2, PlusCircle, ChevronDown } from 'lucide-react'
 import type { Procedure, ProcedureStep, VehicleRecord, Bulk } from '@/lib/types/tables.type'
 import api from '@/lib/axios'
 import {
@@ -39,6 +39,13 @@ import {
 } from '@/components/ui/dialog'
 import BulkForm from '@/components/page/bulks/form'
 import { uploadService } from '@/lib/services/upload'
+import { Switch } from '@/components/ui/switch'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -59,6 +66,7 @@ export default function ProcedureForm({
     register,
     handleSubmit,
     reset,
+    getValues,
     setValue,
     watch,
     formState: { isSubmitting },
@@ -113,9 +121,11 @@ export default function ProcedureForm({
   const [isFetchingActionTypes, setIsFetchingActionTypes] = useState(false)
 
   // State for step 1 image upload
-  const [step1Image, setStep1Image] = useState<File | null>(null)
-  const [step1ImageUrl, setStep1ImageUrl] = useState<string | null>(null)
-  const [isUploadingStep1Image, setIsUploadingStep1Image] = useState(false)
+  const [image, setImage] = useState<File | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+
+  const [useCustomColor, setUseCustomColor] = useState(false)
 
   const debouncedRecordSearch = useDebounce(recordSearch, 500)
   const debouncedBulkSearch = useDebounce(bulkSearch, 500)
@@ -258,18 +268,18 @@ export default function ProcedureForm({
   }, [initialData, reset])
 
   // Handle step 1 image upload
-  const handleStep1ImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setIsUploadingStep1Image(true)
+    setIsUploadingImage(true)
     try {
       const res = await uploadService.uploadImage(file)
-      setStep1Image(file)
-      setStep1ImageUrl(res.file.storedName)
+      setImage(file)
+      setImageUrl(res.file.storedName)
     } catch (error) {
       console.error('Failed to upload image', error)
     } finally {
-      setIsUploadingStep1Image(false)
+      setIsUploadingImage(false)
     }
   }
 
@@ -311,9 +321,9 @@ export default function ProcedureForm({
             order: 1,
             step: 1,
             title: '',
-            action: '',
+            action: getValues('registrationType'),
             note: '',
-            attachments: step1ImageUrl ? [step1ImageUrl] : [],
+            attachments: imageUrl ? [imageUrl] : [],
             isCompleted: false,
           },
         ]
@@ -463,6 +473,37 @@ export default function ProcedureForm({
             )}
 
             <div className="space-y-2">
+              <Label htmlFor="image">Đính kèm</Label>
+              <div className="flex items-center gap-4">
+                <input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  disabled={isUploadingImage}
+                  style={{ display: 'none' }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById('image')?.click()}
+                  disabled={isUploadingImage}
+                  className="flex-shrink-0"
+                >
+                  {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
+                </Button>
+                {imageUrl && (
+                  <img
+                    src={`/uploads/du/${imageUrl}`}
+                    alt="Ảnh bước 1"
+                    className="max-h-20 rounded border ml-2"
+                    style={{ maxWidth: 80 }}
+                  />
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="note">Ghi chú</Label>
               <Textarea
                 id="note"
@@ -496,35 +537,59 @@ export default function ProcedureForm({
                   }))
                 }
                 onBlur={handlePlateNumberBlur}
-                placeholder="Nhập biển số xe..."
+                placeholder="Nhập biển số xe (chỉ bao gồm chữ và số)..."
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="color">
-                {getLabel('color')}
+              <Label htmlFor="color" className="w-full flex justify-between items-center mb-[2px]">
+                <span>{getLabel('color')}</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500">Tùy chỉnh</span>
+                  <Switch
+                    id="custom-color"
+                    checked={useCustomColor}
+                    onCheckedChange={setUseCustomColor}
+                    className="mr-0"
+                  />
+                </div>
               </Label>
-              <Select
-                value={recordFields.color}
-                onValueChange={(value) => setRecordFields((prev) => ({ ...prev, color: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Chọn màu" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PLATE_COLORS.map((color) => (
-                    <SelectItem key={color.label} value={color.label}>
-                      {color.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {useCustomColor ? (
+                <Input
+                  value={recordFields.color}
+                  onChange={(e) => setRecordFields((prev) => ({ ...prev, color: e.target.value }))}
+                  placeholder="Nhập màu tùy chỉnh..."
+                />
+              ) : (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="w-full !max-w-full overflow-hidden">
+                    <Button variant="outline" className="w-full justify-between">
+                      <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
+                        {recordFields.color ? recordFields.color : 'Chọn màu'}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {PLATE_COLORS.map((c) => (
+                      <DropdownMenuItem
+                        key={c.label}
+                        onClick={() => setRecordFields((prev) => ({ ...prev, color: c.label }))}
+                      >
+                        <div
+                          className="h-4 w-4 rounded-full"
+                          style={{ backgroundColor: c.color }}
+                        />
+                        <span className="ml-2">{c.label}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="identificationNumber">
-                {getLabel('identificationNumber')}
-              </Label>
+              <Label htmlFor="identificationNumber">{getLabel('identificationNumber')}</Label>
               <Input
                 id="identificationNumber"
                 value={recordFields.identificationNumber}
@@ -536,9 +601,7 @@ export default function ProcedureForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="engineNumber">
-                {getLabel('engineNumber')}
-              </Label>
+              <Label htmlFor="engineNumber">{getLabel('engineNumber')}</Label>
               <Input
                 id="engineNumber"
                 value={recordFields.engineNumber}
@@ -667,6 +730,27 @@ export default function ProcedureForm({
                       />
                     </div>
                     <div className="space-y-2">
+                      <Label htmlFor="image">Đính kèm</Label>
+                      <Input
+                        id="image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        disabled={isUploadingImage}
+                      />
+                      {isUploadingImage && <div>Đang tải lên...</div>}
+                      {imageUrl && (
+                        <div className="mt-2">
+                          <img
+                            src={`/uploads/du/${imageUrl}`}
+                            alt="Ảnh bước 1"
+                            className="max-h-40 rounded border"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
                       <Label>Ghi chú</Label>
                       <Textarea
                         value={step.note || ''}
@@ -682,34 +766,6 @@ export default function ProcedureForm({
         </Card>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Thêm hình ảnh</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Label htmlFor="step1Image">Tải lên ảnh cho bước 1</Label>
-            <Input
-              id="step1Image"
-              type="file"
-              accept="image/*"
-              onChange={handleStep1ImageChange}
-              disabled={isUploadingStep1Image}
-            />
-            {isUploadingStep1Image && <div>Đang tải lên...</div>}
-            {step1ImageUrl && (
-              <div className="mt-2">
-                <img
-                  src={`/uploads/du/${step1ImageUrl}`}
-                  alt="Ảnh bước 1"
-                  className="max-h-40 rounded border"
-                />
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button type="button" variant="ghost" onClick={onCancel}>
@@ -717,11 +773,7 @@ export default function ProcedureForm({
           </Button>
         )}
         <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
-          {isCreatingRecord
-            ? 'Đang tạo hồ sơ...'
-            : initialData && !isCopying
-            ? 'Lưu thay đổi'
-            : 'Tạo mới'}
+          {isCreatingRecord ? 'Đang tạo hồ sơ...' : 'Lưu'}
         </Button>
       </div>
     </form>

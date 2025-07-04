@@ -25,7 +25,8 @@ export const VehicleRecordSchema = z.object({
   plateNumber: z
     .string()
     .min(7, 'Biển số xe tối thiểu là 7 ký tự')
-    .max(9, 'Biển số xe không được vượt quá 9 ký tự'),
+    .max(10, 'Biển số xe không được vượt quá 9 ký tự')
+    .regex(/[A-Z0-9]+/, 'Biển số xe không được chứa kí tự đặc biệt'),
   color: z.string(),
   identificationNumber: z.string(),
   engineNumber: z.string(),

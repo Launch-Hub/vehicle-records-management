@@ -265,7 +265,7 @@ export default function VehicleRecordForm({
                 render={({ field }) => (
                   <FormItem className="w-full gap-0.5">
                     <FormLabel className="w-full flex justify-between items-center">
-                      <span className="required">{getLabel('color')}</span>
+                      <span>{getLabel('color')}</span>
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-500">Tùy chỉnh</span>
                         <Switch
@@ -471,7 +471,7 @@ export default function VehicleRecordForm({
             </Button>
           )}
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {isEditing ? 'Lưu thay đổi' : 'Tạo mới'}
+            Lưu
           </Button>
         </div>
       </form>

@@ -9,6 +9,10 @@ export const PLATE_COLORS = [
     label: 'Nền màu vàng, chữ và số màu đen',
     color: '#fec917',
   },
+  {
+    label: 'Nền màu xanh, chữ và số màu trắng',
+    color: '#1750c4',
+  },
 ]
 export const USER_STATUSES = [
   {

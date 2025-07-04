@@ -175,7 +175,7 @@ export default function ProfileForm({
           </Button>
         )}
         <Button type="submit" disabled={isSubmitting}>
-          {isEditing ? 'Lưu thay đổi' : 'Tạo mới'}
+          Lưu
         </Button>
       </div>
     </form>
