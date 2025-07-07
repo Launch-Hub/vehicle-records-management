@@ -132,7 +132,7 @@ export default function ActionTypeForm({ initialData, onSubmit, onCancel }: Acti
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="required">Hạng mục</FormLabel>
+                  <FormLabel className="required">Tạo mục</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Nhập hạng mục" />
                   </FormControl>

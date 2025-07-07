@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
-import api from '@/lib/axios'
 import type { Procedure } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { joinPath, exportToExcel } from '@/lib/utils'
@@ -101,7 +100,7 @@ const columns: ColumnDef<Procedure>[] = [
   },
   {
     accessorKey: 'registrationType',
-    header: () => <div>Hạng mục đăng ký</div>,
+    header: () => <div>Tạo mục đăng ký</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 150,
   },

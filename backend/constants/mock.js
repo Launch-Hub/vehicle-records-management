@@ -210,7 +210,7 @@ exports.sample_record = {
 };
 exports.mock_records = [
   {
-    plateNumber: "51A-12345",
+    plateNumber: "51A12345",
     color: "Vàng",
     identificationNumber: "VIN000001",
     engineNumber: "ENG000001",
@@ -222,7 +222,7 @@ exports.mock_records = [
     status: "active",
   },
   {
-    plateNumber: "51B-67890",
+    plateNumber: "51B67890",
     color: "Trắng",
     identificationNumber: "VIN000002",
     engineNumber: "ENG000002",
@@ -234,7 +234,7 @@ exports.mock_records = [
     status: "archived",
   },
   {
-    plateNumber: "59C-22222",
+    plateNumber: "59C22222",
     color: "Trắng",
     identificationNumber: "VIN000003",
     engineNumber: "ENG000003",
@@ -246,7 +246,7 @@ exports.mock_records = [
     status: "active",
   },
   {
-    plateNumber: "60D-33333",
+    plateNumber: "60D33333",
     color: "Trắng",
     identificationNumber: "VIN000004",
     engineNumber: "ENG000004",
@@ -258,7 +258,7 @@ exports.mock_records = [
     status: "archived",
   },
   {
-    plateNumber: "61E-44444",
+    plateNumber: "61E44444",
     color: "Trắng",
     identificationNumber: "VIN000005",
     engineNumber: "ENG000005",
@@ -270,7 +270,7 @@ exports.mock_records = [
     status: "active",
   },
   {
-    plateNumber: "62F-55555",
+    plateNumber: "62F55555",
     color: "Trắng",
     identificationNumber: "VIN000006",
     engineNumber: "ENG000006",
@@ -282,7 +282,7 @@ exports.mock_records = [
     status: "archived",
   },
   {
-    plateNumber: "63G-66666",
+    plateNumber: "63G66666",
     color: "Trắng",
     identificationNumber: "VIN000007",
     engineNumber: "ENG000007",
@@ -294,7 +294,7 @@ exports.mock_records = [
     status: "active",
   },
   {
-    plateNumber: "64H-77777",
+    plateNumber: "64H77777",
     color: "Vàng",
     identificationNumber: "VIN000008",
     engineNumber: "ENG000008",
@@ -306,7 +306,7 @@ exports.mock_records = [
     status: "archived",
   },
   {
-    plateNumber: "65K-88888",
+    plateNumber: "65K88888",
     color: "Vàng",
     identificationNumber: "VIN000009",
     engineNumber: "ENG000009",
@@ -318,7 +318,7 @@ exports.mock_records = [
     status: "active",
   },
   {
-    plateNumber: "66L-99999",
+    plateNumber: "66L99999",
     color: "Vàng",
     identificationNumber: "VIN000010",
     engineNumber: "ENG000010",

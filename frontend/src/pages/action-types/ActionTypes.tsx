@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { STEP_TABS } from '@/constants/general'
 
 const columns: ColumnDef<ActionType>[] = [
   {
@@ -31,7 +32,7 @@ const columns: ColumnDef<ActionType>[] = [
   {
     id: 'name',
     accessorKey: 'name',
-    header: () => <div>Hạng mục</div>,
+    header: () => <div>Tạo mục</div>,
     cell: (info: any) => <span className="font-medium">{info.getValue()}</span>,
     minSize: 250,
   },
@@ -54,21 +55,13 @@ const columns: ColumnDef<ActionType>[] = [
   },
 ]
 
-const STEP_TABS = [
-  { value: '1', label: 'Tiếp nhận', color: 'bg-blue-500' },
-  { value: '2', label: 'Phân loại', color: 'bg-green-500' },
-  { value: '3', label: 'Thu phí', color: 'bg-yellow-500' },
-  { value: '4', label: 'Trình ký', color: 'bg-red-500' },
-  { value: '5', label: 'Trả kết quả', color: 'bg-purple-500' },
-]
-
 export default function ActionTypesPage() {
   const [isFetching, setIsFetching] = useState(false)
   const [total, setTotal] = useState(0)
   const [data, setData] = useState<ActionType[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
-  const [stepFilter, setStepFilter] = useState<string>('all')
+  const [stepFilter, setStepFilter] = useState<string>('1')
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false)
 
   const location = useLocation()
@@ -175,8 +168,8 @@ export default function ActionTypesPage() {
                 {STEP_TABS.map((tab) => (
                   <TabsTrigger
                     key={tab.value}
-                    value={tab.value}
-                    className={stepFilter === tab.value ? 'bg-primary text-primary' : ''}
+                    value={tab.value.toString()}
+                    className={stepFilter == tab.value.toString() ? 'bg-primary text-primary' : ''}
                   >
                     {tab.label}
                   </TabsTrigger>

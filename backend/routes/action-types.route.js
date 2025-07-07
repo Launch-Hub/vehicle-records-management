@@ -14,12 +14,7 @@ router.post(
   logActivityMiddleware("create", "action-types"),
   actionTypeController.create
 );
-router.post(
-  "/bulk",
-  authenticateToken,
-  logActivityMiddleware("create", "action-types"),
-  actionTypeController.createBulk
-);
+router.post("/bulk", authenticateToken, actionTypeController.createBulk);
 router.put(
   "/:id",
   authenticateToken,

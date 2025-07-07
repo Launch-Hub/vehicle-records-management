@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, PlusCircle, ChevronDown } from 'lucide-react'
+import { Plus, Trash2, PlusCircle, ChevronDown, PrinterIcon } from 'lucide-react'
 import type { Procedure, ProcedureStep, VehicleRecord, Bulk } from '@/lib/types/tables.type'
 import api from '@/lib/axios'
 import {
@@ -26,7 +26,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PLATE_COLORS } from '@/constants/general'
+import { PLATE_COLORS, VEHICLE_TYPES } from '@/constants/general'
 import { getLabel } from '@/constants/dictionary'
 import type { PaginationProps } from '@/lib/types/props'
 import { useDebounce } from '@/lib/hooks/use-debounce'
@@ -46,6 +46,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@/components/ui/accordion'
+import { QrCodeIcon } from 'lucide-react'
+import { QRCodeCanvas } from 'qrcode.react'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -72,7 +80,7 @@ export default function ProcedureForm({
     formState: { isSubmitting },
   } = useForm<Omit<Procedure, '_id'>>({
     defaultValues: initialData || {
-      recordId: '',
+      recordId: '', // keep as recordId for frontend compatibility
       bulkId: undefined,
       registrationType: '',
       currentStep: 1,
@@ -207,9 +215,14 @@ export default function ProcedureForm({
     if (!plateNumber) return
 
     try {
-      const res = await api.get(`/records/search?plateNumber=${encodeURIComponent(plateNumber)}`)
-      if (res.data && res.data.length > 0) {
-        const record = res.data[0]
+      const res = await api.post('/records/search', {
+        plateNumber,
+        identificationNumber: recordFields.identificationNumber,
+        engineNumber: recordFields.engineNumber,
+        vehicleType: recordFields.vehicleType,
+      })
+      if (res.data) {
+        const record = res.data
         setExistingRecord(record)
         setValue('recordId', record._id)
         // Auto-fill record fields
@@ -244,6 +257,21 @@ export default function ProcedureForm({
         }))
       }
     } catch (error) {
+      setExistingRecord(null)
+      setValue('recordId', '')
+      setRecordFields((prev) => ({
+        ...prev,
+        plateNumber: plateNumber,
+        color: '',
+        identificationNumber: '',
+        engineNumber: '',
+        registrant: '',
+        phone: '',
+        email: '',
+        address: '',
+        note: '',
+        vehicleType: 'Ô tô',
+      }))
       console.error('Failed to search for record', error)
     }
   }
@@ -286,7 +314,6 @@ export default function ProcedureForm({
   const handleFormSubmit = async (data: Omit<Procedure, '_id'>) => {
     try {
       let recordId = data.recordId
-
       // If no existing record and we have record fields, create a new record
       if (!existingRecord && recordFields.plateNumber) {
         setIsCreatingRecord(true)
@@ -294,13 +321,7 @@ export default function ProcedureForm({
           const recordData = {
             ...recordFields,
             status: 'idle',
-            archiveAt: {
-              storage: 'Kho A',
-              room: '',
-              row: '',
-              shelf: '',
-              level: '',
-            },
+            archiveAt: null,
           }
           const recordRes = await api.post('/records', recordData)
           recordId = recordRes.data._id
@@ -312,7 +333,6 @@ export default function ProcedureForm({
           setIsCreatingRecord(false)
         }
       }
-
       // Prepare step 1 with attachment if creating
       let finalSteps = initialData ? steps : []
       if (!initialData) {
@@ -321,7 +341,7 @@ export default function ProcedureForm({
             order: 1,
             step: 1,
             title: '',
-            action: getValues('registrationType'),
+            action: getValues('registrationType'), // This is now the _id
             note: '',
             attachments: imageUrl ? [imageUrl] : [],
             isCompleted: false,
@@ -329,7 +349,6 @@ export default function ProcedureForm({
         ]
       }
       const record = existingRecord || vehicleRecords.find((e) => e._id === recordId)
-
       // Update bulk size if procedure is created successfully
       if (data.bulkId) {
         try {
@@ -338,8 +357,19 @@ export default function ProcedureForm({
           console.error('Failed to update bulk size', error)
         }
       }
-
-      onSubmit({ ...data, recordId, steps: finalSteps })
+      // Ensure dueDate is a valid Date object
+      let dueDate = data.dueDate
+      if (!(dueDate instanceof Date)) {
+        dueDate = dueDate ? new Date(dueDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
+      }
+      // Map frontend fields to backend fields
+      onSubmit({
+        ...data,
+        record: recordId,
+        bulk: data.bulkId,
+        steps: finalSteps,
+        dueDate,
+      } as any)
     } catch (error) {
       console.error('Failed to submit procedure', error)
     }
@@ -369,19 +399,24 @@ export default function ProcedureForm({
   }
 
   const isEditing = !!initialData?._id
+  const [showQR, setShowQR] = useState(false)
+  const recordId = existingRecord?._id || getValues('recordId')
+  const recordDetailUrl = recordId
+    ? `${window.location.origin}/registration-history/${recordId}`
+    : ''
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Procedure Fields Section */}
       <Card>
         <CardHeader>
-          <CardTitle>Thông tin đăng ký</CardTitle>
+          <CardTitle>Thông tin tiếp nhận</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="space-y-2">
               <Label htmlFor="registrationType" className="required">
-                Hạng mục đăng ký
+                Phân loại đăng ký
               </Label>
               <Select
                 value={watch('registrationType')}
@@ -392,7 +427,7 @@ export default function ProcedureForm({
                 </SelectTrigger>
                 <SelectContent>
                   {actionTypes.map((actionType) => (
-                    <SelectItem key={actionType._id} value={actionType.name}>
+                    <SelectItem key={actionType._id} value={actionType._id}>
                       {actionType.name}
                     </SelectItem>
                   ))}
@@ -402,7 +437,7 @@ export default function ProcedureForm({
 
             {!hideBulkId && (
               <div className="space-y-2 w-full">
-                <Label htmlFor="bulkId">Lần nhập</Label>
+                <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
                 <div className="w-full flex gap-2">
                   <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
                     <PopoverTrigger asChild>
@@ -473,7 +508,7 @@ export default function ProcedureForm({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="image">Đính kèm</Label>
+              <Label htmlFor="image">Đính kèm file</Label>
               <div className="flex items-center gap-4">
                 <input
                   id="image"
@@ -503,7 +538,7 @@ export default function ProcedureForm({
               </div>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="note">Ghi chú</Label>
               <Textarea
                 id="note"
@@ -511,191 +546,242 @@ export default function ProcedureForm({
                 placeholder="Nhập ghi chú (tùy chọn)"
                 rows={3}
               />
+            </div> */}
+            <div className="space-y-2">
+              <div className=""></div>
+              <div className="flex justify-end gap-2">
+                {/* Print and QR buttons */}
+                <Button type="button" variant="outline" onClick={() => window.print()}>
+                  <PrinterIcon />
+                  In mã
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setShowQR(true)} disabled={!recordId}>
+                  <QrCodeIcon className="mr-2" />
+                  Tạo mã
+                </Button>
+                <Dialog open={showQR} onOpenChange={setShowQR}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Mã QR xem lịch sử hồ sơ</DialogTitle>
+                    </DialogHeader>
+                    {recordId && (
+                      <div className="flex flex-col items-center gap-4">
+                        <QRCodeCanvas
+                          value={recordDetailUrl}
+                          size={200}
+                          level="H"
+                          includeMargin
+                          bgColor="#fff"
+                          fgColor="#000"
+                        />
+                        <div className="text-xs break-all text-center">{recordDetailUrl}</div>
+                        <Button type="button" variant="outline" onClick={() => window.print()}>
+                          <PrinterIcon className="mr-2" />
+                          In mã
+                        </Button>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+                {onCancel && (
+                  <Button type="button" variant="ghost" onClick={onCancel}>
+                    Huỷ bỏ
+                  </Button>
+                )}
+                <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
+                  {isCreatingRecord ? 'Đang tiếp nhận...' : 'Tiếp nhận'}
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Record Fields Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Thông tin xe</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="plateNumber" className="required">
-                {getLabel('plateNumber')}
-              </Label>
-              <Input
-                id="plateNumber"
-                value={recordFields.plateNumber}
-                onChange={(e) =>
-                  setRecordFields((prev) => ({
-                    ...prev,
-                    plateNumber: e.target.value.toUpperCase(),
-                  }))
-                }
-                onBlur={handlePlateNumberBlur}
-                placeholder="Nhập biển số xe (chỉ bao gồm chữ và số)..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="vehicleType" className="required">
-                {getLabel('vehicleType')}
-              </Label>
-              <Input
-                id="vehicleType"
-                value={recordFields.vehicleType}
-                onChange={(e) =>
-                  setRecordFields((prev) => ({
-                    ...prev,
-                    vehicleType: e.target.value,
-                  }))
-                }
-                onBlur={handlePlateNumberBlur}
-                placeholder="Nhập biển số xe (chỉ bao gồm chữ và số)..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="color" className="w-full flex justify-between items-center mb-[2px]">
-                <span>{getLabel('color')}</span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">Tùy chỉnh</span>
-                  <Switch
-                    id="custom-color"
-                    checked={useCustomColor}
-                    onCheckedChange={setUseCustomColor}
-                    className="mr-0"
-                  />
-                </div>
-              </Label>
-              {useCustomColor ? (
+      <Accordion type="multiple" defaultValue={['vehicle', 'owner']} className="mb-4">
+        <AccordionItem value="vehicle">
+          <AccordionTrigger>Thông tin xe</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="plateNumber" className="required">
+                  {getLabel('plateNumber')}
+                </Label>
                 <Input
-                  value={recordFields.color}
-                  onChange={(e) => setRecordFields((prev) => ({ ...prev, color: e.target.value }))}
-                  placeholder="Nhập màu tùy chỉnh..."
+                  id="plateNumber"
+                  value={recordFields.plateNumber}
+                  onChange={(e) =>
+                    setRecordFields((prev) => ({
+                      ...prev,
+                      plateNumber: e.target.value.toUpperCase(),
+                    }))
+                  }
+                  onBlur={handlePlateNumberBlur}
+                  placeholder="Nhập hoặc quét mã biển số..."
                 />
-              ) : (
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="identificationNumber">{getLabel('identificationNumber')}</Label>
+                <Input
+                  id="identificationNumber"
+                  value={recordFields.identificationNumber}
+                  onChange={(e) =>
+                    setRecordFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
+                  }
+                  placeholder="Nhập số khung..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="engineNumber">{getLabel('engineNumber')}</Label>
+                <Input
+                  id="engineNumber"
+                  value={recordFields.engineNumber}
+                  onChange={(e) =>
+                    setRecordFields((prev) => ({ ...prev, engineNumber: e.target.value }))
+                  }
+                  placeholder="Nhập số máy..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vehicleType" className="required">
+                  {getLabel('vehicleType')}
+                </Label>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="w-full !max-w-full overflow-hidden">
-                    <Button variant="outline" className="w-full justify-between">
+                  <DropdownMenuTrigger asChild={false} className="w-full !max-w-full overflow-hidden">
+                    <span
+                      className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    >
                       <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
-                        {recordFields.color ? recordFields.color : 'Chọn màu'}
+                        {recordFields.vehicleType ? recordFields.vehicleType : 'Chọn loại xe'}
                       </span>
                       <ChevronDown className="h-4 w-4" />
-                    </Button>
+                    </span>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {PLATE_COLORS.map((c) => (
+                  <DropdownMenuContent align="start">
+                    {VEHICLE_TYPES.map((t) => (
                       <DropdownMenuItem
-                        key={c.label}
-                        onClick={() => setRecordFields((prev) => ({ ...prev, color: c.label }))}
+                        key={t}
+                        onClick={() => setRecordFields((prev) => ({ ...prev, vehicleType: t }))}
                       >
-                        <div
-                          className="h-4 w-4 rounded-full"
-                          style={{ backgroundColor: c.color }}
-                        />
-                        <span className="ml-2">{c.label}</span>
+                        {t}
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              </div>
+              <div className="space-y-2">
+                <Label
+                  htmlFor="color"
+                  className="w-full flex justify-between items-center mb-[2px]"
+                >
+                  <span>{getLabel('color')}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-500">Tùy chỉnh</span>
+                    <Switch
+                      id="custom-color"
+                      checked={useCustomColor}
+                      onCheckedChange={setUseCustomColor}
+                      className="mr-0"
+                    />
+                  </div>
+                </Label>
+                {useCustomColor ? (
+                  <Input
+                    value={recordFields.color}
+                    onChange={(e) => setRecordFields((prev) => ({ ...prev, color: e.target.value }))}
+                    placeholder="Nhập màu tùy chỉnh..."
+                  />
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild={false} className="w-full !max-w-full overflow-hidden">
+                      <span
+                        className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focusVisible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
+                          {recordFields.color ? recordFields.color : 'Chọn màu'}
+                        </span>
+                        <ChevronDown className="h-4 w-4" />
+                      </span>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {PLATE_COLORS.map((c) => (
+                        <DropdownMenuItem
+                          key={c.label}
+                          onClick={() => setRecordFields((prev) => ({ ...prev, color: c.label }))}
+                        >
+                          <div className="h-4 w-4 rounded-full" style={{ backgroundColor: c.color }} />
+                          <span className="ml-2">{c.label}</span>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="identificationNumber">{getLabel('identificationNumber')}</Label>
-              <Input
-                id="identificationNumber"
-                value={recordFields.identificationNumber}
-                onChange={(e) =>
-                  setRecordFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
-                }
-                placeholder="Nhập số khung..."
-              />
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="owner">
+          <AccordionTrigger>Thông tin chủ xe</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="registrant" className="required">
+                  {getLabel('registrant')}
+                </Label>
+                <Input
+                  id="registrant"
+                  value={recordFields.registrant}
+                  onChange={(e) =>
+                    setRecordFields((prev) => ({ ...prev, registrant: e.target.value }))
+                  }
+                  placeholder="Nhập tên chủ xe..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">{getLabel('phone')}</Label>
+                <Input
+                  id="phone"
+                  value={recordFields.phone}
+                  onChange={(e) => setRecordFields((prev) => ({ ...prev, phone: e.target.value }))}
+                  placeholder="Nhập số điện thoại..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">{getLabel('email')}</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={recordFields.email}
+                  onChange={(e) => setRecordFields((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="Nhập email..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="address">{getLabel('address')}</Label>
+                <Input
+                  id="address"
+                  value={recordFields.address}
+                  onChange={(e) =>
+                    setRecordFields((prev) => ({ ...prev, address: e.target.value }))
+                  }
+                  placeholder="Nhập địa chỉ..."
+                />
+              </div>
+              <div className="space-y-2 md:col-span-3">
+                <Label htmlFor="recordNote">Ghi chú hồ sơ</Label>
+                <Textarea
+                  id="recordNote"
+                  value={recordFields.note}
+                  onChange={(e) => setRecordFields((prev) => ({ ...prev, note: e.target.value }))}
+                  placeholder="Nhập ghi chú cho hồ sơ..."
+                  rows={2}
+                />
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="engineNumber">{getLabel('engineNumber')}</Label>
-              <Input
-                id="engineNumber"
-                value={recordFields.engineNumber}
-                onChange={(e) =>
-                  setRecordFields((prev) => ({ ...prev, engineNumber: e.target.value }))
-                }
-                placeholder="Nhập số máy..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="registrant" className="required">
-                {getLabel('registrant')}
-              </Label>
-              <Input
-                id="registrant"
-                value={recordFields.registrant}
-                onChange={(e) =>
-                  setRecordFields((prev) => ({ ...prev, registrant: e.target.value }))
-                }
-                placeholder="Nhập tên chủ xe..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone">{getLabel('phone')}</Label>
-              <Input
-                id="phone"
-                value={recordFields.phone}
-                onChange={(e) => setRecordFields((prev) => ({ ...prev, phone: e.target.value }))}
-                placeholder="Nhập số điện thoại..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email">{getLabel('email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={recordFields.email}
-                onChange={(e) => setRecordFields((prev) => ({ ...prev, email: e.target.value }))}
-                placeholder="Nhập email..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">{getLabel('address')}</Label>
-              <Input
-                id="address"
-                value={recordFields.address}
-                onChange={(e) => setRecordFields((prev) => ({ ...prev, address: e.target.value }))}
-                placeholder="Nhập địa chỉ..."
-              />
-            </div>
-
-            <div className="space-y-2 md:col-span-3">
-              <Label htmlFor="recordNote">Ghi chú hồ sơ</Label>
-              <Textarea
-                id="recordNote"
-                value={recordFields.note}
-                onChange={(e) => setRecordFields((prev) => ({ ...prev, note: e.target.value }))}
-                placeholder="Nhập ghi chú cho hồ sơ..."
-                rows={2}
-              />
-            </div>
-          </div>
-
-          {existingRecord && (
-            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-sm text-green-700">
-                ✓ Tìm thấy hồ sơ hiện có cho biển số {existingRecord.plateNumber}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {isEditing && (
         <Card>
@@ -783,17 +869,6 @@ export default function ProcedureForm({
           </CardContent>
         </Card>
       )}
-
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="ghost" onClick={onCancel}>
-            Huỷ bỏ
-          </Button>
-        )}
-        <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
-          {isCreatingRecord ? 'Đang tạo hồ sơ...' : 'Lưu'}
-        </Button>
-      </div>
     </form>
   )
 }

@@ -166,13 +166,18 @@ exports.mockCreate = async (req, res) => {
   }
 };
 
-exports.searchByPlateNumber = async (req, res) => {
+exports.searchBy = async (req, res) => {
   try {
-    const { plateNumber } = req.query;
-    if (!plateNumber) {
-      return res.status(400).json({ message: "plateNumber is required" });
+    const { plateNumber, identificationNumber, engineNumber, vehicleType } = req.body;
+    const filter = {};
+    if (plateNumber) filter.plateNumber = plateNumber;
+    if (identificationNumber) filter.identificationNumber = identificationNumber;
+    if (engineNumber) filter.engineNumber = engineNumber;
+    if (vehicleType) filter.vehicleType = vehicleType;
+    if (Object.keys(filter).length === 0) {
+      return res.status(400).json({ message: "At least one search field is required" });
     }
-    const record = await VehicleRecord.findOne({ plateNumber });
+    const record = await VehicleRecord.findOne(filter);
     if (!record) {
       return res.status(404).json({ message: "Record not found" });
     }

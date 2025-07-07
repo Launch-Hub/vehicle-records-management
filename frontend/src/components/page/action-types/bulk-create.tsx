@@ -84,7 +84,7 @@ export default function BulkCreateActionTypes({ onSuccess }: { onSuccess?: () =>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[10%]">Thứ tự</TableHead>
-            <TableHead>Hạng mục</TableHead>
+            <TableHead>Tạo mục</TableHead>
             <TableHead className="w-[18%]">Bước</TableHead>
             <TableHead className="w-[18%]">Chuyển bước</TableHead>
             <TableHead className="w-[60px]"></TableHead>

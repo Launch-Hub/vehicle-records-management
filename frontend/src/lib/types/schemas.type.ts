@@ -64,7 +64,7 @@ export const ProcedureFormSchema = z.object({
   plateNumber: z.string().optional(),
   color: z.string().optional(),
   identificationNumber: z.string().optional(),
-  registrationType: z.string().min(1, 'Hạng mục đăng ký là bắt buộc'),
+  registrationType: z.string().min(1, 'Tạo mục đăng ký là bắt buộc'),
   note: z.string().optional(),
   dueDate: z.date(),
   status: z.string(),
@@ -79,7 +79,7 @@ export const ProcedureFormSchema = z.object({
 export type ProcedureFormValues = z.infer<typeof ProcedureFormSchema>
 
 export const ActionTypeFormSchema = z.object({
-  name: z.string().min(1, 'Hạng mục là bắt buộc'),
+  name: z.string().min(1, 'Tạo mục là bắt buộc'),
   step: z.coerce.number().min(1, 'Bước phải lớn hơn 0'),
   toStep: z.coerce.number().min(1, 'Bước phải lớn hơn 0'),
   order: z.coerce.number(),

@@ -10,6 +10,11 @@ import {
   FileClockIcon,
   NotebookPenIcon,
   BookOpenCheckIcon,
+  ImportIcon,
+  PackageOpenIcon,
+  PackageIcon,
+  HardDriveIcon,
+  PrinterCheckIcon,
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -30,6 +35,7 @@ import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import LogsPage from '@/pages/activities/Logs'
 import { DEFAULT_LANG } from './constants/env'
+import CreateProcedurePage from '@/pages/procedures/CreateProcedure'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -99,6 +105,11 @@ export const PAGE_MAP = {
   ProceduresPage: {
     lazy: lazy(() => import('@/pages/procedures/Procedures')), // lazy-loaded
     component: ProceduresPage,
+    default: 'eager',
+  },
+  CreateProcedurePage: {
+    lazy: lazy(() => import('@/pages/procedures/CreateProcedure')), // lazy-loaded
+    component: CreateProcedurePage,
     default: 'eager',
   },
   ProcedureDetailPage: {
@@ -291,8 +302,8 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     language: 'en',
     translations: [
       {
-        path: '/lich-su-dang-ky',
-        title: 'Lịch sử đăng ký',
+        path: '/tim-kiem-xe',
+        title: 'Tìm kiếm xe',
         language: 'vi',
       },
     ],
@@ -381,8 +392,8 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     language: 'en',
     translations: [
       {
-        path: '/quan-ly-hang-muc',
-        title: 'Quản lý hạng mục',
+        path: '/quan-ly-hoat-dong',
+        title: 'Tạo mục đăng ký',
         language: 'vi',
       },
     ],
@@ -416,7 +427,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
 
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'CreateProcedurePage',
     resource: 'procedures_1',
     showSidebar: true,
     nav: 2,
@@ -432,32 +443,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         language: 'vi',
       },
     ],
-    children: [
-      {
-        element: 'ProcedureDetailPage',
-        path: ':id',
-        title: 'Procedure Detail',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Chỉnh sửa tiếp nhận',
-          },
-        ],
-      },
-      {
-        element: 'ProcedureDetailPage',
-        path: 'new',
-        title: 'Create Procedure',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Tạo hồ sơ mới',
-          },
-        ],
-      },
-    ],
+    // No children: go directly to create page
   },
 
   {
@@ -473,8 +459,8 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     language: 'en',
     translations: [
       {
-        path: '/phan-loai-ho-so',
-        title: 'Phân loại hồ sơ',
+        path: '/xu-li-ho-so',
+        title: 'Xử lí hồ sơ',
         language: 'vi',
       },
     ],
@@ -506,10 +492,30 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     resource: 'procedures_4',
     showSidebar: true,
     nav: 2,
+    icon: PrinterCheckIcon,
+    path: '/-',
+    title: '-',
+    query: { step: 4 },
+    language: 'en',
+    translations: [
+      {
+        path: '/in-the',
+        title: 'In thẻ',
+        language: 'vi',
+      },
+    ],
+    children: [],
+  },
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures_5',
+    showSidebar: true,
+    nav: 2,
     icon: NotebookPenIcon,
     path: '/request-approval',
     title: 'Request Approval',
-    query: { step: 4 },
+    query: { step: 5 },
     language: 'en',
     translations: [
       {
@@ -523,18 +529,78 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   {
     auth: true,
     element: 'ProceduresPage',
-    resource: 'procedures_5',
+    resource: 'procedures_6',
     showSidebar: true,
     nav: 2,
     icon: BookOpenCheckIcon,
+    path: '/-',
+    title: '-',
+    query: { step: 6 },
+    language: 'en',
+    translations: [
+      {
+        path: '/ket-qua-ra-quay',
+        title: 'Kết quả ra quầy',
+        language: 'vi',
+      },
+    ],
+    children: [],
+  },
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures_7',
+    showSidebar: true,
+    nav: 2,
+    icon: HardDriveIcon,
     path: '/result-return',
     title: 'Result Return',
-    query: { step: 5 },
+    query: { step: 7 },
     language: 'en',
     translations: [
       {
         path: '/tra-ket-qua',
         title: 'Trả kết quả',
+        language: 'vi',
+      },
+    ],
+    children: [],
+  },
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures_8',
+    showSidebar: true,
+    nav: 2,
+    icon: PackageIcon,
+    path: '/archive',
+    title: 'Archive',
+    query: { step: 8 },
+    language: 'en',
+    translations: [
+      {
+        path: '/luu-kho',
+        title: 'Lưu kho',
+        language: 'vi',
+      },
+    ],
+    children: [],
+  },
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures_9',
+    showSidebar: true,
+    nav: 2,
+    icon: PackageOpenIcon,
+    path: '/export',
+    title: 'Export',
+    query: { step: 0 },
+    language: 'en',
+    translations: [
+      {
+        path: '/xuat-kho',
+        title: 'Xuất kho',
         language: 'vi',
       },
     ],

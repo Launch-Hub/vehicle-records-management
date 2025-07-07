@@ -1,5 +1,6 @@
 import { getPermissionLabel } from './dictionary'
 
+export const VEHICLE_TYPES = ['Mô tô', 'Ô tô']
 export const PLATE_COLORS = [
   {
     label: 'Nền màu trắng, chữ và số màu đen',
@@ -78,8 +79,10 @@ export const DEFAULT_PERMISSION = [...$permissionOrigin, ...$adminOnlyPerms, ...
 
 export const STEP_TABS = [
   { value: 1, label: 'Tiếp nhận', color: 'bg-blue-500' },
-  { value: 2, label: 'Phân loại', color: 'bg-green-500' },
+  { value: 2, label: 'Xử lí', color: 'bg-purple-500' },
   { value: 3, label: 'Thu phí', color: 'bg-yellow-500' },
-  { value: 4, label: 'Trình ký', color: 'bg-red-500' },
-  { value: 5, label: 'Trả kết quả', color: 'bg-purple-500' },
+  { value: 4, label: 'In thẻ', color: 'bg-blue-500' },
+  { value: 5, label: 'Trình ký', color: 'bg-red-500' },
+  { value: 6, label: 'Kết quả ra quầy', color: 'bg-red-500' },
+  { value: 7, label: 'Trả kết quả', color: 'bg-green-500' },
 ]

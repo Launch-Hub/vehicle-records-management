@@ -4,12 +4,13 @@ const { parsePagination } = require("../utils/helper");
 exports.getList = async (req, res) => {
   // Define the view: fields to include
   const projection = {
-    recordId: 1,
-    bulkId: 1,
+    record: 1,
+    bulk: 1,
     status: 1,
     registrationType: 1,
     createdAt: 1,
     updatedAt: 1,
+    steps: 1, // include steps for population
   };
   try {
     const { pageIndex, pageSize, search, step } = req.query;
@@ -28,9 +29,10 @@ exports.getList = async (req, res) => {
     if (total === 0) return res.json({ total, items: [] });
 
     const items = await Procedure.find(filter, projection)
-      .populate("recordId", "plateNumber registrant")
-      .populate("bulkId", "name")
-      .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
+      .populate({ path: "record", select: "plateNumber registrant" })
+      .populate({ path: "bulk", select: "name" })
+      .populate({ path: "steps.action", select: "name step" })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
       .exec();
@@ -44,8 +46,9 @@ exports.getList = async (req, res) => {
 exports.getOne = async (req, res) => {
   try {
     const result = await Procedure.findById(req.params.id)
-      .populate("recordId", "plateNumber registrant")
-      .populate("bulkId", "name");
+      .populate({ path: "record", select: "plateNumber registrant" })
+      .populate({ path: "bulk", select: "name" })
+      .populate({ path: "steps.action", select: "name step" });
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
     res.json(result);
   } catch (err) {
@@ -55,12 +58,12 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { recordId, bulkId, registrationType } = req.body;
+    const { record, bulk, registrationType } = req.body;
 
     // Check if a procedure already exists for this record and bulk combination
     const existingItem = await Procedure.findOne({
-      recordId,
-      bulkId,
+      record,
+      bulk,
       registrationType,
     });
 
@@ -91,13 +94,11 @@ exports.update = async (req, res) => {
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
-    
     // Create description with old and new status if status changed
     const oldStatus = procedureStatuses[oldDoc.status] || oldDoc.status;
     const newStatus = procedureStatuses[result.status] || result.status;
     const statusChange = oldDoc.status !== result.status ? ` từ ${oldStatus}` : '';
     res.locals.activityDescription = `Chỉnh sửa hồ sơ ${result.registrationType} - trạng thái: ${newStatus}${statusChange}`;
-    
     res.json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });

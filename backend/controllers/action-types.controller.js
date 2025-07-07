@@ -123,7 +123,6 @@ exports.createBulk = async (req, res) => {
     let results = [];
     if (itemsToCreate.length > 0) {
       results = await ActionType.insertMany(itemsToCreate);
-      res.locals.documentId = results.map((r) => r._id); // ✅ required for activity logger
     }
 
     // Prepare response message

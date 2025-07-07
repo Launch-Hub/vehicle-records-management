@@ -49,6 +49,7 @@ const procedurechema = new mongoose.Schema(
       required: false,
     },
     registrationType: { type: String, require: true }, // type of registration (not the action inside step)
+    oldPlate: String, // old plate number (when the plate is changed)
     steps: [stepSchema], // only 1 step exist isCompleted = false
     currentStep: { type: Number, default: 1 }, // current step number
     status: {

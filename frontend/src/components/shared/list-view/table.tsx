@@ -278,13 +278,13 @@ export function DataTable<T extends Record<string, any>>({
           />
         </div>
         <div className="flex items-center gap-2">
-          {/* <DropdownMenu>
+          <DropdownMenu>
             <DropdownMenuTrigger
               disabled={!table.getAllColumns().filter((col) => col.getCanHide()).length}
               asChild
             >
               <Button variant="outline" size="sm">
-                <ChevronDownIcon className="mr-2 size-4" /> Cột hiển thị
+                <ChevronDownIcon className="size-4" /> Cột hiển thị
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
@@ -297,13 +297,11 @@ export function DataTable<T extends Record<string, any>>({
                     checked={col.getIsVisible()}
                     onCheckedChange={() => col.toggleVisibility()}
                   >
-                    {typeof col.columnDef.header === 'string'
-                      ? col.columnDef.header
-                      : col.id}
+                    {typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}
                   </DropdownMenuCheckboxItem>
                 ))}
             </DropdownMenuContent>
-          </DropdownMenu> */}
+          </DropdownMenu>
           <Button variant="outline" size="sm" onClick={onCreate}>
             <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
           </Button>
@@ -314,8 +312,8 @@ export function DataTable<T extends Record<string, any>>({
             disabled={!selectedRows.length}
             className="border-success text-success hover:border-success hover:text-success"
           >
-            <FileSpreadsheet className="mr-2 size-4" />
-            Xuất Excel
+            <FileSpreadsheet className="size-4" />
+            In danh sách
           </Button>
         </div>
       </div>
@@ -452,7 +450,7 @@ export function DataTable<T extends Record<string, any>>({
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Chọn cột để xuất Excel</DialogTitle>
+            <DialogTitle>Chọn cột hiển thị trong bảng in</DialogTitle>
           </DialogHeader>
           <div className="flex flex-col gap-2 max-h-60 overflow-auto">
             {allExportableColumns.map((col: any) => (
@@ -473,7 +471,7 @@ export function DataTable<T extends Record<string, any>>({
           </div>
           <DialogFooter>
             <Button onClick={handleExportConfirm} disabled={!selectedExportColumns.length}>
-              Xuất Excel
+              In
             </Button>
             <DialogClose asChild>
               <Button variant="outline">Huỷ</Button>
