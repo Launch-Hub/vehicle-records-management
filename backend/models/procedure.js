@@ -37,13 +37,13 @@ const stepSchema = new mongoose.Schema(
 
 const procedurechema = new mongoose.Schema(
   {
-    recordId: {
+    record: {
       // thông tin hồ sơ
       type: mongoose.Schema.Types.ObjectId,
       ref: "VehicleRecord",
       required: true,
     },
-    bulkId: {
+    bulk: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Bulk",
       required: false,

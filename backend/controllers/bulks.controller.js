@@ -102,7 +102,7 @@ exports.getProceduresByBulk = async (req, res) => {
     const { Procedure } = require("../models/procedure");
 
     const procedures = await Procedure.find({ bulkId })
-      .populate("recordId", "plateNumber registrant")
+      .populate("record", "plateNumber registrant")
       .sort({ createdAt: -1 });
 
     res.json(procedures);

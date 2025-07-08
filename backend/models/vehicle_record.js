@@ -11,15 +11,10 @@ const vehicleRecordSchema = new mongoose.Schema(
   {
     plateNumber: { type: String, unique: true, required: true },
     color: { type: String },
-    identificationNumber: { type: String, unique: true, required: true }, // Vehicle Identification Number (VIN)
-    engineNumber: { type: String, required: true },
-    vehicleType: { type: String, default: "Ô tô" },
-    registrant: { type: String, required: true },
-    // the object registrant should be used later
-    // registrant: { type: mongoose.Schema.Types.ObjectId, ref: "registrant", required: true },
-    // the registrant ref can be populated
-    // by using .populate('registrant', '<field_1> <field_2> ...')
-    // or simply .populate('registrant')
+    identificationNumber: String, // Vehicle Identification Number (VIN)
+    engineNumber: String,
+    vehicleType: String,
+    registrant: { type: String, required: true }, // registrant's name
     phone: String,
     email: String,
     address: String,

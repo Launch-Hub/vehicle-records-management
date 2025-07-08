@@ -77,7 +77,9 @@ exports.create = async (req, res) => {
     const result = await Procedure.create(req.body);
 
     res.locals.documentId = result._id; // ✅ required for activity logger
-    res.locals.activityDescription = `Tạo hồ sơ ${result.registrationType} - trạng thái: ${procedureStatuses[result.status] || result.status}`;
+    res.locals.activityDescription = `Tạo hồ sơ ${result.registrationType} - trạng thái: ${
+      procedureStatuses[result.status] || result.status
+    }`;
     res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
@@ -97,7 +99,7 @@ exports.update = async (req, res) => {
     // Create description with old and new status if status changed
     const oldStatus = procedureStatuses[oldDoc.status] || oldDoc.status;
     const newStatus = procedureStatuses[result.status] || result.status;
-    const statusChange = oldDoc.status !== result.status ? ` từ ${oldStatus}` : '';
+    const statusChange = oldDoc.status !== result.status ? ` từ ${oldStatus}` : "";
     res.locals.activityDescription = `Chỉnh sửa hồ sơ ${result.registrationType} - trạng thái: ${newStatus}${statusChange}`;
     res.json(result);
   } catch (err) {
@@ -111,7 +113,9 @@ exports.delete = async (req, res) => {
     if (!result) return res.status(404).json({ error: true, message: "Not found" });
 
     res.locals.documentId = result._id ?? req.params.id; // ✅ required for activity logger
-    res.locals.activityDescription = `Xoá hồ sơ ${result.registrationType} - trạng thái: ${procedureStatuses[result.status] || result.status}`;
+    res.locals.activityDescription = `Xoá hồ sơ ${result.registrationType} - trạng thái: ${
+      procedureStatuses[result.status] || result.status
+    }`;
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });

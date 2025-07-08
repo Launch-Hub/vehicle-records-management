@@ -22,80 +22,18 @@ const statusMap: Record<string, string> = {
   archived: 'Đã lưu trữ',
 }
 
-// Utility hook to fetch and cache record details by ID
-function useRecordDetails(recordId?: string) {
-  const [record, setRecord] = useState<null | { plateNumber: string }>(null)
-  const [loading, setLoading] = useState(false)
-  useEffect(() => {
-    if (!recordId) return
-    let mounted = true
-    setLoading(true)
-    recordService
-      .getOne(recordId)
-      .then((data) => {
-        if (mounted) setRecord(data)
-      })
-      .catch(() => {
-        if (mounted) setRecord(null)
-      })
-      .finally(() => {
-        if (mounted) setLoading(false)
-      })
-    return () => {
-      mounted = false
-    }
-  }, [recordId])
-  return { record, loading }
-}
-
-// Utility hook to fetch and cache bulk details by ID
-function useBulkDetails(bulkId?: string) {
-  const [bulk, setBulk] = useState<null | { name: string }>(null)
-  const [loading, setLoading] = useState(false)
-  useEffect(() => {
-    if (!bulkId) return
-    let mounted = true
-    setLoading(true)
-    bulkService
-      .getOne(bulkId)
-      .then((data) => {
-        if (mounted) setBulk(data)
-      })
-      .catch(() => {
-        if (mounted) setBulk(null)
-      })
-      .finally(() => {
-        if (mounted) setLoading(false)
-      })
-    return () => {
-      mounted = false
-    }
-  }, [bulkId])
-  return { bulk, loading }
-}
-
-// Utility cell component for record
-function TableRecordCell({ recordId }: { recordId?: string }) {
-  const { record, loading } = useRecordDetails(recordId)
-  if (loading) return <span className="text-muted-foreground">Đang tải...</span>
-  if (record && record.plateNumber)
-    return <span className="text-muted-foreground">{record.plateNumber}</span>
-  return <span className="text-muted-foreground">-</span>
-}
-
-// Utility cell component for bulk
-function TableBulkCell({ bulkId }: { bulkId?: string }) {
-  const { bulk, loading } = useBulkDetails(bulkId)
-  if (loading) return <span className="text-muted-foreground">Đang tải...</span>
-  if (bulk && bulk.name) return <span className="text-muted-foreground">{bulk.name}</span>
-  return <span className="text-muted-foreground">-</span>
-}
-
 const columns: ColumnDef<Procedure>[] = [
   {
-    accessorKey: 'recordId',
+    accessorKey: 'record',
     header: () => <div>Hồ sơ</div>,
-    cell: (info: any) => <TableRecordCell recordId={info.getValue() as string} />,
+    cell: (info: any) => {
+      const record = info.row.original.record
+      return (
+        <span className="text-muted-foreground">
+          {record && record.plateNumber ? record.plateNumber : '-'}
+        </span>
+      )
+    },
     minSize: 200,
   },
   {
@@ -105,9 +43,16 @@ const columns: ColumnDef<Procedure>[] = [
     size: 150,
   },
   {
-    accessorKey: 'bulkId',
+    accessorKey: 'bulk',
     header: () => <div>Lần nhập</div>,
-    cell: (info: any) => <TableBulkCell bulkId={info.getValue() as string} />,
+    cell: (info: any) => {
+      const bulk = info.row.original.bulk
+      return (
+        <span className="text-muted-foreground">
+          {bulk && bulk.name ? bulk.name : '-'}
+        </span>
+      )
+    },
     size: 120,
   },
   {
@@ -141,8 +86,6 @@ export default function ProceduresPage() {
 
   // Get the step from the merged route config and query params
   const step = getRoute(location.pathname)?.query?.step ?? -1
-
-  console.log(step)
 
   const fetchData = useCallback(async () => {
     try {

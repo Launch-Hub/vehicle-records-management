@@ -4,14 +4,17 @@ export const VEHICLE_TYPES = ['Mô tô', 'Ô tô']
 export const PLATE_COLORS = [
   {
     label: 'Nền màu trắng, chữ và số màu đen',
+    dictionary: ['trng', 'trắng', 'trang'],
     color: '#ffffff',
   },
   {
     label: 'Nền màu vàng, chữ và số màu đen',
+    dictionary: ['vng', 'vàng', 'vang'],
     color: '#fec917',
   },
   {
     label: 'Nền màu xanh, chữ và số màu trắng',
+    dictionary: ['xnh', 'xanh', 'xanh dương'],
     color: '#1750c4',
   },
 ]

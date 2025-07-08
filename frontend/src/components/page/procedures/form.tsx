@@ -347,8 +347,10 @@ export default function ProcedureForm({
             isCompleted: false,
           },
         ]
+        // step 1 is finished
+        data.currentStep = 2
       }
-      const record = existingRecord || vehicleRecords.find((e) => e._id === recordId)
+      const _record = existingRecord || vehicleRecords.find((e) => e._id === recordId)
       // Update bulk size if procedure is created successfully
       if (data.bulkId) {
         try {
@@ -369,6 +371,7 @@ export default function ProcedureForm({
         bulk: data.bulkId,
         steps: finalSteps,
         dueDate,
+        _record,
       } as any)
     } catch (error) {
       console.error('Failed to submit procedure', error)
@@ -405,140 +408,165 @@ export default function ProcedureForm({
     ? `${window.location.origin}/registration-history/${recordId}`
     : ''
 
+  // Helper to parse QR or pasted string for plateNumber and related fields
+  function parsePlateNumberInput(input: string) {
+    // Remove leading/trailing whitespace
+    const str = input.trim()
+    // Pattern 1: "plateNumber; color; engineNumber; identificationNumber"
+    if (str.includes(';')) {
+      const [plateNumber, color, engineNumber, identificationNumber] = str
+        .split(';')
+        .map((s) => s.trim())
+      return {
+        plateNumber: plateNumber?.toUpperCase() || '',
+        color: color || '',
+        engineNumber: engineNumber || '',
+        identificationNumber: identificationNumber || '',
+      }
+    }
+    // Pattern 2: "plateNumber-[nevermind]-[nevermind]..."
+    if (str.includes('-')) {
+      const [plateNumber] = str.split('-')
+      return {
+        plateNumber: plateNumber?.toUpperCase() || '',
+        color: '',
+        engineNumber: '',
+        identificationNumber: '',
+      }
+    }
+    // Fallback: treat as plateNumber only
+    return {
+      plateNumber: str.toUpperCase(),
+      color: '',
+      engineNumber: '',
+      identificationNumber: '',
+    }
+  }
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Procedure Fields Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Thông tin tiếp nhận</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="registrationType" className="required">
-                Phân loại đăng ký
-              </Label>
-              <Select
-                value={watch('registrationType')}
-                onValueChange={(value) => setValue('registrationType', value as any)}
-              >
-                <SelectTrigger id="registrationType" className="w-full">
-                  <SelectValue placeholder="Chọn hạng mục" />
-                </SelectTrigger>
-                <SelectContent>
-                  {actionTypes.map((actionType) => (
-                    <SelectItem key={actionType._id} value={actionType._id}>
-                      {actionType.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="registrationType" className="required">
+            Phân loại đăng ký
+          </Label>
+          <Select
+            value={watch('registrationType')}
+            onValueChange={(value) => setValue('registrationType', value as any)}
+          >
+            <SelectTrigger id="registrationType" className="w-full">
+              <SelectValue placeholder="Chọn hạng mục" />
+            </SelectTrigger>
+            <SelectContent>
+              {actionTypes.map((actionType) => (
+                <SelectItem key={actionType._id} value={actionType._id}>
+                  {actionType.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {!hideBulkId && (
+          <div className="space-y-2 w-full">
+            <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
+            <div className="w-full flex gap-2">
+              <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={openBulkSelect}
+                    className="flex-1 justify-between"
+                  >
+                    {watch('bulkId')
+                      ? bulks.find((b) => b._id === watch('bulkId'))?.name
+                      : 'Chọn lần nhập...'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                  <Command>
+                    <CommandInput
+                      placeholder="Tìm kiếm lần nhập..."
+                      onValueChange={setBulkSearch}
+                    />
+                    <CommandEmpty>Không tìm thấy lần nhập.</CommandEmpty>
+                    <CommandGroup>
+                      {bulks.map((bulk) => (
+                        <CommandItem
+                          key={bulk._id}
+                          value={bulk._id}
+                          onSelect={(currentValue) => {
+                            setValue('bulkId', currentValue === watch('bulkId') ? '' : currentValue)
+                            setOpenBulkSelect(false)
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              'mr-2 h-4 w-4',
+                              watch('bulkId') === bulk._id ? 'opacity-100' : 'opacity-0'
+                            )}
+                          />
+                          {bulk.name} ({bulk.size} hồ sơ)
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+
+              <Dialog open={showBulkForm} onOpenChange={setShowBulkForm}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <PlusCircle className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Tạo lần nhập mới</DialogTitle>
+                  </DialogHeader>
+                  <BulkForm onSubmit={handleCreateBulk} onCancel={() => setShowBulkForm(false)} />
+                </DialogContent>
+              </Dialog>
             </div>
+          </div>
+        )}
 
-            {!hideBulkId && (
-              <div className="space-y-2 w-full">
-                <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
-                <div className="w-full flex gap-2">
-                  <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={openBulkSelect}
-                        className="flex-1 justify-between"
-                      >
-                        {watch('bulkId')
-                          ? bulks.find((b) => b._id === watch('bulkId'))?.name
-                          : 'Chọn lần nhập...'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                      <Command>
-                        <CommandInput
-                          placeholder="Tìm kiếm lần nhập..."
-                          onValueChange={setBulkSearch}
-                        />
-                        <CommandEmpty>Không tìm thấy lần nhập.</CommandEmpty>
-                        <CommandGroup>
-                          {bulks.map((bulk) => (
-                            <CommandItem
-                              key={bulk._id}
-                              value={bulk._id}
-                              onSelect={(currentValue) => {
-                                setValue(
-                                  'bulkId',
-                                  currentValue === watch('bulkId') ? '' : currentValue
-                                )
-                                setOpenBulkSelect(false)
-                              }}
-                            >
-                              <Check
-                                className={cn(
-                                  'mr-2 h-4 w-4',
-                                  watch('bulkId') === bulk._id ? 'opacity-100' : 'opacity-0'
-                                )}
-                              />
-                              {bulk.name} ({bulk.size} hồ sơ)
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-
-                  <Dialog open={showBulkForm} onOpenChange={setShowBulkForm}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="icon">
-                        <PlusCircle className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Tạo lần nhập mới</DialogTitle>
-                      </DialogHeader>
-                      <BulkForm
-                        onSubmit={handleCreateBulk}
-                        onCancel={() => setShowBulkForm(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </div>
+        <div className="space-y-2">
+          <Label htmlFor="image">Đính kèm file</Label>
+          <div className="flex items-center gap-4">
+            <input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={isUploadingImage}
+              style={{ display: 'none' }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => document.getElementById('image')?.click()}
+              disabled={isUploadingImage}
+              className="flex-shrink-0"
+            >
+              {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
+            </Button>
+            {imageUrl && (
+              <img
+                src={`/uploads/du/${imageUrl}`}
+                alt="Ảnh bước 1"
+                className="max-h-20 rounded border ml-2"
+                style={{ maxWidth: 80 }}
+              />
             )}
+          </div>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="image">Đính kèm file</Label>
-              <div className="flex items-center gap-4">
-                <input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  disabled={isUploadingImage}
-                  style={{ display: 'none' }}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => document.getElementById('image')?.click()}
-                  disabled={isUploadingImage}
-                  className="flex-shrink-0"
-                >
-                  {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
-                </Button>
-                {imageUrl && (
-                  <img
-                    src={`/uploads/du/${imageUrl}`}
-                    alt="Ảnh bước 1"
-                    className="max-h-20 rounded border ml-2"
-                    style={{ maxWidth: 80 }}
-                  />
-                )}
-              </div>
-            </div>
-
-            {/* <div className="space-y-2">
+        {/* <div className="space-y-2">
               <Label htmlFor="note">Ghi chú</Label>
               <Textarea
                 id="note"
@@ -547,61 +575,64 @@ export default function ProcedureForm({
                 rows={3}
               />
             </div> */}
-            <div className="space-y-2">
-              <div className=""></div>
-              <div className="flex justify-end gap-2">
-                {/* Print and QR buttons */}
-                <Button type="button" variant="outline" onClick={() => window.print()}>
-                  <PrinterIcon />
-                  In mã
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setShowQR(true)} disabled={!recordId}>
+        <div className="space-y-2">
+          <div className="h-[14px]"></div>
+          <div className="flex justify-end gap-2">
+            {/* Print and QR buttons */}
+            <Button type="button" variant="outline" onClick={() => window.print()}>
+              <PrinterIcon />
+              In mã
+            </Button>
+            {/* <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowQR(true)}
+                  disabled={!recordId}
+                >
                   <QrCodeIcon className="mr-2" />
                   Tạo mã
-                </Button>
-                <Dialog open={showQR} onOpenChange={setShowQR}>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Mã QR xem lịch sử hồ sơ</DialogTitle>
-                    </DialogHeader>
-                    {recordId && (
-                      <div className="flex flex-col items-center gap-4">
-                        <QRCodeCanvas
-                          value={recordDetailUrl}
-                          size={200}
-                          level="H"
-                          includeMargin
-                          bgColor="#fff"
-                          fgColor="#000"
-                        />
-                        <div className="text-xs break-all text-center">{recordDetailUrl}</div>
-                        <Button type="button" variant="outline" onClick={() => window.print()}>
-                          <PrinterIcon className="mr-2" />
-                          In mã
-                        </Button>
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
-                {onCancel && (
-                  <Button type="button" variant="ghost" onClick={onCancel}>
-                    Huỷ bỏ
-                  </Button>
+                </Button> */}
+            <Dialog open={showQR} onOpenChange={setShowQR}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Mã QR xem lịch sử hồ sơ</DialogTitle>
+                </DialogHeader>
+                {recordId && (
+                  <div className="flex flex-col items-center gap-4">
+                    <QRCodeCanvas
+                      value={recordDetailUrl}
+                      size={200}
+                      level="H"
+                      includeMargin
+                      bgColor="#fff"
+                      fgColor="#000"
+                    />
+                    <div className="text-xs break-all text-center">{recordDetailUrl}</div>
+                    <Button type="button" variant="outline" onClick={() => window.print()}>
+                      <PrinterIcon className="mr-2" />
+                      In mã
+                    </Button>
+                  </div>
                 )}
-                <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
-                  {isCreatingRecord ? 'Đang tiếp nhận...' : 'Tiếp nhận'}
-                </Button>
-              </div>
-            </div>
+              </DialogContent>
+            </Dialog>
+            {onCancel && (
+              <Button type="button" variant="ghost" onClick={onCancel}>
+                Huỷ bỏ
+              </Button>
+            )}
+            <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
+              {isCreatingRecord ? 'Đang tiếp nhận...' : 'Tiếp nhận'}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Record Fields Section */}
       <Accordion type="multiple" defaultValue={['vehicle', 'owner']} className="mb-4">
         <AccordionItem value="vehicle">
           <AccordionTrigger>Thông tin xe</AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="plateNumber" className="required">
@@ -610,12 +641,20 @@ export default function ProcedureForm({
                 <Input
                   id="plateNumber"
                   value={recordFields.plateNumber}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    // If user is typing, just update plateNumber
+                    setRecordFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
+                  }}
+                  onPaste={(e) => {
+                    const pasted = e.clipboardData.getData('text')
+                    const parsed = parsePlateNumberInput(pasted)
                     setRecordFields((prev) => ({
                       ...prev,
-                      plateNumber: e.target.value.toUpperCase(),
+                      ...parsed,
                     }))
-                  }
+                    // Prevent default paste to avoid double input
+                    e.preventDefault()
+                  }}
                   onBlur={handlePlateNumberBlur}
                   placeholder="Nhập hoặc quét mã biển số..."
                 />
@@ -648,10 +687,11 @@ export default function ProcedureForm({
                   {getLabel('vehicleType')}
                 </Label>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild={false} className="w-full !max-w-full overflow-hidden">
-                    <span
-                      className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                    >
+                  <DropdownMenuTrigger
+                    asChild={false}
+                    className="w-full !max-w-full overflow-hidden"
+                  >
+                    <span className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
                       <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
                         {recordFields.vehicleType ? recordFields.vehicleType : 'Chọn loại xe'}
                       </span>
@@ -689,15 +729,18 @@ export default function ProcedureForm({
                 {useCustomColor ? (
                   <Input
                     value={recordFields.color}
-                    onChange={(e) => setRecordFields((prev) => ({ ...prev, color: e.target.value }))}
+                    onChange={(e) =>
+                      setRecordFields((prev) => ({ ...prev, color: e.target.value }))
+                    }
                     placeholder="Nhập màu tùy chỉnh..."
                   />
                 ) : (
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild={false} className="w-full !max-w-full overflow-hidden">
-                      <span
-                        className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focusVisible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                      >
+                    <DropdownMenuTrigger
+                      asChild={false}
+                      className="w-full !max-w-full overflow-hidden"
+                    >
+                      <span className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focusVisible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
                         <span className="overflow-hidden text-ellipsis whitespace-nowrap block">
                           {recordFields.color ? recordFields.color : 'Chọn màu'}
                         </span>
@@ -710,7 +753,10 @@ export default function ProcedureForm({
                           key={c.label}
                           onClick={() => setRecordFields((prev) => ({ ...prev, color: c.label }))}
                         >
-                          <div className="h-4 w-4 rounded-full" style={{ backgroundColor: c.color }} />
+                          <div
+                            className="h-4 w-4 rounded-full"
+                            style={{ backgroundColor: c.color }}
+                          />
                           <span className="ml-2">{c.label}</span>
                         </DropdownMenuItem>
                       ))}
@@ -723,7 +769,7 @@ export default function ProcedureForm({
         </AccordionItem>
         <AccordionItem value="owner">
           <AccordionTrigger>Thông tin chủ xe</AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="registrant" className="required">
@@ -757,7 +803,7 @@ export default function ProcedureForm({
                   placeholder="Nhập email..."
                 />
               </div>
-              <div className="space-y-2">
+              <div className="col-span-3 space-y-2">
                 <Label htmlFor="address">{getLabel('address')}</Label>
                 <Input
                   id="address"

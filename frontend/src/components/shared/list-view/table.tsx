@@ -77,6 +77,10 @@ interface DataTableProps<T> {
   onCopy: (item: T) => void
   onDelete: (id: string) => void
   onExport?: (rows: T[], columns: { key: string; label: string }[]) => void
+  showSearch?: boolean
+  showCreate?: boolean
+  showExport?: boolean
+  showColumnToggle?: boolean
 }
 
 function DataRow<T>({ row }: { row: Row<T> }) {
@@ -103,6 +107,10 @@ export function DataTable<T extends Record<string, any>>({
   onCopy,
   onDelete,
   onExport,
+  showSearch = true,
+  showCreate = true,
+  showExport = true,
+  showColumnToggle = true,
 }: DataTableProps<T>) {
   const [data, setData] = useState<T[]>(() => initialData)
   const [rowSelection, setRowSelection] = useState({})
@@ -266,55 +274,65 @@ export function DataTable<T extends Record<string, any>>({
     <div className="flex w-full flex-col justify-start gap-6 relative">
       {loading && <LoaderOverlay />}
       <div className="flex items-center justify-between px-4 lg:px-6">
-        <div className="relative w-full max-w-sm">
-          <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Tìm kiếm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onBlur={(e) => handleSearch(e.target.value)}
-            className="w-full pr-8"
-          />
-        </div>
+        {showSearch ? (
+          <div className="relative w-full max-w-sm">
+            <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Tìm kiếm..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onBlur={(e) => handleSearch(e.target.value)}
+              className="w-full pr-8"
+            />
+          </div>
+        ) : (
+          <div />
+        )}
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              disabled={!table.getAllColumns().filter((col) => col.getCanHide()).length}
-              asChild
+          {showColumnToggle && (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                disabled={!table.getAllColumns().filter((col) => col.getCanHide()).length}
+                asChild
+              >
+                <Button variant="outline" size="sm">
+                  <ChevronDownIcon className="size-4" /> Cột hiển thị
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56">
+                {table
+                  .getAllColumns()
+                  .filter((col) => col.getCanHide())
+                  .map((col) => (
+                    <DropdownMenuCheckboxItem
+                      key={col.id}
+                      checked={col.getIsVisible()}
+                      onCheckedChange={() => col.toggleVisibility()}
+                    >
+                      {typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          {showCreate && (
+            <Button variant="outline" size="sm" onClick={onCreate}>
+              <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
+            </Button>
+          )}
+          {showExport && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportClick}
+              disabled={!selectedRows.length}
+              className="border-success text-success hover:border-success hover:text-success"
             >
-              <Button variant="outline" size="sm">
-                <ChevronDownIcon className="size-4" /> Cột hiển thị
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              {table
-                .getAllColumns()
-                .filter((col) => col.getCanHide())
-                .map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col.id}
-                    checked={col.getIsVisible()}
-                    onCheckedChange={() => col.toggleVisibility()}
-                  >
-                    {typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}
-                  </DropdownMenuCheckboxItem>
-                ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button variant="outline" size="sm" onClick={onCreate}>
-            <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportClick}
-            disabled={!selectedRows.length}
-            className="border-success text-success hover:border-success hover:text-success"
-          >
-            <FileSpreadsheet className="size-4" />
-            In danh sách
-          </Button>
+              <FileSpreadsheet className="size-4" />
+              In danh sách
+            </Button>
+          )}
         </div>
       </div>
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">

@@ -320,7 +320,7 @@ export default function BulkDetailPage() {
                   <TableBody>
                     {procedures.map((procedure, index) => (
                       <TableRow key={index}>
-                        <TableCell>{procedure._tempRecord?.plateNumber}</TableCell>
+                        <TableCell>{procedure.record?.plateNumber}</TableCell>
                         <TableCell>
                           {getRegistrationType(procedure.registrationType || '')}
                         </TableCell>
@@ -423,7 +423,7 @@ export default function BulkDetailPage() {
                   <TableBody>
                     {procedures.map((procedure, index) => (
                       <TableRow key={index}>
-                        <TableCell>{procedure._tempRecord?.plateNumber}</TableCell>
+                        <TableCell>{procedure.record?.plateNumber}</TableCell>
                         <TableCell>
                           {getRegistrationType(procedure.registrationType || '')}
                         </TableCell>

@@ -76,7 +76,9 @@ export type ProcedureStep = ProcedureStepProps
 interface ProcedureProps {
   _id: string
   recordId: string
+  record?: VehicleRecordProps // for populate
   bulkId?: string
+  bulk?: BulkProps // for populate
   registrationType: string
   steps: ProcedureStep[]
   currentStep: number
@@ -87,9 +89,6 @@ interface ProcedureProps {
   archivedAt?: Date
   createdAt: Date
   updatedAt?: Date
-  // for store in the client only
-  _tempRecord?: VehicleRecordProps
-  _tempBulk?: BulkProps
 }
 export type Procedure = ProcedureProps
 
