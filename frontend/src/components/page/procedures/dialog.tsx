@@ -2,6 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import type { DialogProps } from '@/lib/types/props'
 import type { Procedure } from '@/lib/types/tables.type'
 import ProcedureForm from './form'
+import ProcedureStepChangeForm from './step-change-form'
 
 export default function ProcedureDialog({
   open,
@@ -9,6 +10,7 @@ export default function ProcedureDialog({
   onSubmit,
   initialData,
   isCopying = false,
+  isChangeStep = false,
 }: DialogProps<Procedure>) {
   const defaultAction = initialData || isCopying ? 'create' : 'update'
 
@@ -18,12 +20,20 @@ export default function ProcedureDialog({
         <DialogHeader>
           <DialogTitle>{initialData ? 'Chỉnh sửa thông tin' : 'Tạo đăng ký mới'}</DialogTitle>
         </DialogHeader>
-        <ProcedureForm
-          initialData={initialData}
-          isCopying={isCopying}
-          onSubmit={(data) => onSubmit(defaultAction, data)}
-          onCancel={onClose}
-        />
+        {isChangeStep && initialData ? (
+          <ProcedureStepChangeForm
+            procedure={initialData}
+            onSubmit={(data) => onSubmit(defaultAction, data)}
+            onCancel={onClose}
+          />
+        ) : (
+          <ProcedureForm
+            initialData={initialData}
+            isCopying={isCopying}
+            onSubmit={(data) => onSubmit(defaultAction, data)}
+            onCancel={onClose}
+          />
+        )}
       </DialogContent>
     </Dialog>
   )

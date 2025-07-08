@@ -11,6 +11,14 @@ import { DataTable } from '@/components/shared/list-view/table'
 import { procedureService } from '@/lib/services/procedures'
 import { recordService } from '@/lib/services/records'
 import { bulkService } from '@/lib/services/bulks'
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { MoreVerticalIcon } from 'lucide-react'
 
 const statusMap: Record<string, string> = {
   pending: 'Đăng ký mới',
@@ -47,11 +55,7 @@ const columns: ColumnDef<Procedure>[] = [
     header: () => <div>Lần nhập</div>,
     cell: (info: any) => {
       const bulk = info.row.original.bulk
-      return (
-        <span className="text-muted-foreground">
-          {bulk && bulk.name ? bulk.name : '-'}
-        </span>
-      )
+      return <span className="text-muted-foreground">{bulk && bulk.name ? bulk.name : '-'}</span>
     },
     size: 120,
   },
@@ -182,6 +186,30 @@ export default function ProceduresPage() {
     })
   }
 
+  const customActionColumn: ColumnDef<Procedure> = {
+    id: 'actions',
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="size-8 text-muted-foreground" size="icon">
+            <MoreVerticalIcon className="size-4" />
+            <span className="sr-only">Mở menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          {/* <DropdownMenuItem onClick={() => setConfirmDelete({ open: true, item: row.original })}>
+            <span className="text-destructive">Xoá</span>
+          </DropdownMenuItem> */}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 32,
+  }
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
@@ -202,6 +230,7 @@ export default function ProceduresPage() {
             onDelete={handleDelete}
             onSearch={handleSearch}
             onExport={handleExport}
+            customActionColumn={Number(step) > 1 ? customActionColumn : undefined}
           />
         </div>
       </div>

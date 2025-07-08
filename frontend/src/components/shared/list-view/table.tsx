@@ -69,7 +69,7 @@ interface DataTableProps<T> {
   total: number
   data: T[]
   columns: ColumnDef<T>[]
-  // actionColumns: [],
+  customActionColumn?: ColumnDef<T>
   onSearch: (term: string) => void
   onPageChange: (pagination: PaginationProps) => void
   onCreate: () => void
@@ -100,6 +100,7 @@ export function DataTable<T extends Record<string, any>>({
   data: initialData,
   loading,
   columns,
+  customActionColumn,
   onSearch,
   onPageChange,
   onCreate,
@@ -134,57 +135,65 @@ export function DataTable<T extends Record<string, any>>({
     setData(initialData)
   }, [initialData])
 
-  const selectColumn: ColumnDef<T> = {
-    id: 'select',
-    header: ({ table }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-    size: 32,
-  }
+  const selectColumn: ColumnDef<T> = useMemo(() => {
+    return {
+      id: 'select',
+      header: ({ table }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && 'indeterminate')
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+      size: 32,
+    }
+  }, [])
 
-  const actionColumn: ColumnDef<T> = {
-    id: 'actions',
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="size-8 text-muted-foreground" size="icon">
-            <MoreVerticalIcon className="size-4" />
-            <span className="sr-only">Open menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setConfirmDelete({ open: true, item: row.original })}>
-            <span className="text-destructive">Xoá</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-    size: 32,
-  }
+  const actionColumn: ColumnDef<T> = useMemo(() => {
+    return customActionColumn
+      ? customActionColumn
+      : {
+          id: 'actions',
+          cell: ({ row }) => (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="size-8 text-muted-foreground" size="icon">
+                  <MoreVerticalIcon className="size-4" />
+                  <span className="sr-only">Mở menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => onEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => setConfirmDelete({ open: true, item: row.original })}
+                >
+                  <span className="text-destructive">Xoá</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ),
+          enableSorting: false,
+          enableHiding: false,
+          size: 32,
+        }
+  }, [onEdit, setConfirmDelete, customActionColumn])
 
   const defaultColumns: ColumnDef<T>[] = useMemo(() => {
     const dataColumns = columns
@@ -445,7 +454,7 @@ export function DataTable<T extends Record<string, any>>({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Bạn chắc chắn muốn xoá người dùng này chứ?</DialogTitle>
+            <DialogTitle>Bạn chắc chắn muốn xoá dữ liệu này chứ?</DialogTitle>
           </DialogHeader>
           <div className="flex justify-end gap-2 pt-4">
             <Button

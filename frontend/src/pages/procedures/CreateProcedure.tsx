@@ -12,14 +12,13 @@ export default function CreateProcedurePage() {
   const loader = useLoader()
   const [latestProcedures, setLatestProcedures] = useState<Procedure[]>([])
   const [registrationTypes, setRegistrationTypes] = useState<any[]>([])
-  const [isChanged, setIsChanged] = useState(false)
 
   const fetchData = useCallback(async () => {
     const latest = await procedureService.getList({ pageIndex: 0, pageSize: 5, step: 1 })
     setLatestProcedures(latest.items)
     const types = await actionTypeService.getList({ step: 1, pageIndex: 0, pageSize: 100 })
     setRegistrationTypes(types.items || [])
-  }, [isChanged])
+  }, [])
 
   const handleSubmit = async (data: Omit<Procedure, '_id'>) => {
     loader.show()
@@ -30,7 +29,7 @@ export default function CreateProcedurePage() {
       console.error(err)
       toast.error('Không thể lưu dữ liệu. Vui lòng thử lại.')
     } finally {
-      setIsChanged((prev) => !prev)
+      await fetchData()
       loader.hide()
     }
   }

@@ -1,4 +1,4 @@
-const { ADMIN_PERMISSIONS } = require(".");
+const { ADMIN_PERMISSIONS, DEFAULT_PERMISSIONS } = require(".");
 
 exports.default_admin = {
   username: "admin",
@@ -8,7 +8,7 @@ exports.default_admin = {
   avatar: "/images/default-avatar.png",
   assignedUnit: "PC08",
   serviceNumber: "CS0000",
-  roles: ["Quản Trị Viên"],
+  // roles: ["Quản Trị Viên"],
   permissions: ADMIN_PERMISSIONS,
   isAdmin: true,
 };
@@ -22,14 +22,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0001",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -40,14 +34,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0002",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -58,14 +46,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0003",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -76,14 +58,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0004",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -94,14 +70,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0005",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -112,14 +82,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0006",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -130,14 +94,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0007",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {
@@ -148,14 +106,8 @@ exports.mock_users = [
     avatar: "/images/default-avatar.png",
     assignedUnit: "PC08",
     serviceNumber: "CS0008",
-    roles: ["Nhân Viên"],
-    permissions: {
-      general: { read: true, write: true, delete: true },
-      users: { read: false, write: false, delete: false },
-      settings: { read: true, write: true, delete: true },
-      records: { read: true, write: true, delete: true },
-      reports: { read: true, write: true, delete: true },
-    },
+    // roles: ["Nhân Viên"],
+    permissions: DEFAULT_PERMISSIONS,
     isAdmin: false,
   },
   {

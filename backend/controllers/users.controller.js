@@ -293,12 +293,10 @@ exports.mockCreate = async (_, res) => {
       }
 
       const passwordHash = await hashPassword(password);
-      const finalPermissions = permissions || DEFAULT_PERMISSIONS;
 
       const createdItem = await User.create({
         ...user,
         passwordHash,
-        permissions: finalPermissions,
       });
 
       bulk.push(createdItem);

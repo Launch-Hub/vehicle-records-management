@@ -6,6 +6,7 @@ export interface DialogProps<T> {
   initialData?: T
   isCopying?: boolean
   isSelfEdit?: boolean
+  isChangeStep?: boolean
 }
 
 // Pagination

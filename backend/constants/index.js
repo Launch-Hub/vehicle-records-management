@@ -20,30 +20,17 @@ const LIST_FEATURES = [
   "action_types",
   "activites",
   "procedures",
-  //
+  // Process handling
   "procedures_1",
   "procedures_2",
   "procedures_3",
   "procedures_4",
   "procedures_5",
+  "procedures_6",
+  "procedures_7",
+  "procedures_8",
+  "procedures_9",
 ];
-
-const DEFAULT_PERMISSIONS = LIST_FEATURES.reduce((acc, feature) => {
-  if (feature === "users") {
-    acc[feature] = {
-      read: false,
-      write: false,
-      delete: false,
-    };
-  } else {
-    acc[feature] = {
-      read: true,
-      write: true,
-      delete: true,
-    };
-  }
-  return acc;
-}, {});
 
 const ADMIN_PERMISSIONS = LIST_FEATURES.reduce((acc, feature) => {
   acc[feature] = {
@@ -53,6 +40,14 @@ const ADMIN_PERMISSIONS = LIST_FEATURES.reduce((acc, feature) => {
   };
   return acc;
 }, {});
+const DEFAULT_PERMISSIONS = {
+  ...ADMIN_PERMISSIONS,
+  users: {
+    read: false,
+    write: false,
+    delete: false,
+  },
+};
 
 const DEFAULT_LIMIT_SIZE = 2 * 1024 * 1024;
 const INIT_BUCKET = path.join(__dirname, "uploads");
@@ -69,6 +64,7 @@ module.exports = {
   JWT_EXPIRY,
   JWT_REFRESH_EXPIRY,
   SALT_OR_ROUND,
+  ADMIN_PERMISSIONS,
   DEFAULT_PERMISSIONS,
   DEFAULT_BUCKET_NAME,
   DEFAULT_LIMIT_SIZE,

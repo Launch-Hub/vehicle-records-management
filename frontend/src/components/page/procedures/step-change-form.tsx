@@ -4,17 +4,27 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { uploadService } from '@/lib/services/upload'
 import type { Procedure, ProcedureStep } from '@/lib/types/tables.type'
 
 interface ProcedureStepChangeFormProps {
   procedure: Procedure
-  onSubmit: (data: { currentStep: number; steps: ProcedureStep[] }) => void
+  onSubmit: (data: Procedure) => void
   onCancel?: () => void
 }
 
-export default function ProcedureStepChangeForm({ procedure, onSubmit, onCancel }: ProcedureStepChangeFormProps) {
+export default function ProcedureStepChangeForm({
+  procedure,
+  onSubmit,
+  onCancel,
+}: ProcedureStepChangeFormProps) {
   const [selectedStep, setSelectedStep] = useState<number>(procedure.currentStep)
   const [note, setNote] = useState('')
   const [attachments, setAttachments] = useState<string[]>([])
@@ -39,15 +49,16 @@ export default function ProcedureStepChangeForm({ procedure, onSubmit, onCancel 
     const newStep: ProcedureStep = {
       order: procedure.steps.length + 1,
       step: selectedStep,
-      title: `Chuyển bước ${selectedStep}`,
+      title: `Chuyển sang bước ${selectedStep}`,
       action: '',
       note,
       attachments,
       isCompleted: false,
     }
     onSubmit({
-      currentStep: selectedStep,
+      ...procedure,
       steps: [...procedure.steps, newStep],
+      currentStep: selectedStep,
     })
   }
 
@@ -61,7 +72,10 @@ export default function ProcedureStepChangeForm({ procedure, onSubmit, onCancel 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="step">Chọn bước mới</Label>
-              <Select value={String(selectedStep)} onValueChange={v => setSelectedStep(Number(v))}>
+              <Select
+                value={String(selectedStep)}
+                onValueChange={(v) => setSelectedStep(Number(v))}
+              >
                 <SelectTrigger id="step" className="w-full">
                   <SelectValue placeholder="Chọn bước" />
                 </SelectTrigger>
@@ -79,7 +93,7 @@ export default function ProcedureStepChangeForm({ procedure, onSubmit, onCancel 
               <Textarea
                 id="note"
                 value={note}
-                onChange={e => setNote(e.target.value)}
+                onChange={(e) => setNote(e.target.value)}
                 placeholder="Nhập ghi chú cho lần chuyển bước..."
                 rows={3}
               />
