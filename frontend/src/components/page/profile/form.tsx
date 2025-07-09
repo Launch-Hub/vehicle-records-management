@@ -96,20 +96,20 @@ export default function ProfileForm({
         </div>
 
         <div className="col-span-2 space-y-2">
-          <Label htmlFor="name">{getLabel('name')}</Label>
+          <Label htmlFor="name">{getLabel('name', 'users')}</Label>
           <Input id="name" {...register('name')} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="username" className="required">
-            {getLabel('username')}
+            {getLabel('username', 'users')}
           </Label>
           <Input id="username" {...register('username')} />
         </div>
         {!isEditing && (
           <div className="space-y-2">
             <Label htmlFor="password" className="required">
-              {getLabel('password')}
+              {getLabel('passwordHash', 'users')}
             </Label>
             <div className="relative">
               <Input
@@ -141,28 +141,28 @@ export default function ProfileForm({
 
         <div className="space-y-2">
           <Label htmlFor="email" className="required">
-            {getLabel('email')}
+            {getLabel('email', 'users')}
           </Label>
           <Input id="email" type="email" {...register('email', { required: true })} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="phone" className="required">
-            {getLabel('phone')}
+            {getLabel('phone', 'users')}
           </Label>
           <Input id="phone" type="phone" {...register('phone', { required: true })} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="assignedUnit" className="required">
-            {getLabel('assignedUnit')}
+            {getLabel('assignedUnit', 'users')}
           </Label>
           <Input id="assignedUnit" {...register('assignedUnit')} />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="serviceNumber" className="required">
-            {getLabel('serviceNumber')}
+            {getLabel('serviceNumber', 'users')}
           </Label>
           <Input id="serviceNumber" {...register('serviceNumber')} />
         </div>

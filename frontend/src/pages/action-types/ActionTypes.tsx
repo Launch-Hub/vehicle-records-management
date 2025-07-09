@@ -176,22 +176,26 @@ export default function ActionTypesPage() {
                 ))}
               </TabsList>
             </Tabs>
-            <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">Tạo hàng loạt</Button>
-              </DialogTrigger>
-              <DialogContent className="min-w-[90%] lg:min-w-[80%] xl:min-w-[60%] !max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Tạo hạng mục hàng loạt</DialogTitle>
-                </DialogHeader>
-                <BulkCreateActionTypes
-                  onSuccess={() => {
-                    setBulkDialogOpen(false)
-                    fetchData()
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center gap-2">
+              <Button variant="outlineDestructive" onClick={() => {}}>Khôi phục mặc định</Button>
+
+              <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outlinePrimary">Thêm nhiều</Button>
+                </DialogTrigger>
+                <DialogContent className="min-w-[90%] lg:min-w-[80%] xl:min-w-[60%] !max-w-2xl">
+                  <DialogHeader>
+                    <DialogTitle>Thêm các tạo mục hàng loạt</DialogTitle>
+                  </DialogHeader>
+                  <BulkCreateActionTypes
+                    onSuccess={() => {
+                      setBulkDialogOpen(false)
+                      fetchData()
+                    }}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
           <DataTable

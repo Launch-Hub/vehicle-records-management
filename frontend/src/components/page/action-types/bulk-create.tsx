@@ -58,7 +58,7 @@ export default function BulkCreateActionTypes({ onSuccess }: { onSuccess?: () =>
         .filter((row) => row.name && row.step && row.order && row.toStep)
         .map((row) => ({
           order: Number(row.order),
-          name: row.name, 
+          name: row.name,
           step: Number(row.step),
           toStep: Number(row.toStep),
         }))
@@ -68,11 +68,11 @@ export default function BulkCreateActionTypes({ onSuccess }: { onSuccess?: () =>
         return
       }
       const res = await actionTypeService.createBulk(actionTypes)
-      toast.success(res.message || 'Tạo nhiều hạng mục thành công!')
+      toast.success(res.message || 'Tạo nhiều mục đăng ký thành công!')
       setRows([{ ...emptyRow }])
       if (onSuccess) onSuccess()
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Có lỗi xảy ra khi tạo nhiều hạng mục.')
+      toast.error(err?.response?.data?.message || 'Có lỗi xảy ra khi tạo mục đăng ký.')
     } finally {
       setIsSubmitting(false)
     }
@@ -163,7 +163,7 @@ export default function BulkCreateActionTypes({ onSuccess }: { onSuccess?: () =>
           Thêm dòng
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          Tạo nhiều
+          Lưu
         </Button>
       </div>
     </form>

@@ -1,31 +1,232 @@
-export const TABLE_DICTIONARY = {
-  // User
-  avatar: '',
-  name: 'Họ và tên',
-  username: 'Tài khoản',
-  email: 'Email',
-  assignedUnit: 'Đơn vị',
-  serviceNumber: 'Số hiệu',
-  roles: 'Vai trò',
-  status: 'Trạng thái',
-  password: 'Mật khẩu',
-  // Vehicle Record
-  plateNumber: 'Biển số xe',
-  color: 'Màu biển số',
-  identificationNumber: 'Số khung',
-  engineNumber: 'Số máy',
-  registrant: 'Tên chủ xe',
-  phone: 'Số điện thoại',
-  address: 'Địa chỉ',
-  issuer: 'Người tiếp nhận',
-  registrationType: 'Tạo mục đăng ký',
-  vehicleType: 'Loại xe',
-  archiveAt: 'Vị trí lưu trữ',
-  description: 'Mô tả',
-  note: 'Ghi chú',
-}
-export function getTableLabel(key: string): string {
-  return TABLE_DICTIONARY[key as keyof typeof TABLE_DICTIONARY] ?? ''
+// 1. Define types for each resource
+
+type UserDictionary = {
+  username: string;
+  email: string;
+  passwordHash: string;
+  name: string;
+  phone: string;
+  avatar: string;
+  assignedUnit: string;
+  serviceNumber: string;
+  permissions: string;
+  metadata: string;
+  status: string;
+  createdAt: string;
+  isAdmin: string;
+  isDeleted: string;
+};
+
+type VehicleRecordDictionary = {
+  plateNumber: string;
+  color: string;
+  identificationNumber: string;
+  engineNumber: string;
+  vehicleType: string;
+  registrant: string;
+  phone: string;
+  email: string;
+  address: string;
+  archiveAt: string;
+  issuerId: string;
+  note: string;
+  status: string;
+};
+
+type ActionTypeDictionary = {
+  order: string;
+  name: string;
+  step: string;
+  toStep: string;
+};
+
+type ActivityLogDictionary = {
+  action: string;
+  resource: string;
+  documentId: string;
+  description: string;
+  changes: string;
+  userId: string;
+  createdAt: string;
+};
+
+type ArchiveDictionary = {
+  storage: string;
+  room: string;
+  row: string;
+  shelf: string;
+  level: string;
+};
+
+type BulkDictionary = {
+  code: string;
+  name: string;
+  size: string;
+  note: string;
+};
+
+type IssuerDictionary = {
+  citizenIDNumber: string;
+  name: string;
+  phone: string;
+  address: string;
+  note: string;
+};
+
+type PermissionDictionary = {
+  read: string;
+  write: string;
+  delete: string;
+};
+
+type PlateColorDictionary = {
+  code: string;
+  name: string;
+};
+
+type ProcedureDictionary = {
+  record: string;
+  bulk: string;
+  registrationType: string;
+  oldPlate: string;
+  steps: string;
+  currentStep: string;
+  status: string;
+  note: string;
+  dueDate: string;
+  resultReturnType: string;
+  completedAt: string;
+  archivedAt: string;
+};
+
+type RoleDictionary = {
+  name: string;
+  description: string;
+  defaultPermissions: string;
+};
+
+// 2. Combine into a master type
+
+type Dictionary = {
+  users: UserDictionary;
+  vehicle_records: VehicleRecordDictionary;
+  action_types: ActionTypeDictionary;
+  activity_logs: ActivityLogDictionary;
+  archives: ArchiveDictionary;
+  bulks: BulkDictionary;
+  issuers: IssuerDictionary;
+  permissions: PermissionDictionary;
+  plate_colors: PlateColorDictionary;
+  procedures: ProcedureDictionary;
+  roles: RoleDictionary;
+};
+
+// 3. Update DICTIONARY with all resources and fields
+
+export const DICTIONARY: Dictionary = {
+  users: {
+    username: 'Tài khoản',
+    email: 'Email',
+    passwordHash: 'Mật khẩu',
+    name: 'Họ và tên',
+    phone: 'Số điện thoại',
+    avatar: 'Ảnh đại diện',
+    assignedUnit: 'Đơn vị',
+    serviceNumber: 'Số hiệu',
+    permissions: 'Quyền',
+    metadata: 'Thông tin phụ',
+    status: 'Trạng thái',
+    createdAt: 'Ngày tạo',
+    isAdmin: 'Quản trị viên',
+    isDeleted: 'Đã xóa',
+  },
+  vehicle_records: {
+    plateNumber: 'Biển số xe',
+    color: 'Màu biển số',
+    identificationNumber: 'Số khung',
+    engineNumber: 'Số máy',
+    vehicleType: 'Loại xe',
+    registrant: 'Tên chủ xe',
+    phone: 'Số điện thoại',
+    email: 'Email',
+    address: 'Địa chỉ',
+    archiveAt: 'Vị trí lưu trữ',
+    issuerId: 'Người tiếp nhận',
+    note: 'Ghi chú',
+    status: 'Trạng thái',
+  },
+  action_types: {
+    order: 'Thứ tự',
+    name: 'Tên mục',
+    step: 'Bước',
+    toStep: 'Bước tiếp theo',
+  },
+  activity_logs: {
+    action: 'Hành động',
+    resource: 'Tài nguyên',
+    documentId: 'ID tài liệu',
+    description: 'Mô tả',
+    changes: 'Thay đổi',
+    userId: 'Người dùng',
+    createdAt: 'Ngày tạo',
+  },
+  archives: {
+    storage: 'Kho',
+    room: 'Phòng',
+    row: 'Dãy',
+    shelf: 'Kệ',
+    level: 'Tầng',
+  },
+  bulks: {
+    code: 'Mã lô',
+    name: 'Tên lô',
+    size: 'Kích thước',
+    note: 'Ghi chú',
+  },
+  issuers: {
+    citizenIDNumber: 'Số CCCD',
+    name: 'Tên người cấp',
+    phone: 'Số điện thoại',
+    address: 'Địa chỉ',
+    note: 'Ghi chú',
+  },
+  permissions: {
+    read: 'Xem',
+    write: 'Thêm/Chỉnh sửa',
+    delete: 'Xóa',
+  },
+  plate_colors: {
+    code: 'Mã màu',
+    name: 'Tên màu',
+  },
+  procedures: {
+    record: 'Hồ sơ',
+    bulk: 'Lần nhập',
+    registrationType: 'Loại đăng ký',
+    oldPlate: 'Biển số cũ',
+    steps: 'Các bước',
+    currentStep: 'Bước hiện tại',
+    status: 'Trạng thái',
+    note: 'Ghi chú',
+    dueDate: 'Ngày hết hạn',
+    resultReturnType: 'Cách trả kết quả',
+    completedAt: 'Ngày hoàn thành',
+    archivedAt: 'Ngày lưu trữ',
+  },
+  roles: {
+    name: 'Tên vai trò',
+    description: 'Mô tả',
+    defaultPermissions: 'Quyền mặc định',
+  },
+};
+
+// 4. Refactor getLabel to use generics for type safety
+
+export function getLabel<R extends keyof Dictionary, K extends keyof Dictionary[R]>(
+  key: K,
+  resource: R
+): string {
+  return DICTIONARY[resource][key] ? String(DICTIONARY[resource][key]) : '';
 }
 
 export const PERMISSION_DICTIONARY = {
@@ -51,16 +252,6 @@ export const PERMISSION_DICTIONARY = {
 
 export function getPermissionLabel(key: string): string {
   return PERMISSION_DICTIONARY[key as keyof typeof PERMISSION_DICTIONARY] ?? ''
-}
-
-export const DICTIONARY = {
-  ...TABLE_DICTIONARY,
-  // User
-  attachments: 'Tài liệu đính kèm',
-  avatar: 'Ảnh đại diện',
-}
-export function getLabel(key: string): string {
-  return DICTIONARY[key as keyof typeof DICTIONARY] ?? ''
 }
 
 export const RECORD_STATUS_DICTIONARY = {

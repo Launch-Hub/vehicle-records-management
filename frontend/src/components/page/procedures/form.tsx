@@ -636,7 +636,7 @@ export default function ProcedureForm({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="plateNumber" className="required">
-                  {getLabel('plateNumber')}
+                  {getLabel('plateNumber', 'vehicle_records')}
                 </Label>
                 <Input
                   id="plateNumber"
@@ -660,7 +660,7 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="identificationNumber">{getLabel('identificationNumber')}</Label>
+                <Label htmlFor="identificationNumber">{getLabel('identificationNumber', 'vehicle_records')}</Label>
                 <Input
                   id="identificationNumber"
                   value={recordFields.identificationNumber}
@@ -671,7 +671,7 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="engineNumber">{getLabel('engineNumber')}</Label>
+                <Label htmlFor="engineNumber">{getLabel('engineNumber', 'vehicle_records')}</Label>
                 <Input
                   id="engineNumber"
                   value={recordFields.engineNumber}
@@ -684,7 +684,7 @@ export default function ProcedureForm({
 
               <div className="space-y-2">
                 <Label htmlFor="vehicleType" className="required">
-                  {getLabel('vehicleType')}
+                  {getLabel('vehicleType', 'vehicle_records')}
                 </Label>
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -715,7 +715,7 @@ export default function ProcedureForm({
                   htmlFor="color"
                   className="w-full flex justify-between items-center mb-[2px]"
                 >
-                  <span>{getLabel('color')}</span>
+                  <span>{getLabel('color', 'vehicle_records')}</span>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">Tùy chỉnh</span>
                     <Switch
@@ -773,7 +773,7 @@ export default function ProcedureForm({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="registrant" className="required">
-                  {getLabel('registrant')}
+                  {getLabel('registrant', 'vehicle_records')}
                 </Label>
                 <Input
                   id="registrant"
@@ -785,7 +785,7 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">{getLabel('phone')}</Label>
+                <Label htmlFor="phone">{getLabel('phone', 'vehicle_records')}</Label>
                 <Input
                   id="phone"
                   value={recordFields.phone}
@@ -794,7 +794,7 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">{getLabel('email')}</Label>
+                <Label htmlFor="email">{getLabel('email', 'vehicle_records')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -804,7 +804,7 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="col-span-3 space-y-2">
-                <Label htmlFor="address">{getLabel('address')}</Label>
+                <Label htmlFor="address">{getLabel('address', 'vehicle_records')}</Label>
                 <Input
                   id="address"
                   value={recordFields.address}

@@ -146,7 +146,7 @@ export default function UserForm({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="required">{getLabel('username')}</FormLabel>
+                  <FormLabel className="required">{getLabel('username', 'users')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -162,7 +162,7 @@ export default function UserForm({
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="required">{getLabel('password')}</FormLabel>
+                    <FormLabel className="required">{getLabel('passwordHash', 'users')}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Input
@@ -200,7 +200,7 @@ export default function UserForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{getLabel('name')}</FormLabel>
+                  <FormLabel>{getLabel('name', 'users')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -216,7 +216,7 @@ export default function UserForm({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="required">{getLabel('email')}</FormLabel>
+                  <FormLabel className="required">{getLabel('email', 'users')}</FormLabel>
                   <FormControl>
                     <Input type="email" {...field} />
                   </FormControl>
@@ -232,7 +232,7 @@ export default function UserForm({
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="required">{getLabel('phone')}</FormLabel>
+                  <FormLabel className="required">{getLabel('phone', 'users')}</FormLabel>
                   <FormControl>
                     <Input type="phone" {...field} />
                   </FormControl>
@@ -248,7 +248,7 @@ export default function UserForm({
               name="assignedUnit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="required">{getLabel('assignedUnit')}</FormLabel>
+                  <FormLabel className="required">{getLabel('assignedUnit', 'users')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -264,7 +264,7 @@ export default function UserForm({
               name="serviceNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="required">{getLabel('serviceNumber')}</FormLabel>
+                  <FormLabel className="required">{getLabel('serviceNumber', 'users')}</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -281,7 +281,7 @@ export default function UserForm({
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{getLabel('status')}</FormLabel>
+                    <FormLabel>{getLabel('status', 'users')}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>

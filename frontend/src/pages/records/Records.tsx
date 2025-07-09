@@ -5,7 +5,7 @@ import { recordService } from '@/lib/services/records'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { joinPath } from '@/lib/utils'
-import { getTableLabel } from '@/constants/dictionary'
+import { getLabel } from '@/constants/dictionary'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/shared/list-view/table'
 import { useLoader } from '@/contexts/loader/use-loader'
@@ -13,32 +13,32 @@ import { useLoader } from '@/contexts/loader/use-loader'
 const columns: ColumnDef<VehicleRecord>[] = [
   {
     accessorKey: 'plateNumber',
-    header: () => <div>{getTableLabel('plateNumber')}</div>,
+    header: () => <div>{getLabel('plateNumber', 'vehicle_records')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{String(info.getValue())}</span>,
     minSize: 90,
     // size: 500,
   },
   {
     accessorKey: 'color',
-    header: () => <div>{getTableLabel('color')}</div>,
+    header: () => <div>{getLabel('color', 'vehicle_records')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 60,
   },
   {
     accessorKey: 'identificationNumber',
-    header: () => <div>{getTableLabel('identificationNumber')}</div>,
+    header: () => <div>{getLabel('identificationNumber', 'vehicle_records')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 100,
   },
   {
     accessorKey: 'engineNumber',
-    header: () => <div>{getTableLabel('engineNumber')}</div>,
+    header: () => <div>{getLabel('engineNumber', 'vehicle_records')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 100,
   },
   {
     accessorKey: 'registrant',
-    header: () => <div>{getTableLabel('registrant')}</div>,
+    header: () => <div>{getLabel('registrant', 'vehicle_records')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 120,
   },
@@ -141,6 +141,7 @@ export default function RecordsPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            resource="vehicle_records"
           />
         </div>
       </div>

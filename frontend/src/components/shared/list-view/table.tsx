@@ -63,6 +63,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { LoaderOverlay } from '@/components/shared/loader/loader-overlay'
+import { DICTIONARY } from '@/constants/dictionary'
 
 interface DataTableProps<T> {
   loading: boolean
@@ -81,6 +82,7 @@ interface DataTableProps<T> {
   showCreate?: boolean
   showExport?: boolean
   showColumnToggle?: boolean
+  resource: keyof typeof DICTIONARY // <-- new required prop
 }
 
 function DataRow<T>({ row }: { row: Row<T> }) {
@@ -112,6 +114,7 @@ export function DataTable<T extends Record<string, any>>({
   showCreate = true,
   showExport = true,
   showColumnToggle = true,
+  resource,
 }: DataTableProps<T>) {
   const [data, setData] = useState<T[]>(() => initialData)
   const [rowSelection, setRowSelection] = useState({})
@@ -204,7 +207,7 @@ export function DataTable<T extends Record<string, any>>({
           .map((key) => ({
             accessorKey: key,
             // header: key.charAt(0).toUpperCase() + key.slice(1),
-            header: () => <>{getLabel(key)}</>,
+            header: () => <>{getLabel(key as keyof typeof DICTIONARY[typeof resource], resource)}</>,
             cell: (info: any) => (
               <span className="text-muted-foreground">{String(info.getValue())}</span>
             ),
@@ -212,7 +215,7 @@ export function DataTable<T extends Record<string, any>>({
       : []
 
     return [selectColumn, ...dataColumns, actionColumn]
-  }, [selectColumn, actionColumn, columns, initialData])
+  }, [selectColumn, actionColumn, columns, initialData, resource])
 
   const table = useReactTable({
     // Use a default pageSize for pageCount calculation
@@ -272,7 +275,7 @@ export function DataTable<T extends Record<string, any>>({
       // Map to { key, label }
       const exportColumns = selectedCols.map((col: any) => ({
         key: col.accessorKey as string,
-        label: getLabel(col.accessorKey as string),
+        label: getLabel(col.accessorKey as keyof typeof DICTIONARY[typeof resource], resource),
       }))
       onExport(selectedRows, exportColumns)
     }
@@ -326,17 +329,16 @@ export function DataTable<T extends Record<string, any>>({
             </DropdownMenu>
           )}
           {showCreate && (
-            <Button variant="outline" size="sm" onClick={onCreate}>
-              <PlusIcon /> <span className="hidden lg:inline">Tạo mới</span>
+            <Button variant="default" size="sm" onClick={onCreate}>
+              <PlusIcon /> <span className="hidden lg:inline">Thêm</span>
             </Button>
           )}
           {showExport && (
             <Button
-              variant="outline"
+              variant="success"
               size="sm"
               onClick={handleExportClick}
               disabled={!selectedRows.length}
-              className="border-success text-success hover:border-success hover:text-success"
             >
               <FileSpreadsheet className="size-4" />
               In danh sách
@@ -492,7 +494,7 @@ export function DataTable<T extends Record<string, any>>({
                     )
                   }}
                 />
-                <span>{getLabel(col.accessorKey as string)}</span>
+                <span>{getLabel(col.accessorKey as keyof typeof DICTIONARY[typeof resource], resource)}</span>
               </label>
             ))}
           </div>

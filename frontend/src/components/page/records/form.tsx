@@ -183,7 +183,7 @@ export default function VehicleRecordForm({
                 name="plateNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="required">{getLabel('plateNumber')}</FormLabel>
+                    <FormLabel className="required">{getLabel('plateNumber', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <div className="relative flex items-center">
                         <Input
@@ -234,7 +234,7 @@ export default function VehicleRecordForm({
                 name="identificationNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="required">{getLabel('identificationNumber')}</FormLabel>
+                    <FormLabel className="required">{getLabel('identificationNumber', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -249,7 +249,7 @@ export default function VehicleRecordForm({
                 name="engineNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="required">{getLabel('engineNumber')}</FormLabel>
+                    <FormLabel className="required">{getLabel('engineNumber', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -265,7 +265,7 @@ export default function VehicleRecordForm({
                 render={({ field }) => (
                   <FormItem className="w-full gap-0.5">
                     <FormLabel className="w-full flex justify-between items-center">
-                      <span>{getLabel('color')}</span>
+                      <span>{getLabel('color', 'vehicle_records')}</span>
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-500">Tùy chỉnh</span>
                         <Switch
@@ -319,7 +319,7 @@ export default function VehicleRecordForm({
                 name="registrant"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="required">{getLabel('registrant')}</FormLabel>
+                    <FormLabel className="required">{getLabel('registrant', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -341,7 +341,7 @@ export default function VehicleRecordForm({
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{getLabel('address')}</FormLabel>
+                    <FormLabel>{getLabel('address', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -356,7 +356,7 @@ export default function VehicleRecordForm({
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{getLabel('phone')}</FormLabel>
+                    <FormLabel>{getLabel('phone', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Input {...field} />
                     </FormControl>
@@ -371,7 +371,7 @@ export default function VehicleRecordForm({
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{getLabel('email')}</FormLabel>
+                    <FormLabel>{getLabel('email', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Input type="email" {...field} />
                     </FormControl>
@@ -386,7 +386,7 @@ export default function VehicleRecordForm({
                 name="note"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{getLabel('note')}</FormLabel>
+                    <FormLabel>{getLabel('note', 'vehicle_records')}</FormLabel>
                     <FormControl>
                       <Textarea {...field} />
                     </FormControl>
@@ -396,7 +396,7 @@ export default function VehicleRecordForm({
               />
             </div>
             <div className="col-span-4 space-y-2">
-              <Label>{getLabel('archiveAt')}</Label>
+              <Label>{getLabel('archiveAt', 'vehicle_records')}</Label>
               <div className="grid grid-cols-4 gap-2">
                 {/* current storage is fixed - 1 storage only */}
                 {/* <FormField

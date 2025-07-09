@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { userService } from '@/lib/services/users'
 import type { User } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
-import { getLabel, getTableLabel } from '@/constants/dictionary'
+import { getLabel } from '@/constants/dictionary'
 import { joinPath, exportToExcel } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { ColumnDef } from '@tanstack/react-table'
@@ -16,7 +16,7 @@ import { DataTable } from '@/components/shared/list-view/table'
 const columns: ColumnDef<User>[] = [
   {
     accessorKey: 'avatar',
-    header: () => <div>{getTableLabel('avatar')}</div>,
+    header: () => <></>,
     cell: (info: any) => (
       <Avatar className="mx-auto">
         <AvatarImage src={String(info.getValue())} />
@@ -27,32 +27,32 @@ const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: 'name',
-    header: () => <div>{getTableLabel('name')}</div>,
+    header: () => <div>{getLabel('name', 'users')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{String(info.getValue())}</span>,
     minSize: 150,
     // size: 500,
   },
   {
     accessorKey: 'phone',
-    header: () => <div>{getTableLabel('phone')}</div>,
+    header: () => <div>{getLabel('phone', 'users')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 120,
   },
   {
     accessorKey: 'assignedUnit',
-    header: () => <div>{getTableLabel('assignedUnit')}</div>,
+    header: () => <div>{getLabel('assignedUnit', 'users')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 100,
   },
   {
     accessorKey: 'serviceNumber',
-    header: () => <div>{getTableLabel('serviceNumber')}</div>,
+    header: () => <div>{getLabel('serviceNumber', 'users')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{info.getValue() ?? ''}</span>,
     size: 100,
   },
   {
     accessorKey: 'status',
-    header: () => <div className="text-center">{getTableLabel('status')}</div>,
+    header: () => <div className="text-center">{getLabel('status', 'users')}</div>,
     cell: (info: any) => (
       <div className="flex justify-center items-center">
         <Dot size={32} className={info.getValue() == 'active' ? 'text-success' : 'text-error'} />
@@ -134,7 +134,7 @@ export default function UsersPage() {
       toast.error('Quản trị viên không thể bị xoá!')
       return
     }
-    
+
     loader.show()
     try {
       await userService.delete(id)
@@ -178,6 +178,7 @@ export default function UsersPage() {
             onDelete={handleDelete}
             onSearch={handleSearch}
             onExport={handleExport}
+            resource="users"
           />
         </div>
       </div>
