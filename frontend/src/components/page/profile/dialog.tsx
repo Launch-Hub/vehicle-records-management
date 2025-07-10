@@ -17,7 +17,7 @@ export default function ProfileDialog({
 
   useEffect(() => {
     if (open) {
-      setFormKey(prev => prev + 1)
+      setFormKey((prev) => prev + 1)
     }
   }, [open])
 
@@ -30,7 +30,6 @@ export default function ProfileDialog({
         <ProfileForm
           key={formKey}
           initialData={initialData}
-          isCopying={isCopying}
           isSelfEdit={isSelfEdit}
           onSubmit={(data) => onSubmit(defaultAction, data)}
           onCancel={onClose}

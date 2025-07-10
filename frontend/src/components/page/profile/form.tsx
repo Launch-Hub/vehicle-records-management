@@ -11,18 +11,12 @@ import { processImage } from '@/lib/utils'
 
 interface ProfileFormProps {
   initialData?: User
-  isCopying?: boolean
   isSelfEdit?: boolean
   onSubmit: (data: Omit<User, '_id'>) => void
   onCancel?: () => void
 }
 
-export default function ProfileForm({
-  initialData,
-  isCopying = false,
-  onSubmit,
-  onCancel,
-}: ProfileFormProps) {
+export default function ProfileForm({ initialData, onSubmit, onCancel }: ProfileFormProps) {
   const {
     register,
     handleSubmit,
@@ -54,7 +48,7 @@ export default function ProfileForm({
     })
   }
 
-  const isEditing = initialData && !isCopying
+  const isEditing = initialData
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
@@ -106,38 +100,32 @@ export default function ProfileForm({
           </Label>
           <Input id="username" {...register('username')} />
         </div>
-        {!isEditing && (
-          <div className="space-y-2">
-            <Label htmlFor="password" className="required">
-              {getLabel('passwordHash', 'users')}
-            </Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                {...register('password', {
-                  required: !!initialData && !isCopying ? false : true,
-                })}
-                className="pr-10"
-                disabled={!!initialData && !isCopying}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
-                disabled={!!initialData && !isCopying}
-              >
-                {showPassword ? (
-                  <EyeOffIcon className="h-4 w-4" />
-                ) : (
-                  <EyeIcon className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
+        <div className="space-y-2">
+          <Label htmlFor="password" className="required">
+            {getLabel('passwordHash', 'users')}
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              {...register('password', {
+                required: false,
+              })}
+              className="pr-10"
+              disabled={!!initialData}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+              disabled={!!initialData}
+            >
+              {showPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+            </Button>
           </div>
-        )}
+        </div>
 
         <div className="space-y-2">
           <Label htmlFor="email" className="required">

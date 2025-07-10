@@ -65,7 +65,6 @@ interface ProcedureFormProps {
 
 export default function ProcedureForm({
   initialData,
-  isCopying = false,
   hideBulkId = false,
   onSubmit,
   onCancel,
@@ -419,7 +418,7 @@ export default function ProcedureForm({
         .map((s) => s.trim())
       return {
         plateNumber: plateNumber?.toUpperCase() || '',
-        color: color || '',
+        color: PLATE_COLORS.find((c) => c.dictionary.includes(color.toLowerCase()))?.label || '',
         engineNumber: engineNumber || '',
         identificationNumber: identificationNumber || '',
       }
@@ -815,12 +814,12 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="space-y-2 md:col-span-3">
-                <Label htmlFor="recordNote">Ghi chú hồ sơ</Label>
+                <Label htmlFor="recordNote">{getLabel('note', 'vehicle_records')}</Label>
                 <Textarea
                   id="recordNote"
                   value={recordFields.note}
                   onChange={(e) => setRecordFields((prev) => ({ ...prev, note: e.target.value }))}
-                  placeholder="Nhập ghi chú cho hồ sơ..."
+                  placeholder="Nhập ghi chú cho xe..."
                   rows={2}
                 />
               </div>

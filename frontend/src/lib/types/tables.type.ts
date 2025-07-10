@@ -82,6 +82,8 @@ interface ProcedureProps {
   registrationType: string
   steps: ProcedureStep[]
   currentStep: number
+  oldPlate?: string
+  newPlate?: string // for change plate
   status: 'pending' | 'processing' | 'completed' | 'cancelled'
   note?: string
   dueDate?: Date

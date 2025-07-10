@@ -19,6 +19,7 @@ import {
 import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { MoreVerticalIcon } from 'lucide-react'
+import ProcedureDialog from '@/components/page/procedures/dialog'
 
 const statusMap: Record<string, string> = {
   pending: 'Đăng ký mới',
@@ -76,6 +77,7 @@ export default function ProceduresPage() {
   const [data, setData] = useState<Procedure[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
+  const [proceedDialog, setProceedDialog] = useState<{ open: boolean; procedure?: Procedure }>({ open: false })
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -186,6 +188,18 @@ export default function ProceduresPage() {
     })
   }
 
+  const handleProceed = (procedure: Procedure) => {
+    setProceedDialog({ open: true, procedure })
+  }
+  const handleProceedClose = () => {
+    setProceedDialog({ open: false })
+  }
+  const handleProceedSubmit = async (_action: string, data: Omit<Procedure, '_id'>) => {
+    // If you need the _id, get it from proceedDialog.procedure
+    setProceedDialog({ open: false })
+    fetchData()
+  }
+
   const customActionColumn: ColumnDef<Procedure> = {
     id: 'actions',
     cell: ({ row }) => (
@@ -198,6 +212,14 @@ export default function ProceduresPage() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => handleEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
+          {Number(step) > 1 && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleProceed(row.original)}>
+                Tiến trình
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           {/* <DropdownMenuItem onClick={() => setConfirmDelete({ open: true, item: row.original })}>
             <span className="text-destructive">Xoá</span>
@@ -235,6 +257,13 @@ export default function ProceduresPage() {
           />
         </div>
       </div>
+      <ProcedureDialog
+        open={proceedDialog.open}
+        onClose={handleProceedClose}
+        onSubmit={handleProceedSubmit}
+        initialData={proceedDialog.procedure}
+        isChangeStep={true}
+      />
     </div>
   )
 }
