@@ -231,6 +231,7 @@ export default function ProceduresPage() {
             onSearch={handleSearch}
             onExport={handleExport}
             customActionColumn={Number(step) > 1 ? customActionColumn : undefined}
+            resource="procedures"
           />
         </div>
       </div>
