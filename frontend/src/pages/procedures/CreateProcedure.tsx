@@ -6,18 +6,15 @@ import type { Procedure } from '@/lib/types/tables.type'
 import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
 import BasicTable from '@/components/shared/list-view/basic-table'
-import { actionTypeService } from '@/lib/services/action-types'
 
 export default function CreateProcedurePage() {
   const loader = useLoader()
   const [latestProcedures, setLatestProcedures] = useState<Procedure[]>([])
-  const [registrationTypes, setRegistrationTypes] = useState<any[]>([])
 
   const fetchData = useCallback(async () => {
-    const latest = await procedureService.getList({ pageIndex: 0, pageSize: 5, step: 1 })
+    const latest = await procedureService.getList({ pageIndex: 0, pageSize: 5, step: 2 })
     setLatestProcedures(latest.items)
-    const types = await actionTypeService.getList({ step: 1, pageIndex: 0, pageSize: 100 })
-    setRegistrationTypes(types.items || [])
+    console.log(latest.items)
   }, [])
 
   const handleSubmit = async (data: Omit<Procedure, '_id'>) => {
@@ -44,16 +41,16 @@ export default function CreateProcedurePage() {
       <div>
         <h2 className="font-semibold text-lg mb-2">Tiếp nhận gần đây</h2>
         <BasicTable
+          key={latestProcedures.length}
           columns={[
-            { key: 'registrationType', label: 'Loại đăng ký' },
+            { key: 'registrationType', label: 'Trạng thái đăng ký' },
             { key: 'plateNumber', label: 'Biển số' },
-            { key: 'createdAt', label: 'Ngày tạo' },
+            { key: 'createdAt', label: 'Thời gian tiếp nhận' },
           ]}
           data={latestProcedures.map((p) => ({
-            registrationType:
-              registrationTypes.find((type) => type._id === p.registrationType)?.name || '',
+            registrationType: p.registrationType || '',
             plateNumber: p.record?.plateNumber || '',
-            createdAt: p.createdAt ? new Date(p.createdAt).toLocaleString() : '',
+            createdAt: p.createdAt,
           }))}
           emptyText="Chưa có hồ sơ nào."
         />

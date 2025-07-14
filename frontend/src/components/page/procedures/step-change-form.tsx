@@ -136,7 +136,7 @@ export default function ProcedureStepChangeForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="attachments">Đính kèm file</Label>
+          <Label htmlFor="attachments">Đính kèm</Label>
           <Input
             id="attachments"
             type="file"

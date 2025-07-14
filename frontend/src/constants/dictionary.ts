@@ -202,7 +202,7 @@ export const DICTIONARY: Dictionary = {
   procedures: {
     record: 'Hồ sơ',
     bulk: 'Lần nhập',
-    registrationType: 'Loại đăng ký',
+    registrationType: 'Trạng thái đăng ký',
     oldPlate: 'Biển số cũ',
     steps: 'Các bước',
     currentStep: 'Bước hiện tại',
@@ -240,9 +240,9 @@ export const PERMISSION_DICTIONARY = {
   action_types: 'Quản lý Tạo mục',
   activites: 'Quản lý hoạt động',
   procedures_1: 'Tiếp nhận hồ sơ',
-  procedures_2: 'Xử lí hồ sơ',
+  procedures_2: 'Xử lý hồ sơ',
   procedures_3: 'Thu phí',
-  procedures_4: 'Trình kí hồ sơ',
+  procedures_4: 'Trình ký hồ sơ',
   procedures_5: 'Trả kết quả',
   //
   read: 'Xem',

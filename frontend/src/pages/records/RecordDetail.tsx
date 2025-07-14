@@ -10,6 +10,8 @@ import { ChevronLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { backPath } from '@/lib/utils'
 import { useLayout } from '@/contexts/layout'
+import QRPrint from '@/components/shared/qr-code/qr-print'
+import { PrinterIcon } from 'lucide-react'
 
 export default function VehicleRecordDetailPage() {
   const { id } = useParams()
@@ -23,6 +25,7 @@ export default function VehicleRecordDetailPage() {
   const defaultAction = isCreating || isCopying ? 'create' : 'update'
 
   const [initialData, setInitialData] = useState<VehicleRecord | undefined>(undefined)
+  const [showQRPrint, setShowQRPrint] = useState(false)
 
   useEffect(() => {
     const resource = 'hồ sơ'
@@ -81,14 +84,6 @@ export default function VehicleRecordDetailPage() {
   return (
     <div className="flex flex-col p-6 md:px-10">
       <div className="flex justify-between mb-6">
-        {/* <h1 className="text-secondary text-xl font-semibold ">
-          {defaultAction === 'create'
-            ? isCopying
-              ? 'Sao chép hồ sơ'
-              : 'Tạo hồ sơ mới'
-            : 'Chỉnh sửa hồ sơ'}
-        </h1> */}
-
         <Button
           variant="link"
           className="flex items-center text-secondary hover:opacity-50 gap-0 -translate-x-4"
@@ -97,12 +92,33 @@ export default function VehicleRecordDetailPage() {
           <ChevronLeft width={20} />
           Quay lại
         </Button>
+
+        {/* Print QR button - only show when editing existing record */}
+        {!isCreating && !isCopying && initialData && (
+          <Button
+            variant="outline"
+            onClick={() => setShowQRPrint(true)}
+            className="flex items-center gap-2"
+          >
+            <PrinterIcon />
+            In mã
+          </Button>
+        )}
       </div>
       <VehicleRecordForm
         onSubmit={(data) => handleSubmit(defaultAction, data)}
         initialData={defaultAction === 'update' ? initialData : undefined}
         isCopying={isCopying}
       />
+
+      {/* QR Print Component */}
+      {showQRPrint && initialData && (
+        <QRPrint
+          url={`${window.location.origin}/registration-history/${initialData._id}`}
+          title="Mã QR xem lịch sử hồ sơ"
+          onPrintComplete={() => setShowQRPrint(false)}
+        />
+      )}
     </div>
   )
 }

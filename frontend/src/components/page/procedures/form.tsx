@@ -54,6 +54,7 @@ import {
 } from '@/components/ui/accordion'
 import { QrCodeIcon } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
+import QRPrint from '@/components/shared/qr-code/qr-print'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -202,12 +203,6 @@ export default function ProcedureForm({
     fetchActionTypes()
   }, [fetchActionTypes])
 
-  const handleLoadMoreRecords = () => {
-    if (!isFetchingRecords && vehicleRecords.length < totalRecords) {
-      fetchRecords(debouncedRecordSearch, recordPagination.pageIndex + 1)
-    }
-  }
-
   // Check for existing record when plate number changes
   const handlePlateNumberBlur = async () => {
     const plateNumber = recordFields.plateNumber.trim()
@@ -298,16 +293,8 @@ export default function ProcedureForm({
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setIsUploadingImage(true)
-    try {
-      const res = await uploadService.uploadImage(file)
-      setImage(file)
-      setImageUrl(res.file.storedName)
-    } catch (error) {
-      console.error('Failed to upload image', error)
-    } finally {
-      setIsUploadingImage(false)
-    }
+    setImage(file)
+    setImageUrl(URL.createObjectURL(file)) // for preview only
   }
 
   const handleFormSubmit = async (data: Omit<Procedure, '_id'>) => {
@@ -332,17 +319,36 @@ export default function ProcedureForm({
           setIsCreatingRecord(false)
         }
       }
+      // Upload image if present and not yet uploaded
+      let uploadedImageUrl = imageUrl
+      if (image && (!imageUrl || imageUrl.startsWith('blob:'))) {
+        setIsUploadingImage(true)
+        try {
+          const res = await uploadService.uploadImage(image)
+          uploadedImageUrl = res.file.storedName
+          setImageUrl(res.file.storedName)
+        } catch (error) {
+          console.error('Failed to upload image', error)
+          setIsUploadingImage(false)
+          return
+        }
+        setIsUploadingImage(false)
+      }
       // Prepare step 1 with attachment if creating
       let finalSteps = initialData ? steps : []
       if (!initialData) {
+        // Find the action type ID for the selected registration type
+        const selectedActionType = actionTypes.find(at => at.name === getValues('registrationType'))
+        const actionTypeId = selectedActionType?._id
+        
         finalSteps = [
           {
             order: 1,
             step: 1,
             title: '',
-            action: getValues('registrationType'), // This is now the _id
+            action: actionTypeId, // Use ObjectId instead of name
             note: '',
-            attachments: imageUrl ? [imageUrl] : [],
+            attachments: uploadedImageUrl ? [uploadedImageUrl] : [],
             isCompleted: false,
           },
         ]
@@ -363,12 +369,20 @@ export default function ProcedureForm({
       if (!(dueDate instanceof Date)) {
         dueDate = dueDate ? new Date(dueDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
       }
+      
+      // Find the action type ID for the selected registration type
+      const selectedActionType = actionTypes.find(at => at.name === data.registrationType)
+      const actionTypeId = selectedActionType?._id
+      
       // Map frontend fields to backend fields
       onSubmit({
         ...data,
         record: recordId,
         bulk: data.bulkId,
-        steps: finalSteps,
+        steps: finalSteps.map(step => ({
+          ...step,
+          action: step.step === 1 ? actionTypeId : step.action // Use ObjectId for step 1, keep existing for others
+        })),
         dueDate,
         _record,
       } as any)
@@ -402,6 +416,7 @@ export default function ProcedureForm({
 
   const isEditing = !!initialData?._id
   const [showQR, setShowQR] = useState(false)
+  const [showQRPrint, setShowQRPrint] = useState(false)
   const recordId = existingRecord?._id || getValues('recordId')
   const recordDetailUrl = recordId
     ? `${window.location.origin}/registration-history/${recordId}`
@@ -449,7 +464,7 @@ export default function ProcedureForm({
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <div className="space-y-2">
           <Label htmlFor="registrationType" className="required">
-            Phân loại đăng ký
+            Trạng thái đăng ký
           </Label>
           <Select
             value={watch('registrationType')}
@@ -460,7 +475,7 @@ export default function ProcedureForm({
             </SelectTrigger>
             <SelectContent>
               {actionTypes.map((actionType) => (
-                <SelectItem key={actionType._id} value={actionType._id}>
+                <SelectItem key={actionType._id} value={actionType.name}>
                   {actionType.name}
                 </SelectItem>
               ))}
@@ -535,7 +550,7 @@ export default function ProcedureForm({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="image">Đính kèm file</Label>
+          <Label htmlFor="image">Đính kèm</Label>
           <div className="flex items-center gap-4">
             <input
               id="image"
@@ -557,7 +572,7 @@ export default function ProcedureForm({
             {imageUrl && (
               <img
                 src={`/uploads/du/${imageUrl}`}
-                alt="Ảnh bước 1"
+                alt="Ảnh đính kèm"
                 className="max-h-20 rounded border ml-2"
                 style={{ maxWidth: 80 }}
               />
@@ -578,7 +593,19 @@ export default function ProcedureForm({
           <div className="h-[14px]"></div>
           <div className="flex justify-end gap-2">
             {/* Print and QR buttons */}
-            <Button type="button" variant="outline" onClick={() => window.print()}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => {
+                if (recordId) {
+                  setShowQRPrint(true)
+                } else {
+                  // Show error or alert that no record is selected
+                  alert('Vui lòng chọn hoặc tạo hồ sơ xe trước khi in mã QR')
+                }
+              }}
+              disabled={!recordId}
+            >
               <PrinterIcon />
               In mã
             </Button>
@@ -627,6 +654,121 @@ export default function ProcedureForm({
         </div>
       </div>
 
+      {/* QR Print Component */}
+      {showQRPrint && recordDetailUrl && (
+        <QRPrint
+          url={recordDetailUrl}
+          title="Mã QR xem lịch sử hồ sơ"
+          onPrintComplete={() => setShowQRPrint(false)}
+        />
+      )}
+
+      {/* Add the search area here */}
+      <div className="mb-4 p-4 border rounded bg-gray-50 flex flex-col gap-2">
+        <div className="font-semibold mb-2">Tìm kiếm xe</div>
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex flex-col">
+            <Label className="text-sm mb-1">Biển số</Label>
+            <Input
+              type="text"
+              value={recordFields.plateNumber}
+              onChange={(e) =>
+                setRecordFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
+              }
+              placeholder="Nhập biển số"
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label className="text-sm mb-1">Số máy</Label>
+            <Input
+              type="text"
+              value={recordFields.engineNumber}
+              onChange={(e) =>
+                setRecordFields((prev) => ({ ...prev, engineNumber: e.target.value }))
+              }
+              placeholder="Nhập số máy"
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label className="text-sm mb-1">Số khung</Label>
+            <Input
+              type="text"
+              value={recordFields.identificationNumber}
+              onChange={(e) =>
+                setRecordFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
+              }
+              placeholder="Nhập số khung"
+            />
+          </div>
+          <div className="flex flex-col">
+            <Label className="text-sm mb-1">Màu biển</Label>
+            <Input
+              type="text"
+              value={recordFields.color}
+              onChange={(e) => setRecordFields((prev) => ({ ...prev, color: e.target.value }))}
+              placeholder="Nhập màu biển"
+            />
+          </div>
+          <Button
+            type="button"
+            className="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={async () => {
+              try {
+                const res = await api.post('/records/search', {
+                  plateNumber: recordFields.plateNumber,
+                  engineNumber: recordFields.engineNumber,
+                  identificationNumber: recordFields.identificationNumber,
+                  color: recordFields.color,
+                })
+                if (res.data) {
+                  const record = res.data
+                  setExistingRecord(record)
+                  setValue('recordId', record._id)
+                  setRecordFields({
+                    plateNumber: record.plateNumber,
+                    color: record.color,
+                    identificationNumber: record.identificationNumber,
+                    engineNumber: record.engineNumber,
+                    registrant: record.registrant,
+                    phone: record.phone || '',
+                    email: record.email || '',
+                    address: record.address || '',
+                    note: record.note || '',
+                    vehicleType: record.vehicleType || 'Ô tô',
+                  })
+                } else {
+                  setExistingRecord(null)
+                  setValue('recordId', '')
+                  setRecordFields((prev) => ({
+                    ...prev,
+                    registrant: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    note: '',
+                    vehicleType: 'Ô tô',
+                  }))
+                }
+              } catch (error) {
+                setExistingRecord(null)
+                setValue('recordId', '')
+                setRecordFields((prev) => ({
+                  ...prev,
+                  registrant: '',
+                  phone: '',
+                  email: '',
+                  address: '',
+                  note: '',
+                  vehicleType: 'Ô tô',
+                }))
+              }
+            }}
+          >
+            Tìm kiếm
+          </Button>
+        </div>
+      </div>
+
       {/* Record Fields Section */}
       <Accordion type="multiple" defaultValue={['vehicle', 'owner']} className="mb-4">
         <AccordionItem value="vehicle">
@@ -642,7 +784,10 @@ export default function ProcedureForm({
                   value={recordFields.plateNumber}
                   onChange={(e) => {
                     // If user is typing, just update plateNumber
-                    setRecordFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
+                    setRecordFields((prev) => ({
+                      ...prev,
+                      plateNumber: e.target.value.toUpperCase(),
+                    }))
                   }}
                   onPaste={(e) => {
                     const pasted = e.clipboardData.getData('text')
@@ -659,7 +804,9 @@ export default function ProcedureForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="identificationNumber">{getLabel('identificationNumber', 'vehicle_records')}</Label>
+                <Label htmlFor="identificationNumber">
+                  {getLabel('identificationNumber', 'vehicle_records')}
+                </Label>
                 <Input
                   id="identificationNumber"
                   value={recordFields.identificationNumber}

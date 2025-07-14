@@ -460,7 +460,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/xu-li-ho-so',
-        title: 'Xử lí hồ sơ',
+        title: 'Xử lý hồ sơ',
         language: 'vi',
       },
     ],
@@ -520,7 +520,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/trinh-ki-ho-so',
-        title: 'Trình kí hồ sơ',
+        title: 'Trình ký hồ sơ',
         language: 'vi',
       },
     ],
@@ -540,7 +540,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     translations: [
       {
         path: '/ket-qua-ra-quay',
-        title: 'Kết quả ra quầy',
+        title: 'Kết quả đến quầy chờ trả',
         language: 'vi',
       },
     ],

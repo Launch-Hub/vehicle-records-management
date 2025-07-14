@@ -52,7 +52,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { getLabel } from '@/constants/dictionary'
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState, useImperativeHandle, forwardRef } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -83,6 +83,7 @@ interface DataTableProps<T> {
   showExport?: boolean
   showColumnToggle?: boolean
   resource: keyof typeof DICTIONARY // <-- new required prop
+  onRowSelectionChange?: (rows: T[]) => void // <-- new optional prop
 }
 
 function DataRow<T>({ row }: { row: Row<T> }) {
@@ -97,26 +98,34 @@ function DataRow<T>({ row }: { row: Row<T> }) {
   )
 }
 
-export function DataTable<T extends Record<string, any>>({
-  total,
-  data: initialData,
-  loading,
-  columns,
-  customActionColumn,
-  onSearch,
-  onPageChange,
-  onCreate,
-  onEdit,
-  onCopy,
-  onDelete,
-  onExport,
-  showSearch = true,
-  showCreate = true,
-  showExport = true,
-  showColumnToggle = true,
-  resource,
-}: DataTableProps<T>) {
-  const [data, setData] = useState<T[]>(() => initialData)
+export interface DataTableHandle {
+  openExportDialog: () => void
+}
+
+const DataTableInner = <T extends Record<string, any>>(
+  {
+    total,
+    data,
+    loading,
+    columns,
+    customActionColumn,
+    onSearch,
+    onPageChange,
+    onCreate,
+    onEdit,
+    onCopy,
+    onDelete,
+    onExport,
+    showSearch = true,
+    showCreate = true,
+    showExport = true,
+    showColumnToggle = true,
+    resource,
+    onRowSelectionChange,
+  }: DataTableProps<T>,
+  ref: React.Ref<DataTableHandle>
+) => {
+  const [tableData, setTableData] = useState<T[]>(() => data)
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -135,8 +144,8 @@ export function DataTable<T extends Record<string, any>>({
   })
 
   useEffect(() => {
-    setData(initialData)
-  }, [initialData])
+    setTableData(data)
+  }, [data])
 
   const selectColumn: ColumnDef<T> = useMemo(() => {
     return {
@@ -201,8 +210,8 @@ export function DataTable<T extends Record<string, any>>({
   const defaultColumns: ColumnDef<T>[] = useMemo(() => {
     const dataColumns = columns
       ? columns
-      : initialData.length
-      ? Object.keys(initialData[0])
+      : data.length
+      ? Object.keys(data[0])
           .filter((e) => e != '_id')
           .map((key) => ({
             accessorKey: key,
@@ -215,12 +224,12 @@ export function DataTable<T extends Record<string, any>>({
       : []
 
     return [selectColumn, ...dataColumns, actionColumn]
-  }, [selectColumn, actionColumn, columns, initialData, resource])
+  }, [selectColumn, actionColumn, columns, data, resource])
 
   const table = useReactTable({
     // Use a default pageSize for pageCount calculation
     pageCount: Math.ceil(total / pagination.pageSize), // Fallback to 10 if pageSize isn't available yet
-    data,
+    data: tableData,
     columns: defaultColumns,
     state: { rowSelection, columnVisibility, columnFilters, sorting, pagination },
     getRowId: (_, i) => i.toString(),
@@ -243,6 +252,15 @@ export function DataTable<T extends Record<string, any>>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     manualPagination: true,
   })
+
+  // Call onRowSelectionChange when selection changes
+  useEffect(() => {
+    if (onRowSelectionChange) {
+      const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original)
+      onRowSelectionChange(selectedRows)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowSelection])
 
   const handleSearch = (term: string) => {
     setSearchTerm(term)
@@ -281,6 +299,11 @@ export function DataTable<T extends Record<string, any>>({
     }
     setExportDialogOpen(false)
   }
+
+  // Expose openExportDialog to parent
+  useImperativeHandle(ref, () => ({
+    openExportDialog: () => setExportDialogOpen(true),
+  }))
 
   return (
     <div className="flex w-full flex-col justify-start gap-6 relative">
@@ -511,3 +534,7 @@ export function DataTable<T extends Record<string, any>>({
     </div>
   )
 }
+
+export const DataTable = React.forwardRef(DataTableInner) as <T extends Record<string, any>>(
+  props: DataTableProps<T> & { ref?: React.Ref<DataTableHandle> }
+) => React.ReactElement;

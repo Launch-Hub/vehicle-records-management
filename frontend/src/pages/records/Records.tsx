@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { recordService } from '@/lib/services/records'
@@ -8,7 +8,19 @@ import { joinPath } from '@/lib/utils'
 import { getLabel } from '@/constants/dictionary'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/shared/list-view/table'
+import type { DataTableHandle } from '@/components/shared/list-view/table'
 import { useLoader } from '@/contexts/loader/use-loader'
+import QRPrint from '@/components/shared/qr-code/qr-print'
+import QRPrintGrid from '@/components/shared/qr-code/qr-print-grid'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { MoreVerticalIcon } from 'lucide-react'
 
 const columns: ColumnDef<VehicleRecord>[] = [
   {
@@ -50,6 +62,13 @@ export default function RecordsPage() {
   const [data, setData] = useState<VehicleRecord[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
+  const [showQRPrint, setShowQRPrint] = useState(false)
+  const [selectedRecordForQR, setSelectedRecordForQR] = useState<VehicleRecord | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item?: VehicleRecord }>({ open: false })
+  // Batch QR print state
+  const [showQRGrid, setShowQRGrid] = useState(false)
+  const [qrGridItems, setQRGridItems] = useState<{ url: string; label?: string }[]>([])
+  const dataTableRef = useRef<DataTableHandle>(null)
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -122,6 +141,64 @@ export default function RecordsPage() {
     }
   }
 
+  const handlePrintQR = (record: VehicleRecord) => {
+    setSelectedRecordForQR(record)
+    setShowQRPrint(true)
+  }
+
+  // DataTable row selection
+  const [selectedRows, setSelectedRows] = useState<VehicleRecord[]>([])
+
+  // Pass this to DataTable to get selected rows
+  const handleRowSelectionChange = (rows: VehicleRecord[]) => {
+    setSelectedRows(rows)
+  }
+
+  // Batch QR print handler
+  const handleBatchPrintQR = () => {
+    const items = selectedRows.map((record) => ({
+      url: `${window.location.origin}/registration-history/${record._id}`,
+      label: record.plateNumber,
+    }))
+    setQRGridItems(items)
+    setShowQRGrid(true)
+  }
+
+  const handleExportDropdown = () => {
+    dataTableRef.current?.openExportDialog()
+  }
+
+  const customActionColumn: ColumnDef<VehicleRecord> = {
+    id: 'actions',
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="size-8 text-muted-foreground" size="icon">
+            <MoreVerticalIcon className="size-4" />
+            <span className="sr-only">Mở menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => handleEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleCopy(row.original)}>Sao chép</DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => handlePrintQR(row.original)}>
+            In mã QR
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => setConfirmDelete({ open: true, item: row.original })}
+          >
+            <span className="text-destructive">Xoá</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 32,
+  }
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
@@ -129,12 +206,35 @@ export default function RecordsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
+        {/* Batch actions dropdown menu */}
+        {selectedRows.length > 0 && (
+          <div className="flex justify-end mb-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="success" size="sm">
+                  Thao tác với mục đã chọn
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={handleExportDropdown}>
+                  In danh sách
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleBatchPrintQR}>
+                  In danh sách mã QR
+                </DropdownMenuItem>
+                {/* Add more actions here if needed */}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <DataTable
+            ref={dataTableRef}
             loading={isFetching}
             total={total}
             data={data}
-            columns={columns}
+            columns={columns as ColumnDef<VehicleRecord>[]}
+            customActionColumn={customActionColumn as ColumnDef<VehicleRecord>}
             onPageChange={handleChangePage}
             onCreate={handleCreate}
             onEdit={handleEdit}
@@ -142,9 +242,30 @@ export default function RecordsPage() {
             onDelete={handleDelete}
             onSearch={handleSearch}
             resource="vehicle_records"
+            onRowSelectionChange={handleRowSelectionChange}
           />
         </div>
       </div>
+
+      {/* QR Print Component (single) */}
+      {showQRPrint && selectedRecordForQR && (
+        <QRPrint
+          url={`${window.location.origin}/registration-history/${selectedRecordForQR._id}`}
+          title="Mã QR xem lịch sử hồ sơ"
+          onPrintComplete={() => {
+            setShowQRPrint(false)
+            setSelectedRecordForQR(null)
+          }}
+        />
+      )}
+      {/* QR Print Grid (batch) */}
+      {showQRGrid && qrGridItems.length > 0 && (
+        <QRPrintGrid
+          items={qrGridItems}
+          title="Danh sách mã QR"
+          onPrintComplete={() => setShowQRGrid(false)}
+        />
+      )}
     </div>
   )
 }
