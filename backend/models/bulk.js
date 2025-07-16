@@ -6,11 +6,11 @@ const bulkSchema = new mongoose.Schema(
     name: { type: String, require: true },
     size: { type: Number, default: 0 },
     note: String,
-    // timestamp has both props
+    // timestamps has both props
     // createdAt: { type: Date, default: Date.now },
     // updatedAt: { type: Date, default: Date.now },
   },
-  { timestamp: true, autoIndex: true }
+  { timestamps: true, autoIndex: true }
 );
 
 const Bulk = mongoose.model("Bulk", bulkSchema);

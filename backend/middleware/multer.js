@@ -16,8 +16,8 @@ function createMulterMiddleware({ subdirectory = "", fileFilter, limits }, stora
           //(req, file, cb) => ...
           destination: (_, __, cb) => cb(null, destination),
           filename: (_, file, cb) => {
-            const timestamp = Date.now();
-            const uniqueName = `${timestamp}-${file.originalname}`;
+            const timestamps = Date.now();
+            const uniqueName = `${timestamps}-${file.originalname}`;
             cb(null, uniqueName);
           },
         })

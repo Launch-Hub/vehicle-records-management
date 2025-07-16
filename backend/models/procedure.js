@@ -62,11 +62,11 @@ const procedurechema = new mongoose.Schema(
     resultReturnType: { type: String, enum: ["direct", "post_office"] },
     completedAt: { type: Date, default: null }, // only when status = completed
     archivedAt: { type: Date, default: null }, // only when status = archived
-    // timestamp has both props
+    // timestamps has both props
     // createdAt: { type: Date, default: Date.now },
     // updatedAt: { type: Date, default: Date.now },
   },
-  { timestamp: true, autoIndex: true }
+  { timestamps: true, autoIndex: true }
 );
 
 const Procedure = mongoose.model("Procedure", procedurechema);
