@@ -31,6 +31,7 @@ type VehicleRecordDictionary = {
   issuerId: string;
   note: string;
   status: string;
+  createdAt: string;
 };
 
 type ActionTypeDictionary = {
@@ -97,6 +98,7 @@ type ProcedureDictionary = {
   resultReturnType: string;
   completedAt: string;
   archivedAt: string;
+  createdAt: string;
 };
 
 type RoleDictionary = {
@@ -154,6 +156,7 @@ export const DICTIONARY: Dictionary = {
     issuerId: 'Người tiếp nhận',
     note: 'Ghi chú',
     status: 'Trạng thái',
+    createdAt: 'Ngày tạo',
   },
   action_types: {
     order: 'Thứ tự',
@@ -212,6 +215,7 @@ export const DICTIONARY: Dictionary = {
     resultReturnType: 'Cách trả kết quả',
     completedAt: 'Ngày hoàn thành',
     archivedAt: 'Ngày lưu trữ',
+    createdAt: 'Ngày tiếp nhận',
   },
   roles: {
     name: 'Tên vai trò',

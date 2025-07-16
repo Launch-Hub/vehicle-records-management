@@ -338,9 +338,11 @@ export default function ProcedureForm({
       let finalSteps = initialData ? steps : []
       if (!initialData) {
         // Find the action type ID for the selected registration type
-        const selectedActionType = actionTypes.find(at => at.name === getValues('registrationType'))
+        const selectedActionType = actionTypes.find(
+          (at) => at.name === getValues('registrationType')
+        )
         const actionTypeId = selectedActionType?._id
-        
+
         finalSteps = [
           {
             order: 1,
@@ -369,19 +371,19 @@ export default function ProcedureForm({
       if (!(dueDate instanceof Date)) {
         dueDate = dueDate ? new Date(dueDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
       }
-      
+
       // Find the action type ID for the selected registration type
-      const selectedActionType = actionTypes.find(at => at.name === data.registrationType)
+      const selectedActionType = actionTypes.find((at) => at.name === data.registrationType)
       const actionTypeId = selectedActionType?._id
-      
+
       // Map frontend fields to backend fields
       onSubmit({
         ...data,
         record: recordId,
         bulk: data.bulkId,
-        steps: finalSteps.map(step => ({
+        steps: finalSteps.map((step) => ({
           ...step,
-          action: step.step === 1 ? actionTypeId : step.action // Use ObjectId for step 1, keep existing for others
+          action: step.step === 1 ? actionTypeId : step.action, // Use ObjectId for step 1, keep existing for others
         })),
         dueDate,
         _record,
@@ -593,9 +595,9 @@ export default function ProcedureForm({
           <div className="h-[14px]"></div>
           <div className="flex justify-end gap-2">
             {/* Print and QR buttons */}
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => {
                 if (recordId) {
                   setShowQRPrint(true)
@@ -609,15 +611,7 @@ export default function ProcedureForm({
               <PrinterIcon />
               In mã
             </Button>
-            {/* <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowQR(true)}
-                  disabled={!recordId}
-                >
-                  <QrCodeIcon className="mr-2" />
-                  Tạo mã
-                </Button> */}
+
             <Dialog open={showQR} onOpenChange={setShowQR}>
               <DialogContent>
                 <DialogHeader>
@@ -629,7 +623,8 @@ export default function ProcedureForm({
                       value={recordDetailUrl}
                       size={200}
                       level="H"
-                      includeMargin
+                      // includeMargin
+                      // marginSize={0}
                       bgColor="#fff"
                       fgColor="#000"
                     />
@@ -664,8 +659,8 @@ export default function ProcedureForm({
       )}
 
       {/* Add the search area here */}
-      <div className="mb-4 p-4 border rounded bg-gray-50 flex flex-col gap-2">
-        <div className="font-semibold mb-2">Tìm kiếm xe</div>
+      <div className="mb-4 flex flex-col gap-2">
+        <div className="font-semibold">Tìm kiếm xe</div>
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex flex-col">
             <Label className="text-sm mb-1">Biển số</Label>
@@ -711,7 +706,7 @@ export default function ProcedureForm({
           </div>
           <Button
             type="button"
-            className="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            variant="secondary"
             onClick={async () => {
               try {
                 const res = await api.post('/records/search', {

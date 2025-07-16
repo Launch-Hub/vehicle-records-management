@@ -6,6 +6,8 @@ import type { Procedure } from '@/lib/types/tables.type'
 import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
 import BasicTable from '@/components/shared/list-view/basic-table'
+import { Button } from '@/components/ui/button'
+import { getLabel } from '@/constants/dictionary'
 
 export default function CreateProcedurePage() {
   const loader = useLoader()
@@ -31,6 +33,20 @@ export default function CreateProcedurePage() {
     }
   }
 
+  const handleDelete = async (id: string) => {
+    loader.show()
+    try {
+      await procedureService.delete(id)
+      toast.success('Đã xoá hồ sơ.')
+    } catch (err) {
+      console.error(err)
+      toast.error('Không thể xoá hồ sơ. Vui lòng thử lại.')
+    } finally {
+      await fetchData()
+      loader.hide()
+    }
+  }
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
@@ -43,16 +59,28 @@ export default function CreateProcedurePage() {
         <BasicTable
           key={latestProcedures.length}
           columns={[
-            { key: 'registrationType', label: 'Trạng thái đăng ký' },
-            { key: 'plateNumber', label: 'Biển số' },
-            { key: 'createdAt', label: 'Thời gian tiếp nhận' },
+            { key: 'registrationType', label: getLabel('registrationType', 'procedures') },
+            { key: 'plateNumber', label: getLabel('plateNumber', 'vehicle_records') },
+            { key: 'createdAt', label: getLabel('createdAt', 'procedures') },
+            { key: 'action', label: '', width: '80' },
           ]}
           data={latestProcedures.map((p) => ({
+            _id: p._id,
             registrationType: p.registrationType || '',
             plateNumber: p.record?.plateNumber || '',
             createdAt: p.createdAt,
           }))}
           emptyText="Chưa có hồ sơ nào."
+          renderCell={(col, row) => {
+            if (col.key === 'action') {
+              return (
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(row._id)}>
+                  Xoá
+                </Button>
+              )
+            }
+            return (row as Record<string, any>)[col.key]
+          }}
         />
       </div>
     </div>
