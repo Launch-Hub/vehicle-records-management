@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, PlusCircle, ChevronDown, PrinterIcon } from 'lucide-react'
+import { Plus, Trash2, PlusCircle, ChevronDown, PrinterIcon, X } from 'lucide-react'
 import type { Procedure, ProcedureStep, VehicleRecord, Bulk } from '@/lib/types/tables.type'
 import api from '@/lib/axios'
 import {
@@ -52,9 +52,9 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from '@/components/ui/accordion'
-import { QrCodeIcon } from 'lucide-react'
 import { QRCodeCanvas } from 'qrcode.react'
 import QRPrint from '@/components/shared/qr-code/qr-print'
+import VehicleRecordSearch from './vehicle-search'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -209,14 +209,17 @@ export default function ProcedureForm({
     if (!plateNumber) return
 
     try {
-      const res = await api.post('/records/search', {
+      const params = {
         plateNumber,
         identificationNumber: recordFields.identificationNumber,
         engineNumber: recordFields.engineNumber,
         vehicleType: recordFields.vehicleType,
-      })
-      if (res.data) {
-        const record = res.data
+        noPagination: true,
+      }
+      const res = await api.get('/records', { params })
+      const items = res.data?.items || []
+      if (items.length > 0) {
+        const record = items[0]
         setExistingRecord(record)
         setValue('recordId', record._id)
         // Auto-fill record fields
@@ -295,6 +298,24 @@ export default function ProcedureForm({
     if (!file) return
     setImage(file)
     setImageUrl(URL.createObjectURL(file)) // for preview only
+  }
+
+  // Handle image removal
+  const handleRemoveImage = () => {
+    setImage(null)
+    setImageUrl(null)
+    // Reset the file input
+    const fileInput = document.getElementById('image') as HTMLInputElement
+    if (fileInput) {
+      fileInput.value = ''
+    }
+  }
+
+  // Handle step image removal
+  const handleRemoveStepImage = (stepIndex: number) => {
+    const updatedSteps = [...steps]
+    updatedSteps[stepIndex] = { ...updatedSteps[stepIndex], attachments: [] }
+    setSteps(updatedSteps)
   }
 
   const handleFormSubmit = async (data: Omit<Procedure, '_id'>) => {
@@ -459,6 +480,24 @@ export default function ProcedureForm({
     }
   }
 
+  // Handler to update vehicle record fields when a vehicle is selected from search
+  const handleVehicleSelected = (vehicle: VehicleRecord) => {
+    setExistingRecord(vehicle)
+    setValue('recordId', vehicle._id)
+    setRecordFields({
+      plateNumber: vehicle.plateNumber,
+      color: vehicle.color,
+      identificationNumber: vehicle.identificationNumber,
+      engineNumber: vehicle.engineNumber,
+      registrant: vehicle.registrant,
+      phone: vehicle.phone || '',
+      email: vehicle.email || '',
+      address: vehicle.address || '',
+      note: vehicle.note || '',
+      vehicleType: vehicle.vehicleType || 'Ô tô',
+    })
+  }
+
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
       {/* Procedure Fields Section */}
@@ -471,6 +510,7 @@ export default function ProcedureForm({
           <Select
             value={watch('registrationType')}
             onValueChange={(value) => setValue('registrationType', value as any)}
+            disabled={isFetchingActionTypes || isSubmitting}
           >
             <SelectTrigger id="registrationType" className="w-full">
               <SelectValue placeholder="Chọn hạng mục" />
@@ -490,7 +530,7 @@ export default function ProcedureForm({
             <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
             <div className="w-full flex gap-2">
               <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
-                <PopoverTrigger asChild>
+                <PopoverTrigger asChild disabled={isFetchingBulks || isSubmitting}>
                   <Button
                     variant="outline"
                     role="combobox"
@@ -499,16 +539,13 @@ export default function ProcedureForm({
                   >
                     {watch('bulkId')
                       ? bulks.find((b) => b._id === watch('bulkId'))?.name
-                      : 'Chọn lần nhập...'}
+                      : 'Chọn lần nhập (không bắt buộc)'}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
                   <Command>
-                    <CommandInput
-                      placeholder="Tìm kiếm lần nhập..."
-                      onValueChange={setBulkSearch}
-                    />
+                    <CommandInput placeholder="Tìm kiếm lần nhập" onValueChange={setBulkSearch} />
                     <CommandEmpty>Không tìm thấy lần nhập.</CommandEmpty>
                     <CommandGroup>
                       {bulks.map((bulk) => (
@@ -553,7 +590,7 @@ export default function ProcedureForm({
 
         <div className="space-y-2">
           <Label htmlFor="image">Đính kèm</Label>
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             <input
               id="image"
               type="file"
@@ -572,12 +609,23 @@ export default function ProcedureForm({
               {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
             </Button>
             {imageUrl && (
-              <img
-                src={`/uploads/du/${imageUrl}`}
-                alt="Ảnh đính kèm"
-                className="max-h-20 rounded border ml-2"
-                style={{ maxWidth: 80 }}
-              />
+              <div className="relative inline-block">
+                <img
+                  src={imageUrl.startsWith('blob:') ? imageUrl : `/uploads/du/${imageUrl}`}
+                  alt="Ảnh đính kèm"
+                  className="max-h-20 rounded border ml-2"
+                  style={{ maxWidth: 80 }}
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                  onClick={handleRemoveImage}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -649,123 +697,12 @@ export default function ProcedureForm({
         </div>
       </div>
 
-      {/* QR Print Component */}
-      {showQRPrint && recordDetailUrl && (
-        <QRPrint
-          url={recordDetailUrl}
-          title="Mã QR xem lịch sử hồ sơ"
-          onPrintComplete={() => setShowQRPrint(false)}
-        />
-      )}
+      {/* Vehicle Search Section */}
+      <VehicleRecordSearch onVehicleSelected={handleVehicleSelected} />
 
-      {/* Add the search area here */}
-      <div className="mb-4 flex flex-col gap-2">
-        <div className="font-semibold">Tìm kiếm xe</div>
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="flex flex-col">
-            <Label className="text-sm mb-1">Biển số</Label>
-            <Input
-              type="text"
-              value={recordFields.plateNumber}
-              onChange={(e) =>
-                setRecordFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
-              }
-              placeholder="Nhập biển số"
-            />
-          </div>
-          <div className="flex flex-col">
-            <Label className="text-sm mb-1">Số máy</Label>
-            <Input
-              type="text"
-              value={recordFields.engineNumber}
-              onChange={(e) =>
-                setRecordFields((prev) => ({ ...prev, engineNumber: e.target.value }))
-              }
-              placeholder="Nhập số máy"
-            />
-          </div>
-          <div className="flex flex-col">
-            <Label className="text-sm mb-1">Số khung</Label>
-            <Input
-              type="text"
-              value={recordFields.identificationNumber}
-              onChange={(e) =>
-                setRecordFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
-              }
-              placeholder="Nhập số khung"
-            />
-          </div>
-          <div className="flex flex-col">
-            <Label className="text-sm mb-1">Màu biển</Label>
-            <Input
-              type="text"
-              value={recordFields.color}
-              onChange={(e) => setRecordFields((prev) => ({ ...prev, color: e.target.value }))}
-              placeholder="Nhập màu biển"
-            />
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={async () => {
-              try {
-                const res = await api.post('/records/search', {
-                  plateNumber: recordFields.plateNumber,
-                  engineNumber: recordFields.engineNumber,
-                  identificationNumber: recordFields.identificationNumber,
-                  color: recordFields.color,
-                })
-                if (res.data) {
-                  const record = res.data
-                  setExistingRecord(record)
-                  setValue('recordId', record._id)
-                  setRecordFields({
-                    plateNumber: record.plateNumber,
-                    color: record.color,
-                    identificationNumber: record.identificationNumber,
-                    engineNumber: record.engineNumber,
-                    registrant: record.registrant,
-                    phone: record.phone || '',
-                    email: record.email || '',
-                    address: record.address || '',
-                    note: record.note || '',
-                    vehicleType: record.vehicleType || 'Ô tô',
-                  })
-                } else {
-                  setExistingRecord(null)
-                  setValue('recordId', '')
-                  setRecordFields((prev) => ({
-                    ...prev,
-                    registrant: '',
-                    phone: '',
-                    email: '',
-                    address: '',
-                    note: '',
-                    vehicleType: 'Ô tô',
-                  }))
-                }
-              } catch (error) {
-                setExistingRecord(null)
-                setValue('recordId', '')
-                setRecordFields((prev) => ({
-                  ...prev,
-                  registrant: '',
-                  phone: '',
-                  email: '',
-                  address: '',
-                  note: '',
-                  vehicleType: 'Ô tô',
-                }))
-              }
-            }}
-          >
-            Tìm kiếm
-          </Button>
-        </div>
-      </div>
-
-      {/* Record Fields Section */}
-      <Accordion type="multiple" defaultValue={['vehicle', 'owner']} className="mb-4">
+      {/* Vehicle Detail Section (Accordion) */}
+      {/* defaultValue={['vehicle', 'owner']} */}
+      <Accordion type="multiple" defaultValue={['vehicle']} className="mb-4">
         <AccordionItem value="vehicle">
           <AccordionTrigger>Thông tin xe</AccordionTrigger>
           <AccordionContent className="">
@@ -778,7 +715,6 @@ export default function ProcedureForm({
                   id="plateNumber"
                   value={recordFields.plateNumber}
                   onChange={(e) => {
-                    // If user is typing, just update plateNumber
                     setRecordFields((prev) => ({
                       ...prev,
                       plateNumber: e.target.value.toUpperCase(),
@@ -791,10 +727,9 @@ export default function ProcedureForm({
                       ...prev,
                       ...parsed,
                     }))
-                    // Prevent default paste to avoid double input
                     e.preventDefault()
                   }}
-                  onBlur={handlePlateNumberBlur}
+                  // onBlur={handlePlateNumberBlur}
                   placeholder="Nhập hoặc quét mã biển số..."
                 />
               </div>
@@ -970,6 +905,15 @@ export default function ProcedureForm({
         </AccordionItem>
       </Accordion>
 
+      {/* QR Print Component */}
+      {showQRPrint && recordDetailUrl && (
+        <QRPrint
+          url={recordDetailUrl}
+          title="Mã QR xem lịch sử hồ sơ"
+          onPrintComplete={() => setShowQRPrint(false)}
+        />
+      )}
+
       {isEditing && (
         <Card>
           <CardHeader>
@@ -1031,12 +975,41 @@ export default function ProcedureForm({
                       />
                       {isUploadingImage && <div>Đang tải lên...</div>}
                       {imageUrl && (
-                        <div className="mt-2">
+                        <div className="mt-2 relative inline-block">
                           <img
-                            src={`/uploads/du/${imageUrl}`}
+                            src={
+                              imageUrl.startsWith('blob:') ? imageUrl : `/uploads/du/${imageUrl}`
+                            }
                             alt="Ảnh bước 1"
                             className="max-h-40 rounded border"
                           />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                            onClick={handleRemoveImage}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                      {step.attachments && step.attachments.length > 0 && (
+                        <div className="mt-2 relative inline-block">
+                          <img
+                            src={`/uploads/du/${step.attachments[0]}`}
+                            alt="Ảnh bước"
+                            className="max-h-40 rounded border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                            onClick={() => handleRemoveStepImage(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
                         </div>
                       )}
                     </div>

@@ -15,6 +15,7 @@ import {
   PackageIcon,
   HardDriveIcon,
   PrinterCheckIcon,
+  SettingsIcon, // <-- add this
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -164,6 +165,7 @@ export interface CustomRouteProps {
   language: string
   translations: Array<RouteTranslationProps>
   children?: Array<CustomRouteProps>
+  isAdmin?: boolean // Add isAdmin property
 }
 
 const GLOBAL_ROUTES: Array<CustomRouteProps> = [
@@ -248,43 +250,106 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'UsersPage',
-    resource: 'users',
+    element: '', // No direct page
+    resource: 'settings',
     showSidebar: true,
     nav: 1,
-    icon: UsersIcon,
-    path: '/users',
-    title: 'Manage Users',
+    icon: SettingsIcon,
+    path: '/settings',
+    title: 'Settings',
     language: 'en',
     translations: [
       {
-        path: '/quan-ly-nguoi-dung',
-        title: 'Quản lý người dùng',
+        path: '/cai-dat',
+        title: 'Cài đặt',
         language: 'vi',
       },
     ],
+    isAdmin: true,
     children: [
       {
-        element: 'UserDetailPage',
-        path: ':id',
-        title: 'Create User',
+        auth: true,
+        element: 'ActionTypesPage',
+        resource: 'action_types',
+        showSidebar: true,
+        icon: ListTodoIcon,
+        path: 'action-types',
+        title: 'Manage Action Types',
         language: 'en',
         translations: [
           {
+            path: 'tao-muc-dang-ky',
+            title: 'Tạo mục đăng ký',
             language: 'vi',
-            title: 'Chỉnh sửa người dùng',
+          },
+        ],
+        children: [
+          {
+            element: 'ActionTypeDetailPage',
+            path: ':id',
+            title: 'Action Type Detail',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Chỉnh sửa tạo mục',
+              },
+            ],
+          },
+          {
+            element: 'ActionTypeDetailPage',
+            path: 'new',
+            title: 'Create Action Type',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Thêm tạo mục mới',
+              },
+            ],
           },
         ],
       },
       {
-        element: 'UserDetailPage',
-        path: 'new',
-        title: 'Create User',
+        auth: true,
+        element: 'UsersPage',
+        resource: 'users',
+        showSidebar: true,
+        icon: UsersIcon,
+        path: 'users',
+        title: 'Manage Users',
         language: 'en',
         translations: [
           {
+            path: 'users',
+            title: 'Quản lý người dùng',
             language: 'vi',
-            title: 'Tạo người dùng mới',
+          },
+        ],
+        children: [
+          {
+            element: 'UserDetailPage',
+            path: ':id',
+            title: 'Create User',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Chỉnh sửa người dùng',
+              },
+            ],
+          },
+          {
+            element: 'UserDetailPage',
+            path: 'new',
+            title: 'Create User',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Tạo người dùng mới',
+              },
+            ],
           },
         ],
       },
@@ -379,51 +444,6 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //     },
   //   ],
   // },
-
-  {
-    auth: true,
-    element: 'ActionTypesPage',
-    resource: 'action_types',
-    showSidebar: true,
-    nav: 1,
-    icon: ListTodoIcon,
-    path: '/action-types',
-    title: 'Manage Action Types',
-    language: 'en',
-    translations: [
-      {
-        path: '/quan-ly-hoat-dong',
-        title: 'Tạo mục đăng ký',
-        language: 'vi',
-      },
-    ],
-    children: [
-      {
-        element: 'ActionTypeDetailPage',
-        path: ':id',
-        title: 'Action Type Detail',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Chỉnh sửa hạng mục',
-          },
-        ],
-      },
-      {
-        element: 'ActionTypeDetailPage',
-        path: 'new',
-        title: 'Create Action Type',
-        language: 'en',
-        translations: [
-          {
-            language: 'vi',
-            title: 'Tạo hạng mục mới',
-          },
-        ],
-      },
-    ],
-  },
 
   {
     auth: true,
@@ -539,8 +559,9 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     language: 'en',
     translations: [
       {
-        path: '/ket-qua-ra-quay',
-        title: 'Kết quả đến quầy chờ trả',
+        path: '/ket-qua-den-quay',
+        // title: 'Kết quả đến quầy chờ trả',
+        title: 'Kết quả đến quầy',
         language: 'vi',
       },
     ],

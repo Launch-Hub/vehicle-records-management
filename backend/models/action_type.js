@@ -5,6 +5,7 @@ const actionTypeSchema = new mongoose.Schema({
   name: { type: String, unique: true, required: true },
   step: { type: Number, required: true },
   toStep: { type: Number, required: true },
+  isCreateNewRecord: { type: Boolean, default: false },
 });
 
 const ActionType = mongoose.model("ActionType", actionTypeSchema);

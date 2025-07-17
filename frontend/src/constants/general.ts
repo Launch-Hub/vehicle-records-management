@@ -86,6 +86,7 @@ export const STEP_TABS = [
   { value: 3, label: 'Thu phí', color: 'bg-yellow-500' },
   { value: 4, label: 'In thẻ', color: 'bg-blue-500' },
   { value: 5, label: 'Trình ký', color: 'bg-red-500' },
-  { value: 6, label: 'Kết quả đến quầy chờ trả', color: 'bg-red-500' },
+  // { value: 6, label: 'Kết quả đến quầy chờ trả', color: 'bg-red-500' },
+  { value: 6, label: 'Kết quả đến quầy', color: 'bg-red-500' },
   { value: 7, label: 'Trả kết quả', color: 'bg-green-500' },
 ]

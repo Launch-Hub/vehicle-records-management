@@ -4,8 +4,8 @@ import { useLayout } from '@/contexts/layout'
 import { getRouteField } from '@/routes'
 import { useLayoutEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { ThemeSwitcher } from '@/components/shared/theme/theme-switcher'
-import { ThemeChanger } from '@/components/shared/theme/theme-changer'
+// import { ThemeSwitcher } from '@/components/shared/theme/theme-switcher'
+// import { ThemeChanger } from '@/components/shared/theme/theme-changer'
 
 export function AppHeader() {
   const { pathname } = useLocation()
@@ -29,7 +29,7 @@ export function AppHeader() {
         {/* right section */}
         <div>
           {/* <ThemeChanger /> */}
-          <ThemeSwitcher />
+          {/* <ThemeSwitcher /> */}
         </div>
       </div>
     </header>

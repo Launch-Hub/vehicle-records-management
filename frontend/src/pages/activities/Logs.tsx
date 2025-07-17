@@ -94,6 +94,7 @@ export default function LogsPage() {
             onEdit={() => {}}
             onCopy={() => {}}
             onDelete={() => {}}
+            resource="activity_logs"
           />
         </div>
       </div>

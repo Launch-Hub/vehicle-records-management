@@ -89,11 +89,14 @@ interface DataTableProps<T> {
 function DataRow<T>({ row }: { row: Row<T> }) {
   return (
     <TableRow data-state={row.getIsSelected() && 'selected'}>
-      {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </TableCell>
-      ))}
+      {row.getVisibleCells().map((cell) => {
+        const textAlign = (cell.column.columnDef as any).textAlign || 'left';
+        return (
+          <TableCell key={cell.id} style={{ width: cell.column.getSize(), textAlign }}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        );
+      })}
     </TableRow>
   )
 }
@@ -216,7 +219,9 @@ const DataTableInner = <T extends Record<string, any>>(
           .map((key) => ({
             accessorKey: key,
             // header: key.charAt(0).toUpperCase() + key.slice(1),
-            header: () => <>{getLabel(key as keyof typeof DICTIONARY[typeof resource], resource)}</>,
+            header: () => (
+              <>{getLabel(key as keyof (typeof DICTIONARY)[typeof resource], resource)}</>
+            ),
             cell: (info: any) => (
               <span className="text-muted-foreground">{String(info.getValue())}</span>
             ),
@@ -293,7 +298,7 @@ const DataTableInner = <T extends Record<string, any>>(
       // Map to { key, label }
       const exportColumns = selectedCols.map((col: any) => ({
         key: col.accessorKey as string,
-        label: getLabel(col.accessorKey as keyof typeof DICTIONARY[typeof resource], resource),
+        label: getLabel(col.accessorKey as keyof (typeof DICTIONARY)[typeof resource], resource),
       }))
       onExport(selectedRows, exportColumns)
     }
@@ -345,7 +350,12 @@ const DataTableInner = <T extends Record<string, any>>(
                       checked={col.getIsVisible()}
                       onCheckedChange={() => col.toggleVisibility()}
                     >
-                      {typeof col.columnDef.header === 'string' ? col.columnDef.header : col.id}
+                      {getLabel(
+                        (col.columnDef.header && typeof col.columnDef.header === 'string'
+                          ? col.columnDef.header
+                          : col.id) as keyof typeof DICTIONARY[typeof resource],
+                        resource
+                      )}
                     </DropdownMenuCheckboxItem>
                   ))}
               </DropdownMenuContent>
@@ -375,11 +385,14 @@ const DataTableInner = <T extends Record<string, any>>(
             <TableHeader className="sticky top-0 z-10 bg-muted">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} style={{ width: header.getSize() }}>
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    const textAlign = (header.column.columnDef as any).textAlign || 'left';
+                    return (
+                      <TableHead key={header.id} style={{ width: header.getSize(), textAlign }}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -517,7 +530,9 @@ const DataTableInner = <T extends Record<string, any>>(
                     )
                   }}
                 />
-                <span>{getLabel(col.accessorKey as keyof typeof DICTIONARY[typeof resource], resource)}</span>
+                <span>
+                  {getLabel(col.accessorKey as keyof typeof DICTIONARY[typeof resource], resource)}
+                </span>
               </label>
             ))}
           </div>
@@ -537,4 +552,4 @@ const DataTableInner = <T extends Record<string, any>>(
 
 export const DataTable = React.forwardRef(DataTableInner) as <T extends Record<string, any>>(
   props: DataTableProps<T> & { ref?: React.Ref<DataTableHandle> }
-) => React.ReactElement;
+) => React.ReactElement

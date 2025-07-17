@@ -14,7 +14,7 @@ app.use("/uploads", express.static(UPLOAD_BUCKET));
 app.use(express.json());
 app.use(
   cors({
-    // origin: '*', 
+    // origin: '*',
     // origin: CLIENT_ORIGIN,
     // credentials: true, // If you're using cookies
   })
@@ -23,15 +23,21 @@ app.use(
 // Database connection
 mongoose
   .connect(MONGO_URI, {})
-  .then(() => console.log("%cMongoDB connected", "color: green; font-weight: bold;"))
+  .then(() =>
+    console.log(
+      "%cMongoDB connected. Connection type: " +
+        (MONGO_URI.includes("localhost") ? "local" : "remote"),
+      "color: green; font-weight: bold;"
+    )
+  )
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Health check
 app.get(`${BASE_API_URL}/health`, (_, res) => {
   // get void.txt here
-  const fs = require('fs');
-  const path = require('path');
-  const testFilePath = path.join(UPLOAD_BUCKET, 'test', 'void.txt');
+  const fs = require("fs");
+  const path = require("path");
+  const testFilePath = path.join(UPLOAD_BUCKET, "test", "void.txt");
   let staticFileOk = false;
   try {
     staticFileOk = fs.existsSync(testFilePath);
@@ -39,7 +45,7 @@ app.get(`${BASE_API_URL}/health`, (_, res) => {
     staticFileOk = false;
   }
   res.status(200).json({
-    status: 'ok',
+    status: "ok",
     staticFile: staticFileOk,
   });
 });

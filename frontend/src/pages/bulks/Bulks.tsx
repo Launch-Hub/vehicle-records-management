@@ -133,6 +133,7 @@ export default function BulksPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            resource="bulks"
           />
         </div>
       </div>

@@ -224,8 +224,6 @@ export const DICTIONARY: Dictionary = {
   },
 };
 
-// 4. Refactor getLabel to use generics for type safety
-
 export function getLabel<R extends keyof Dictionary, K extends keyof Dictionary[R]>(
   key: K,
   resource: R

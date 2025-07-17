@@ -19,8 +19,31 @@ exports.getList = async (req, res) => {
     createdAt: 1,
   };
   try {
-    const { pageIndex, pageSize, search } = req.query;
-    const { skip, limit } = parsePagination(pageIndex, pageSize);
+    const {
+      pageIndex,
+      pageSize,
+      search,
+      noPagination,
+      plateNumber,
+      identificationNumber,
+      engineNumber,
+      vehicleType,
+      color,
+      registrant,
+      phone,
+      email,
+      address,
+      status,
+    } = req.query;
+    let skip = 0, limit = 50;
+    if (!noPagination || noPagination === 'false') {
+      const parsed = parsePagination(pageIndex, pageSize);
+      skip = parsed.skip;
+      limit = parsed.limit;
+    } else {
+      skip = 0;
+      limit = 0; // 0 means no limit in mongoose
+    }
 
     const filter = {};
     if (!!search) {
@@ -32,16 +55,27 @@ exports.getList = async (req, res) => {
         { registrant: regex },
       ];
     }
+    if (plateNumber) filter.plateNumber = plateNumber;
+    if (identificationNumber) filter.identificationNumber = identificationNumber;
+    if (engineNumber) filter.engineNumber = engineNumber;
+    if (vehicleType) filter.vehicleType = vehicleType;
+    if (color) filter.color = color;
+    if (registrant) filter.registrant = registrant;
+    if (phone) filter.phone = phone;
+    if (email) filter.email = email;
+    if (address) filter.address = address;
+    if (status) filter.status = status;
 
     const total = await VehicleRecord.countDocuments(filter);
     if (total === 0) return res.json({ total, items: [] });
 
-    const items = await VehicleRecord.find(filter, projection)
+    let query = VehicleRecord.find(filter, projection)
       // .populate("registrationType")
-      .sort({ updatedAt: -1 }) // ✅ Default sort by latest first
-      .skip(skip)
-      .limit(limit)
-      .exec();
+      .sort({ updatedAt: -1 }); // ✅ Default sort by latest first
+    if (!noPagination || noPagination === 'false') {
+      query = query.skip(skip).limit(limit);
+    }
+    const items = await query.exec();
 
     res.json({ total, items });
   } catch (err) {
@@ -166,23 +200,24 @@ exports.mockCreate = async (req, res) => {
   }
 };
 
-exports.searchBy = async (req, res) => {
-  try {
-    const { plateNumber, identificationNumber, engineNumber, vehicleType } = req.body;
-    const filter = {};
-    if (plateNumber) filter.plateNumber = plateNumber;
-    if (identificationNumber) filter.identificationNumber = identificationNumber;
-    if (engineNumber) filter.engineNumber = engineNumber;
-    if (vehicleType) filter.vehicleType = vehicleType;
-    if (Object.keys(filter).length === 0) {
-      return res.status(400).json({ message: "At least one search field is required" });
-    }
-    const record = await VehicleRecord.findOne(filter);
-    if (!record) {
-      return res.status(404).json({ message: "Record not found" });
-    }
-    res.json(record);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+// Deprecated: Remove this after frontend migration
+// exports.searchBy = async (req, res) => {
+//   try {
+//     const { plateNumber, identificationNumber, engineNumber, vehicleType } = req.body;
+//     const filter = {};
+//     if (plateNumber) filter.plateNumber = plateNumber;
+//     if (identificationNumber) filter.identificationNumber = identificationNumber;
+//     if (engineNumber) filter.engineNumber = engineNumber;
+//     if (vehicleType) filter.vehicleType = vehicleType;
+//     if (Object.keys(filter).length === 0) {
+//       return res.status(400).json({ message: "At least one search field is required" });
+//     }
+//     const records = await VehicleRecord.find(filter);
+//     if (!records || records.length === 0) {
+//       return res.status(404).json({ message: "Record not found" });
+//     }
+//     res.json(records);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };

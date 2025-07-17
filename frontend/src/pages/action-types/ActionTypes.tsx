@@ -25,9 +25,13 @@ const columns: ColumnDef<ActionType>[] = [
   {
     id: 'order',
     accessorKey: 'order',
-    header: () => <div>Thứ tự</div>,
-    cell: (info: any) => <span className="text-muted-foreground">{info.getValue()}</span>,
-    size: 80,
+    header: () => <div className="text-center">Thứ tự</div>,
+    cell: (info: any) => (
+      <div className="flex items-center justify-center">
+        <span className="text-muted-foreground">{info.getValue()}</span>
+      </div>
+    ),
+    size: 50,
   },
   {
     id: 'name',
@@ -177,11 +181,11 @@ export default function ActionTypesPage() {
               </TabsList>
             </Tabs>
             <div className="flex items-center gap-2">
-              <Button variant="outlineDestructive" onClick={() => {}}>Khôi phục mặc định</Button>
+              {/* <Button variant="outlineDestructive" onClick={() => {}}>Khôi phục mặc định</Button> */}
 
               <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outlinePrimary">Thêm nhiều</Button>
+                  <Button>Thêm nhiều</Button>
                 </DialogTrigger>
                 <DialogContent className="min-w-[90%] lg:min-w-[80%] xl:min-w-[60%] !max-w-2xl">
                   <DialogHeader>
@@ -210,6 +214,8 @@ export default function ActionTypesPage() {
             onDelete={handleDelete}
             onSearch={handleSearch}
             onExport={handleExport}
+            resource="action_types"
+            showExport={false}
           />
         </div>
       </div>

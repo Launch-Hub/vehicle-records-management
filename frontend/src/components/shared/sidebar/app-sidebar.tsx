@@ -12,71 +12,27 @@ import { scrollToTop } from '@/lib/utils'
 import { NavMain } from '@/components/shared/sidebar/nav-main'
 import { NavUser } from '@/components/shared/sidebar/nav-user'
 import { NavSecondary } from '@/components/shared/sidebar/nav-secondary'
-
-// const mock_data = {
-//   // navMain: [
-//   //   {
-//   //     title: 'Bảng điều khiển',
-//   //     url: '/dashboard',
-//   //     icon: LayoutDashboardIcon,
-//   //   },
-//   //   {
-//   //     title: 'Quản lý hồ sơ',
-//   //     url: '/records',
-//   //     icon: FolderIcon,
-//   //   },
-//   //   {
-//   //     title: 'Quản lý nhân viên',
-//   //     url: '/users',
-//   //     icon: UsersIcon,
-//   //   },
-//   // ],
-//   navSecondary: [
-//     {
-//       title: 'Settings',
-//       url: '#',
-//       icon: SettingsIcon,
-//     },
-//     {
-//       title: 'Get Help',
-//       url: '#',
-//       icon: HelpCircleIcon,
-//     },
-//     {
-//       title: 'Search',
-//       url: '#',
-//       icon: SearchIcon,
-//     },
-//   ],
-//   documents: [
-//     {
-//       name: 'Data Library',
-//       url: '#',
-//       icon: DatabaseIcon,
-//     },
-//     {
-//       name: 'Reports',
-//       url: '#',
-//       icon: ClipboardListIcon,
-//     },
-//     {
-//       name: 'Word Assistant',
-//       url: '#',
-//       icon: FileIcon,
-//     },
-//   ],
-// }
+import { useAuth } from '@/contexts/auth/use-auth'
 
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
-  const navMain = ROUTES.filter((e) => e.showSidebar && (e.nav ?? 1) === 1).map((e) => mapRoute(e))
+  const { user } = useAuth()
+  const navMain = ROUTES.filter((e) => {
+    if (e.isAdmin) return user?.isAdmin && e.showSidebar && (e.nav ?? 1) === 1
+    return e.showSidebar && (e.nav ?? 1) === 1
+  }).map((e) => mapRoute(e))
   const navSecondary = ROUTES.filter((e) => e.showSidebar && e.nav === 2).map((e) => mapRoute(e))
 
-  function mapRoute(route: any) {
+  function mapRoute(route: any, parentPath?: string) {
+    const fullPath = parentPath ? `${parentPath}/${route.path}` : route.path
+    console.log(fullPath)
     return {
       title: route.title,
-      url: route.path,
+      url: fullPath,
       icon: route.icon,
-      children: route.children?.filter((e: any) => e.showSidebar)?.map(mapRoute) ?? [],
+      children:
+        route.children
+          ?.filter((e: any) => e.showSidebar)
+          ?.map((child: any) => mapRoute(child, fullPath)) ?? [],
     }
   }
 
@@ -94,14 +50,8 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={navMain} />
         {navSecondary.length > 0 && (
-          <NavSecondary
-            items={navSecondary}
-            className="mt-4"
-            label="Quản lý đăng ký"
-          />
+          <NavSecondary items={navSecondary} className="mt-4" label="Quản lý đăng ký" />
         )}
-        {/* the below are currently not in use */}
-        {/* <NavDocuments items={mock_data.documents} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
