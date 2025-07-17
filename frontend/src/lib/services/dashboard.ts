@@ -21,10 +21,10 @@ export interface DashboardStats {
     procedures: number;
   };
   procedureStats: {
-    createdPending: number;
-    processing: number;
     overdue: number;
-    completedArchived: number;
+    processing: number;
+    steps: { step: number; count: number }[];
+    archived: number;
   };
   byStatus: {
     records: Array<{ _id: string; count: number }>;

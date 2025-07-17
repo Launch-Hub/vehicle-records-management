@@ -65,7 +65,7 @@ export function NavMain({ items }: NavMainProps) {
                   >
                     <CollapsibleTrigger
                       className={clsx(
-                        'flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors duration-300 ease-in-out',
+                        'flex w-full items-center justify-between rounded-md p-2 text-sm transition-colors duration-300 ease-in-out cursor-pointer',
                         isActive
                           ? 'bg-primary text-primary-foreground font-semibold'
                           : 'hover:bg-muted/50'
@@ -81,7 +81,7 @@ export function NavMain({ items }: NavMainProps) {
                         <ChevronRight className="h-4 w-4" />
                       )}
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="pl-6">
+                    <CollapsibleContent className="pl-4 pt-2">
                       <SidebarMenu>
                         {item.children.map((child) => {
                           const isChildActive = location.pathname.startsWith(child.url)

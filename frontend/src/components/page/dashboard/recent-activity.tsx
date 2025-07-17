@@ -61,36 +61,36 @@ export function RecentActivity({ stats }: RecentActivityProps) {
   ]
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Hoạt động gần đây</CardTitle>
-        <CardDescription>
-          Tổng quan hoạt động trong ngày và tuần
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {activities.map((activity, index) => (
-            <div
-              key={index}
-              className={`flex items-center gap-3 rounded-lg p-3 ${activity.bgColor}`}
-            >
-              <div className={`p-2 rounded-md ${activity.bgColor}`}>
-                <activity.icon className={`h-5 w-5 ${activity.color}`} />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">{activity.title}</p>
-                  <Badge variant="secondary" className="text-xs">
-                    {activity.count}
-                  </Badge>
+    <div className="px-4 lg:px-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Hoạt động gần đây</CardTitle>
+          <CardDescription>Tổng quan hoạt động trong ngày và tuần</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activities.map((activity, index) => (
+              <div
+                key={index}
+                className={`flex items-center gap-3 rounded-lg p-3 ${activity.bgColor}`}
+              >
+                <div className={`p-2 rounded-md ${activity.bgColor}`}>
+                  <activity.icon className={`h-5 w-5 ${activity.color}`} />
                 </div>
-                <p className="text-xs text-muted-foreground">{activity.period}</p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{activity.title}</p>
+                    <Badge variant="secondary" className="text-xs">
+                      {activity.count}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{activity.period}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
-} 
+}

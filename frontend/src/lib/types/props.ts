@@ -25,13 +25,13 @@ export interface StatProps {
 export interface StatCardProps extends StatProps {
   field: string
   title: string
-  insights: string
-  comment?: string
+  insights?: string
+  colorClass?: string; // Optional custom class for card color
 }
 export interface StatChartProps {
   field: string
   title: string
   insights: string
   chartData: StatProps[]
-  comment?: string
+  colorClass?: string; // Optional custom class for card color
 }

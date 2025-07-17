@@ -55,9 +55,18 @@ exports.getDashboardStats = async (req, res) => {
       status: "pending"
     });
 
+    // Get processing procedures (all steps)
     const processingProcedures = await Procedure.countDocuments({
       status: "processing"
     });
+
+    // Get processing procedures by step 1-7 as an array
+    const steps = await Promise.all(
+      Array.from({ length: 7 }, (_, i) =>
+        Procedure.countDocuments({ status: "processing", step: i + 1 })
+      )
+    );
+    const stepStats = steps.map((count, idx) => ({ step: idx + 1, count }));
 
     // Get overdue procedures (pending or processing with dueDate < current date)
     const overdueProcedures = await Procedure.countDocuments({
@@ -65,6 +74,11 @@ exports.getDashboardStats = async (req, res) => {
         { status: { $in: ["pending", "processing"] } },
         { dueDate: { $lt: now } }
       ]
+    });
+
+    // Get archived procedures
+    const archivedProcedures = await Procedure.countDocuments({
+      status: "archived"
     });
 
     // Get completed and archived procedures
@@ -161,10 +175,10 @@ exports.getDashboardStats = async (req, res) => {
         procedures: monthProcedures
       },
       procedureStats: {
-        createdPending: createdPendingProcedures,
-        processing: processingProcedures,
         overdue: overdueProcedures,
-        completedArchived: completedArchivedProcedures
+        processing: processingProcedures,
+        steps: stepStats,
+        archived: archivedProcedures
       },
       byStatus: {
         records: recordsByStatus,

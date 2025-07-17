@@ -4,7 +4,6 @@ import { SectionCards } from '@/components/page/dashboard/section-cards'
 import { StatusCards } from '@/components/page/dashboard/status-cards'
 import { RecentActivity } from '@/components/page/dashboard/recent-activity'
 import { dashboardService, type DashboardStats } from '@/lib/services/dashboard'
-import { Loader2 } from 'lucide-react'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
@@ -28,27 +27,16 @@ export default function DashboardPage() {
     fetchStats()
   }, [])
 
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading dashboard...</span>
-        </div>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="text-center">
           <p className="text-destructive">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="mt-2 text-sm text-muted-foreground hover:text-foreground"
           >
-            Try again
+            Thử lại
           </button>
         </div>
       </div>
@@ -62,53 +50,75 @@ export default function DashboardPage() {
   // Transform stats data for the cards - showing procedure statistics
   const statCards = [
     {
-      field: 'createdPending',
-      title: 'Đăng ký chờ xử lý',
-      total: stats.procedureStats.createdPending,
-      unit: '',
-      diff: 0, // No daily tracking for this specific status
-      ratio: 0,
-      insights: 'Đăng ký đang chờ xử lý',
-      insightsColor: 'default',
-      comment: 'Trạng thái pending',
-      commentColor: '',
-    },
-    {
-      field: 'processing',
-      title: 'Đăng ký đang xử lý',
-      total: stats.procedureStats.processing,
-      unit: '',
-      diff: 0, // No daily tracking for this specific status
-      ratio: 0,
-      insights: 'Đăng ký đang được xử lý',
-      insightsColor: 'default',
-      comment: 'Trạng thái processing',
-      commentColor: '',
-    },
-    {
       field: 'overdue',
-      title: 'Đăng ký quá hạn',
+      title: 'Hồ sơ trễ hạn',
       total: stats.procedureStats.overdue,
       unit: '',
-      diff: 0, // No daily tracking for this specific status
+      diff: 0,
       ratio: 0,
-      insights: 'Đăng ký đã quá hạn xử lý',
-      insightsColor: 'destructive',
-      comment: 'Cần chú ý xử lý',
-      commentColor: '',
+      // insights: '',
+      colorClass: 'bg-red-100 border-red-400',
+    },
+    // {
+    //   field: 'processing',
+    //   title: 'Hồ sơ đang giải quyết',
+    //   total: stats.procedureStats.processing,
+    //   unit: '',
+    //   diff: 0,
+    //   ratio: 0,
+    //   // insights: '',
+    //   colorClass: 'bg-blue-200',
+    // },
+    {
+      field: 'processing',
+      title: 'Hồ sơ đang trình ký',
+      total: stats.procedureStats.steps.find((step) => step.step === 5)?.count || 0,
+      unit: '',
+      diff: 0,
+      ratio: 0,
+      // insights: '',
+      colorClass: 'bg-green-100 border-green-400',
     },
     {
-      field: 'completedArchived',
-      title: 'Đăng ký hoàn thành',
-      total: stats.procedureStats.completedArchived,
+      field: 'archived',
+      title: 'Kết quả đang chờ trả',
+      total: stats.procedureStats.steps.find((step) => step.step === 6)?.count || 0,
       unit: '',
-      diff: 0, // No daily tracking for this specific status
+      diff: 0,
       ratio: 0,
-      insights: 'Đăng ký đã hoàn thành',
-      insightsColor: 'success',
-      comment: 'Trạng thái completed/archived',
-      commentColor: '',
+      // insights: '',
+      colorClass: 'bg-green-100 border-green-400',
     },
+    {
+      field: 'archived',
+      title: 'Kết quả đã trả',
+      total: stats.procedureStats.steps.find((step) => step.step === 7)?.count || 0,
+      unit: '',
+      diff: 0,
+      ratio: 0,
+      // insights: '',
+      colorClass: 'bg-green-100 border-green-400',
+    },
+    // {
+    //   field: 'archived',
+    //   title: 'Hồ sơ đã lưu kho',
+    //   total: stats.procedureStats.archived,
+    //   unit: '',
+    //   diff: 0,
+    //   ratio: 0,
+    //   // insights: '',
+    //   colorClass: 'bg-green-300',
+    // },
+    // {
+    //   field: 'archived',
+    //   title: 'Hồ sơ đã ra kho',
+    //   total: stats.procedureStats.archived,
+    //   unit: '',
+    //   diff: 0,
+    //   ratio: 0,
+    //   // insights: '',
+    //   colorClass: 'bg-orange-200',
+    // },
   ]
 
   return (
@@ -116,13 +126,9 @@ export default function DashboardPage() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <SectionCards data={statCards} />
-          <div className="px-4 lg:px-6">
-            <RecentActivity stats={stats} />
-          </div>
+          <RecentActivity stats={stats} />
           <StatusCards stats={stats} />
-          <div className="px-4 lg:px-6">
-            <ChartAreaInteractive stats={stats} />
-          </div>
+          <ChartAreaInteractive stats={stats} />
         </div>
       </div>
     </div>

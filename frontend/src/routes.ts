@@ -269,49 +269,6 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     children: [
       {
         auth: true,
-        element: 'ActionTypesPage',
-        resource: 'action_types',
-        showSidebar: true,
-        icon: ListTodoIcon,
-        path: 'action-types',
-        title: 'Manage Action Types',
-        language: 'en',
-        translations: [
-          {
-            path: 'tao-muc-dang-ky',
-            title: 'Tạo mục đăng ký',
-            language: 'vi',
-          },
-        ],
-        children: [
-          {
-            element: 'ActionTypeDetailPage',
-            path: ':id',
-            title: 'Action Type Detail',
-            language: 'en',
-            translations: [
-              {
-                language: 'vi',
-                title: 'Chỉnh sửa tạo mục',
-              },
-            ],
-          },
-          {
-            element: 'ActionTypeDetailPage',
-            path: 'new',
-            title: 'Create Action Type',
-            language: 'en',
-            translations: [
-              {
-                language: 'vi',
-                title: 'Thêm tạo mục mới',
-              },
-            ],
-          },
-        ],
-      },
-      {
-        auth: true,
         element: 'UsersPage',
         resource: 'users',
         showSidebar: true,
@@ -348,6 +305,49 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
               {
                 language: 'vi',
                 title: 'Tạo người dùng mới',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        auth: true,
+        element: 'ActionTypesPage',
+        resource: 'action_types',
+        showSidebar: true,
+        icon: ListTodoIcon,
+        path: 'action-types',
+        title: 'Manage Action Types',
+        language: 'en',
+        translations: [
+          {
+            path: 'tao-muc-dang-ky',
+            title: 'Tạo mục đăng ký',
+            language: 'vi',
+          },
+        ],
+        children: [
+          {
+            element: 'ActionTypeDetailPage',
+            path: ':id',
+            title: 'Action Type Detail',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Chỉnh sửa tạo mục',
+              },
+            ],
+          },
+          {
+            element: 'ActionTypeDetailPage',
+            path: 'new',
+            title: 'Create Action Type',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Thêm tạo mục mới',
               },
             ],
           },
