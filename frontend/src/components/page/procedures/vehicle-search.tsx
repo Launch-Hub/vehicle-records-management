@@ -125,56 +125,79 @@ export default function VehicleRecordSearch({
   return (
     <div className="mb-4 flex flex-col gap-2">
       <div className="font-semibold">Tìm kiếm xe</div>
-      <div className="flex flex-wrap gap-4 items-end">
-        <div className="space-y-2">
-          <Label className="text-sm mb-1">Biển số</Label>
-          <Input
-            type="text"
-            value={fields.plateNumber}
-            onChange={(e) =>
-              setFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
-            }
-            onPaste={(e) => {
-              const pasted = e.clipboardData.getData('text')
-              const parsed = parsePlateNumberInput(pasted)
-              setFields((prev) => ({
-                ...prev,
-                ...parsed,
-              }))
-              e.preventDefault()
-            }}
-            placeholder="Nhập hoặc quét mã biển số"
-            autoFocus
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm mb-1">Số máy</Label>
-          <Input
-            type="text"
-            value={fields.engineNumber}
-            onChange={(e) => setFields((prev) => ({ ...prev, engineNumber: e.target.value }))}
-            placeholder="Nhập số máy"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm mb-1">Số khung</Label>
-          <Input
-            type="text"
-            value={fields.identificationNumber}
-            onChange={(e) =>
-              setFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
-            }
-            placeholder="Nhập số khung"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-sm mb-1">Màu biển</Label>
-          <Input
-            type="text"
-            value={fields.color}
-            onChange={(e) => setFields((prev) => ({ ...prev, color: e.target.value }))}
-            placeholder="Nhập màu biển"
-          />
+      <div className="flex gap-4 items-end">
+        <div className="w-3/4 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
+            <Label className="text-sm mb-1">{getLabel('plateNumber', 'vehicle_records')}</Label>
+            <Input
+              type="text"
+              value={fields.plateNumber}
+              onChange={(e) =>
+                setFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
+              }
+              onPaste={(e) => {
+                const pasted = e.clipboardData.getData('text')
+                const parsed = parsePlateNumberInput(pasted)
+                setFields((prev) => ({
+                  ...prev,
+                  ...parsed,
+                }))
+                e.preventDefault()
+              }}
+              placeholder="Nhập hoặc quét mã biển số"
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm mb-1">{getLabel('engineNumber', 'vehicle_records')}</Label>
+            <Input
+              type="text"
+              value={fields.engineNumber}
+              onChange={(e) => setFields((prev) => ({ ...prev, engineNumber: e.target.value }))}
+              placeholder="Nhập số máy"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm mb-1">
+              {getLabel('identificationNumber', 'vehicle_records')}
+            </Label>
+            <Input
+              type="text"
+              value={fields.identificationNumber}
+              onChange={(e) =>
+                setFields((prev) => ({ ...prev, identificationNumber: e.target.value }))
+              }
+              placeholder="Nhập số khung"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm mb-1">{getLabel('color', 'vehicle_records')}</Label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild={false} className="w-full !max-w-full overflow-hidden">
+                <span className="w-full justify-between cursor-pointer inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focusVisible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50">
+                  <span
+                    className={`overflow-hidden text-ellipsis whitespace-nowrap block ${
+                      fields.color ? 'text-foreground' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {fields.color ? fields.color : 'Chọn màu'}
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {PLATE_COLORS.map((c) => (
+                  <DropdownMenuItem
+                    key={c.label}
+                    onClick={() => setFields((prev: any) => ({ ...prev, color: c.label }))}
+                  >
+                    <div className="h-4 w-4 rounded-full" style={{ backgroundColor: c.color }} />
+                    <span className="ml-2">{c.label}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         <Button type="button" variant="secondary" onClick={handleSearch} disabled={loading}>
           {loading ? 'Đang tìm...' : 'Tìm kiếm'}

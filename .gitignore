@@ -7,4 +7,5 @@
 **/*.env
 **/!.env.example
 
-public/
+# vrm bucket only
+/public/vrm-bucket/

@@ -24,7 +24,6 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
 
   function mapRoute(route: any, parentPath?: string) {
     const fullPath = parentPath ? `${parentPath}/${route.path}` : route.path
-    console.log(fullPath)
     return {
       title: route.title,
       url: fullPath,

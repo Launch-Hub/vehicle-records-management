@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, Trash2, PlusCircle, ChevronDown, PrinterIcon, X } from 'lucide-react'
+import { Plus, Trash2, PlusCircle, PrinterIcon, X } from 'lucide-react'
 import type { Procedure, ProcedureStep, VehicleRecord, Bulk } from '@/lib/types/tables.type'
 import api from '@/lib/axios'
 import {
@@ -26,8 +26,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PLATE_COLORS, VEHICLE_TYPES } from '@/constants/general'
-import { getLabel } from '@/constants/dictionary'
+import { PLATE_COLORS } from '@/constants/general'
 import type { PaginationProps } from '@/lib/types/props'
 import { useDebounce } from '@/lib/hooks/use-debounce'
 import {
@@ -39,19 +38,6 @@ import {
 } from '@/components/ui/dialog'
 import BulkForm from '@/components/page/bulks/form'
 import { uploadService } from '@/lib/services/upload'
-import { Switch } from '@/components/ui/switch'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion'
 import { QRCodeCanvas } from 'qrcode.react'
 import QRPrint from '@/components/shared/qr-code/qr-print'
 import VehicleRecordSearch from './vehicle-search'
@@ -204,74 +190,74 @@ export default function ProcedureForm({
   }, [fetchActionTypes])
 
   // Check for existing record when plate number changes
-  const handlePlateNumberBlur = async () => {
-    const plateNumber = recordFields.plateNumber.trim()
-    if (!plateNumber) return
+  // const handlePlateNumberBlur = async () => {
+  //   const plateNumber = recordFields.plateNumber.trim()
+  //   if (!plateNumber) return
 
-    try {
-      const params = {
-        plateNumber,
-        identificationNumber: recordFields.identificationNumber,
-        engineNumber: recordFields.engineNumber,
-        vehicleType: recordFields.vehicleType,
-        noPagination: true,
-      }
-      const res = await api.get('/records', { params })
-      const items = res.data?.items || []
-      if (items.length > 0) {
-        const record = items[0]
-        setExistingRecord(record)
-        setValue('recordId', record._id)
-        // Auto-fill record fields
-        setRecordFields({
-          plateNumber: record.plateNumber,
-          color: record.color,
-          identificationNumber: record.identificationNumber,
-          engineNumber: record.engineNumber,
-          registrant: record.registrant,
-          phone: record.phone || '',
-          email: record.email || '',
-          address: record.address || '',
-          note: record.note || '',
-          vehicleType: record.vehicleType || 'Ô tô',
-        })
-      } else {
-        setExistingRecord(null)
-        setValue('recordId', '')
-        // Keep the plate number but clear other fields
-        setRecordFields((prev) => ({
-          ...prev,
-          plateNumber: plateNumber,
-          color: '',
-          identificationNumber: '',
-          engineNumber: '',
-          registrant: '',
-          phone: '',
-          email: '',
-          address: '',
-          note: '',
-          vehicleType: 'Ô tô',
-        }))
-      }
-    } catch (error) {
-      setExistingRecord(null)
-      setValue('recordId', '')
-      setRecordFields((prev) => ({
-        ...prev,
-        plateNumber: plateNumber,
-        color: '',
-        identificationNumber: '',
-        engineNumber: '',
-        registrant: '',
-        phone: '',
-        email: '',
-        address: '',
-        note: '',
-        vehicleType: 'Ô tô',
-      }))
-      console.error('Failed to search for record', error)
-    }
-  }
+  //   try {
+  //     const params = {
+  //       plateNumber,
+  //       identificationNumber: recordFields.identificationNumber,
+  //       engineNumber: recordFields.engineNumber,
+  //       vehicleType: recordFields.vehicleType,
+  //       noPagination: true,
+  //     }
+  //     const res = await api.get('/records', { params })
+  //     const items = res.data?.items || []
+  //     if (items.length > 0) {
+  //       const record = items[0]
+  //       setExistingRecord(record)
+  //       setValue('recordId', record._id)
+  //       // Auto-fill record fields
+  //       setRecordFields({
+  //         plateNumber: record.plateNumber,
+  //         color: record.color,
+  //         identificationNumber: record.identificationNumber,
+  //         engineNumber: record.engineNumber,
+  //         registrant: record.registrant,
+  //         phone: record.phone || '',
+  //         email: record.email || '',
+  //         address: record.address || '',
+  //         note: record.note || '',
+  //         vehicleType: record.vehicleType || 'Ô tô',
+  //       })
+  //     } else {
+  //       setExistingRecord(null)
+  //       setValue('recordId', '')
+  //       // Keep the plate number but clear other fields
+  //       setRecordFields((prev) => ({
+  //         ...prev,
+  //         plateNumber: plateNumber,
+  //         color: '',
+  //         identificationNumber: '',
+  //         engineNumber: '',
+  //         registrant: '',
+  //         phone: '',
+  //         email: '',
+  //         address: '',
+  //         note: '',
+  //         vehicleType: 'Ô tô',
+  //       }))
+  //     }
+  //   } catch (error) {
+  //     setExistingRecord(null)
+  //     setValue('recordId', '')
+  //     setRecordFields((prev) => ({
+  //       ...prev,
+  //       plateNumber: plateNumber,
+  //       color: '',
+  //       identificationNumber: '',
+  //       engineNumber: '',
+  //       registrant: '',
+  //       phone: '',
+  //       email: '',
+  //       address: '',
+  //       note: '',
+  //       vehicleType: 'Ô tô',
+  //     }))
+  //     console.error('Failed to search for record', error)
+  //   }
+  // }
 
   const handleCreateBulk = async (bulkData: Partial<Bulk>) => {
     try {
@@ -698,7 +684,7 @@ export default function ProcedureForm({
       </div>
 
       {/* Vehicle Search Section */}
-      <VehicleRecordSearch 
+      <VehicleRecordSearch
         onVehicleSelected={handleVehicleSelected}
         recordFields={recordFields}
         setRecordFields={setRecordFields}
