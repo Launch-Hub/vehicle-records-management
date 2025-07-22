@@ -322,7 +322,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         translations: [
           {
             path: 'tao-muc-dang-ky',
-            title: 'Tạo mục đăng ký',
+            title: 'Tuỳ chỉnh tạo mục',
             language: 'vi',
           },
         ],

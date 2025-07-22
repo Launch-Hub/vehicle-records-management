@@ -484,7 +484,7 @@ export default function ProcedureForm({
 
           {step === 3 && (
             <div className="space-y-2 w-full">
-              <Label htmlFor="paidAmount">Phí xử lý</Label>
+              <Label htmlFor="paidAmount">Lệ phí</Label>
               <div className="w-full flex gap-2">
                 <Select
                   value={watch('paidAmount')}
