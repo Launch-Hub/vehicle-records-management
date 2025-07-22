@@ -94,7 +94,7 @@ jobs:
           npm run build
           # Replace placeholder with actual server name
           sed -i "s/\${NGINX_SERVER_NAME}/${{ env.NGINX_SERVER_NAME }}/g" nginx.conf
-          sed -i "s/\${BASE_API_URL}/${{ env.BASE_API_URL }}/g" nginx.conf
+          sed -i "s/\${BASE_API_URL}/\${{ env.BASE_API_URL }}/g" nginx.conf
           cp nginx.conf dist/
           cp .env dist/
 
