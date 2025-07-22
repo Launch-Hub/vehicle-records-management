@@ -31,7 +31,7 @@ import {
 } from 'lucide-react'
 
 import api from '@/lib/axios'
-import type { Bulk, Procedure } from '@/lib/types/tables.type'
+import type { Bulk, Procedure, VehicleRecord } from '@/lib/types/tables.type'
 import BulkForm from '@/components/page/bulks/form'
 import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
@@ -72,10 +72,10 @@ export default function BulkDetailPage() {
         ? `Sao chép ${resource}`
         : `Chỉnh sửa ${resource}`
     )
-    
+
     // Fetch action types for registration type display
     fetchActionTypes()
-    
+
     if (isCreating) return
 
     const fetchDetail = async () => {
@@ -194,7 +194,9 @@ export default function BulkDetailPage() {
         }
       }
 
-      toast.success(defaultAction === 'create' ? 'Tạo Lần nhập thành công.' : 'Cập nhật Lần nhập thành công.')
+      toast.success(
+        defaultAction === 'create' ? 'Tạo Lần nhập thành công.' : 'Cập nhật Lần nhập thành công.'
+      )
       navigate(-1)
     } catch (err) {
       console.error(err)
@@ -298,7 +300,6 @@ export default function BulkDetailPage() {
               <ProcedureForm
                 key={selectedProcedureIndex ?? 'new'}
                 initialData={selectedProcedure as any}
-                hideBulkId={true}
                 onSubmit={handleProcedureSubmit}
                 onCancel={selectedProcedureIndex !== null ? handleAddNewProcedure : undefined}
               />
@@ -320,7 +321,7 @@ export default function BulkDetailPage() {
                   <TableBody>
                     {procedures.map((procedure, index) => (
                       <TableRow key={index}>
-                        <TableCell>{procedure.record?.plateNumber}</TableCell>
+                        <TableCell>{(procedure.record as VehicleRecord)?.plateNumber}</TableCell>
                         <TableCell>
                           {getRegistrationType(procedure.registrationType || '')}
                         </TableCell>
@@ -423,7 +424,7 @@ export default function BulkDetailPage() {
                   <TableBody>
                     {procedures.map((procedure, index) => (
                       <TableRow key={index}>
-                        <TableCell>{procedure.record?.plateNumber}</TableCell>
+                        <TableCell>{(procedure.record as VehicleRecord)?.plateNumber}</TableCell>
                         <TableCell>
                           {getRegistrationType(procedure.registrationType || '')}
                         </TableCell>

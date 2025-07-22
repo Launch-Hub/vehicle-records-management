@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { uploadService } from '@/lib/services/upload'
-import type { Procedure, ProcedureStep } from '@/lib/types/tables.type'
+import type { Procedure, ProcedureStep, VehicleRecord } from '@/lib/types/tables.type'
 import { recordService } from '@/lib/services/records'
 import { toast } from 'sonner'
 
@@ -72,7 +72,7 @@ export default function ProcedureStepChangeForm({
       ...procedure,
       steps: [...procedure.steps, newStep],
       currentStep: selectedStep,
-      oldPlate: procedure.record?.plateNumber,
+      oldPlate: (procedure.record as VehicleRecord)?.plateNumber,
       newPlate,
     })
   }

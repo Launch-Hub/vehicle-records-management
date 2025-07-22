@@ -10,6 +10,7 @@ import BasicTable from '@/components/shared/list-view/basic-table'
 import { Button } from '@/components/ui/button'
 import { getLabel } from '@/constants/dictionary'
 import { getRoute } from '@/routes'
+import { beautifyDate } from '@/lib/utils'
 
 export default function ProceedProcedurePage() {
   const loader = useLoader()
@@ -93,7 +94,7 @@ export default function ProceedProcedurePage() {
             _id: p._id,
             registrationType: p.registrationType || '',
             plateNumber: (p.record as VehicleRecord)?.plateNumber || '',
-            createdAt: p.createdAt,
+            createdAt: beautifyDate(p.createdAt),
           }))}
           emptyText="Chưa có hồ sơ nào."
           renderCell={(col, row) => {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { procedureService } from '@/lib/services/procedures'
-import type { Procedure } from '@/lib/types/tables.type'
+import type { Procedure, VehicleRecord } from '@/lib/types/tables.type'
 import ProcedureForm from '@/components/page/procedures/form'
 import { useLoader } from '@/contexts/loader/use-loader'
 import BasicTable from '@/components/shared/list-view/basic-table'
@@ -67,7 +67,7 @@ export default function CreateProcedurePage() {
           data={latestProcedures.map((p) => ({
             _id: p._id,
             registrationType: p.registrationType || '',
-            plateNumber: p.record?.plateNumber || '',
+            plateNumber: (p.record as VehicleRecord)?.plateNumber || '',
             createdAt: p.createdAt,
           }))}
           emptyText="Chưa có hồ sơ nào."
