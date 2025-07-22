@@ -36,7 +36,7 @@ import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import LogsPage from '@/pages/activities/Logs'
 import { DEFAULT_LANG } from './constants/env'
-import CreateProcedurePage from '@/pages/procedures/CreateProcedure'
+import ProceedProcedurePage from '@/pages/procedures/ProceedProcedure'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -108,9 +108,9 @@ export const PAGE_MAP = {
     component: ProceduresPage,
     default: 'eager',
   },
-  CreateProcedurePage: {
-    lazy: lazy(() => import('@/pages/procedures/CreateProcedure')), // lazy-loaded
-    component: CreateProcedurePage,
+  ProceedProcedurePage: {
+    lazy: lazy(() => import('@/pages/procedures/ProceedProcedure')), // lazy-loaded
+    component: ProceedProcedurePage,
     default: 'eager',
   },
   ProcedureDetailPage: {
@@ -447,7 +447,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
 
   {
     auth: true,
-    element: 'CreateProcedurePage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_1',
     showSidebar: true,
     nav: 2,
@@ -468,7 +468,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
 
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_2',
     showSidebar: true,
     nav: 2,
@@ -488,7 +488,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_3',
     showSidebar: true,
     nav: 2,
@@ -508,7 +508,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_4',
     showSidebar: true,
     nav: 2,
@@ -528,7 +528,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_5',
     showSidebar: true,
     nav: 2,
@@ -539,7 +539,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     language: 'en',
     translations: [
       {
-        path: '/trinh-ki-ho-so',
+        path: '/trinh-ky-ho-so',
         title: 'Trình ký hồ sơ',
         language: 'vi',
       },
@@ -548,7 +548,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_6',
     showSidebar: true,
     nav: 2,
@@ -569,7 +569,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_7',
     showSidebar: true,
     nav: 2,
@@ -589,7 +589,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_8',
     showSidebar: true,
     nav: 2,
@@ -609,7 +609,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   },
   {
     auth: true,
-    element: 'ProceduresPage',
+    element: 'ProceedProcedurePage',
     resource: 'procedures_9',
     showSidebar: true,
     nav: 2,
@@ -665,10 +665,7 @@ export const ROUTES = GLOBAL_ROUTES.map((e) => {
   }
 })
 
-export const getRoute = (
-  pathname: string,
-  queryParams: Record<string, string | number | boolean> = {}
-): CustomRouteProps | undefined => {
+export const getRoute = (pathname: string): CustomRouteProps | undefined => {
   if (pathname === '/') return ROUTES.find((route) => route.path === '/')
 
   const path = pathname.replace('/', '')

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { QRCodeCanvas } from 'qrcode.react'
+import { beautifyDate } from '@/lib/utils'
 
 interface QRPrintGridItem {
   url: string
@@ -18,7 +19,7 @@ const MAX_PER_PAGE = MAX_COLS * MAX_ROWS
 
 export default function QRPrintGrid({
   items,
-  title = 'Danh sách mã QR',
+  title,
   onPrintComplete,
 }: QRPrintGridProps) {
   // Refs for all canvases
@@ -43,7 +44,6 @@ export default function QRPrintGrid({
           <!DOCTYPE html>
           <html>
             <head>
-              <title>${title}</title>
               <style>
                 @media print, screen {
                   body {
@@ -75,9 +75,10 @@ export default function QRPrintGrid({
                   }
                   .qr-label {
                     margin-top: 8px;
-                    font-size: 12px;
+                    font-size: 14px;
                     color: #444;
                     text-align: center;
+                    font-weight: bold;
                     max-width: ${qrSize + 20}px;
                   }
                 }
@@ -89,8 +90,9 @@ export default function QRPrintGrid({
                   .map(
                     (url, i) => `
                   <div class="qr-cell">
-                    <img src="${url}" class="qr-img" alt="QR Code" />
                     ${items[i].label ? `<div class="qr-label">${items[i].label}</div>` : ''}
+                    <img src="${url}" class="qr-img" alt="QR Code" />
+                    <div class="qr-label">${beautifyDate(Date.now())}</div>
                   </div>
                 `
                   )

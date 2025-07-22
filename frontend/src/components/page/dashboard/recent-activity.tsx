@@ -14,9 +14,10 @@ interface RecentActivityProps {
       procedures: number
     }
   }
+  fetching: boolean
 }
 
-export function RecentActivity({ stats }: RecentActivityProps) {
+export function RecentActivity({ stats, fetching }: RecentActivityProps) {
   const activities = [
     // {
     //   icon: FileTextIcon,

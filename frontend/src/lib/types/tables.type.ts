@@ -76,9 +76,9 @@ export type ProcedureStep = ProcedureStepProps
 interface ProcedureProps {
   _id: string
   recordId: string
-  record?: VehicleRecordProps // for populate
+  record?: VehicleRecordProps | string // for populate
   bulkId?: string
-  bulk?: BulkProps // for populate
+  bulk?: BulkProps | string // for populate
   registrationType: string
   steps: ProcedureStep[]
   currentStep: number
@@ -86,11 +86,16 @@ interface ProcedureProps {
   newPlate?: string // for change plate
   status: 'pending' | 'processing' | 'completed' | 'cancelled'
   note?: string
-  dueDate?: Date
+  dueDate?: Date | number
   completedAt?: Date
   archivedAt?: Date
   createdAt: Date
   updatedAt?: Date
+  paidAmount?: string
+  isPromoteIdentityPlate?: boolean
+  isPromoteBusinessPlate?: boolean
+  returnType?: string
+  action?: string
 }
 export type Procedure = ProcedureProps
 

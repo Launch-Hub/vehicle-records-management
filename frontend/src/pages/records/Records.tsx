@@ -64,7 +64,9 @@ export default function RecordsPage() {
   const [search, setSearch] = useState('')
   const [showQRPrint, setShowQRPrint] = useState(false)
   const [selectedRecordForQR, setSelectedRecordForQR] = useState<VehicleRecord | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item?: VehicleRecord }>({ open: false })
+  const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item?: VehicleRecord }>({
+    open: false,
+  })
   // Batch QR print state
   const [showQRGrid, setShowQRGrid] = useState(false)
   const [qrGridItems, setQRGridItems] = useState<{ url: string; label?: string }[]>([])
@@ -182,13 +184,9 @@ export default function RecordsPage() {
           <DropdownMenuItem onClick={() => handleEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleCopy(row.original)}>Sao chép</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handlePrintQR(row.original)}>
-            In mã QR
-          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handlePrintQR(row.original)}>In mã QR</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setConfirmDelete({ open: true, item: row.original })}
-          >
+          <DropdownMenuItem onClick={() => setConfirmDelete({ open: true, item: row.original })}>
             <span className="text-destructive">Xoá</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -208,26 +206,22 @@ export default function RecordsPage() {
       <div className="@container/main flex flex-1 flex-col gap-2">
         {/* Batch actions dropdown menu */}
         {selectedRows.length > 0 && (
-          <div className="flex justify-end mb-2">
+          <div className="flex justify-end pt-4 px-4 md:pt-6 md:px-6">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="success" size="sm">
-                  Thao tác với mục đã chọn
+                  Thao tác
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleExportDropdown}>
-                  In danh sách
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleBatchPrintQR}>
-                  In danh sách mã QR
-                </DropdownMenuItem>
+                {/* <DropdownMenuItem onClick={handleExportDropdown}>In danh sách</DropdownMenuItem> */}
+                <DropdownMenuItem onClick={handleBatchPrintQR}>In danh sách mã QR</DropdownMenuItem>
                 {/* Add more actions here if needed */}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         )}
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+        <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}
             loading={isFetching}
@@ -260,11 +254,7 @@ export default function RecordsPage() {
       )}
       {/* QR Print Grid (batch) */}
       {showQRGrid && qrGridItems.length > 0 && (
-        <QRPrintGrid
-          items={qrGridItems}
-          title="Danh sách mã QR"
-          onPrintComplete={() => setShowQRGrid(false)}
-        />
+        <QRPrintGrid items={qrGridItems} onPrintComplete={() => setShowQRGrid(false)} />
       )}
     </div>
   )

@@ -9,8 +9,6 @@ import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
 import { DataTable } from '@/components/shared/list-view/table'
 import { procedureService } from '@/lib/services/procedures'
-import { recordService } from '@/lib/services/records'
-import { bulkService } from '@/lib/services/bulks'
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -77,7 +75,9 @@ export default function ProceduresPage() {
   const [data, setData] = useState<Procedure[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
-  const [proceedDialog, setProceedDialog] = useState<{ open: boolean; procedure?: Procedure }>({ open: false })
+  const [proceedDialog, setProceedDialog] = useState<{ open: boolean; procedure?: Procedure }>({
+    open: false,
+  })
 
   const location = useLocation()
   const navigate = useNavigate()

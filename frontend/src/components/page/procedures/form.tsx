@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,7 +15,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Plus, Trash2, PlusCircle, PrinterIcon, X } from 'lucide-react'
-import type { Procedure, ProcedureStep, VehicleRecord, Bulk } from '@/lib/types/tables.type'
+import type {
+  Procedure,
+  ProcedureStep,
+  VehicleRecord,
+  Bulk,
+  ActionType,
+} from '@/lib/types/tables.type'
 import api from '@/lib/axios'
 import {
   Command,
@@ -26,8 +33,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { PLATE_COLORS } from '@/constants/general'
-import type { PaginationProps } from '@/lib/types/props'
 import { useDebounce } from '@/lib/hooks/use-debounce'
 import {
   Dialog,
@@ -41,20 +46,26 @@ import { uploadService } from '@/lib/services/upload'
 import { QRCodeCanvas } from 'qrcode.react'
 import QRPrint from '@/components/shared/qr-code/qr-print'
 import VehicleRecordSearch from './vehicle-search'
+import { LAST_STEP } from '@/constants/general'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface ProcedureFormProps {
   initialData?: Procedure
   isCopying?: boolean
-  hideBulkId?: boolean
   onSubmit: (data: Omit<Procedure, '_id'>) => void
   onCancel?: () => void
+  isNew?: boolean
+  step?: number
+  submitButtonText?: string
 }
 
 export default function ProcedureForm({
   initialData,
-  hideBulkId = false,
   onSubmit,
   onCancel,
+  isNew = false,
+  step = 1,
+  submitButtonText = 'Tiếp nhận',
 }: ProcedureFormProps) {
   const {
     register,
@@ -64,28 +75,25 @@ export default function ProcedureForm({
     setValue,
     watch,
     formState: { isSubmitting },
-  } = useForm<Omit<Procedure, '_id'>>({
+  } = useForm<Omit<Procedure, '_id'> & { isPromoteIdentityPlate?: boolean }>({
     defaultValues: initialData || {
       recordId: '', // keep as recordId for frontend compatibility
       bulkId: undefined,
       registrationType: '',
-      currentStep: 1,
+      currentStep: step,
       steps: [],
-      dueDate: new Date(new Date().getTime() + 48 * 60 * 60 * 1000),
+      dueDate: new Date().getTime() + 48 * 60 * 60 * 1000,
       status: 'pending',
+      paidAmount: '',
+      action: '', // temp for step
+      newPlate: '',
+      returnType: '',
+      isPromoteIdentityPlate: false,
     },
   })
 
   const [steps, setSteps] = useState<ProcedureStep[]>(initialData?.steps || [])
   const [vehicleRecords, setVehicleRecords] = useState<VehicleRecord[]>([])
-  const [openRecordSelect, setOpenRecordSelect] = useState(false)
-  const [recordPagination, setRecordPagination] = useState<PaginationProps>({
-    pageIndex: 0,
-    pageSize: 50,
-  })
-  const [totalRecords, setTotalRecords] = useState(0)
-  const [recordSearch, setRecordSearch] = useState('')
-  const [isFetchingRecords, setIsFetchingRecords] = useState(false)
 
   // New states for record fields
   const [recordFields, setRecordFields] = useState({
@@ -111,7 +119,7 @@ export default function ProcedureForm({
   const [showBulkForm, setShowBulkForm] = useState(false)
 
   // Action types states
-  const [actionTypes, setActionTypes] = useState<any[]>([])
+  const [actionTypes, setActionTypes] = useState<ActionType[]>([])
   const [isFetchingActionTypes, setIsFetchingActionTypes] = useState(false)
 
   // State for step 1 image upload
@@ -121,29 +129,8 @@ export default function ProcedureForm({
 
   const [useCustomColor, setUseCustomColor] = useState(false)
 
-  const debouncedRecordSearch = useDebounce(recordSearch, 500)
+  // const debouncedRecordSearch = useDebounce(recordSearch, 500)
   const debouncedBulkSearch = useDebounce(bulkSearch, 500)
-
-  const fetchRecords = useCallback(
-    async (searchQuery: string, page: number) => {
-      setIsFetchingRecords(true)
-      try {
-        const res = await api.get('/records', {
-          params: { search: searchQuery, pageIndex: page, pageSize: recordPagination.pageSize },
-        })
-        if (res.data.items) {
-          setVehicleRecords((prev) => (page === 0 ? res.data.items : [...prev, ...res.data.items]))
-          setTotalRecords(res.data.total)
-          setRecordPagination((prev) => ({ ...prev, pageIndex: page }))
-        }
-      } catch (error) {
-        console.error('Failed to fetch vehicle records', error)
-      } finally {
-        setIsFetchingRecords(false)
-      }
-    },
-    [recordPagination.pageSize]
-  )
 
   const fetchBulks = useCallback(async (searchQuery: string) => {
     setIsFetchingBulks(true)
@@ -165,7 +152,7 @@ export default function ProcedureForm({
     setIsFetchingActionTypes(true)
     try {
       const res = await api.get('/action-types', {
-        params: { step: 1, pageIndex: 0, pageSize: 100 },
+        params: { step: step, pageIndex: 0, pageSize: 100 },
       })
       if (res.data.items) {
         setActionTypes(res.data.items)
@@ -175,89 +162,15 @@ export default function ProcedureForm({
     } finally {
       setIsFetchingActionTypes(false)
     }
-  }, [])
-
-  useEffect(() => {
-    fetchRecords(debouncedRecordSearch, 0)
-  }, [debouncedRecordSearch, fetchRecords])
-
-  useEffect(() => {
-    fetchBulks(debouncedBulkSearch)
-  }, [debouncedBulkSearch, fetchBulks])
+  }, [step])
 
   useEffect(() => {
     fetchActionTypes()
   }, [fetchActionTypes])
 
-  // Check for existing record when plate number changes
-  // const handlePlateNumberBlur = async () => {
-  //   const plateNumber = recordFields.plateNumber.trim()
-  //   if (!plateNumber) return
-
-  //   try {
-  //     const params = {
-  //       plateNumber,
-  //       identificationNumber: recordFields.identificationNumber,
-  //       engineNumber: recordFields.engineNumber,
-  //       vehicleType: recordFields.vehicleType,
-  //       noPagination: true,
-  //     }
-  //     const res = await api.get('/records', { params })
-  //     const items = res.data?.items || []
-  //     if (items.length > 0) {
-  //       const record = items[0]
-  //       setExistingRecord(record)
-  //       setValue('recordId', record._id)
-  //       // Auto-fill record fields
-  //       setRecordFields({
-  //         plateNumber: record.plateNumber,
-  //         color: record.color,
-  //         identificationNumber: record.identificationNumber,
-  //         engineNumber: record.engineNumber,
-  //         registrant: record.registrant,
-  //         phone: record.phone || '',
-  //         email: record.email || '',
-  //         address: record.address || '',
-  //         note: record.note || '',
-  //         vehicleType: record.vehicleType || 'Ô tô',
-  //       })
-  //     } else {
-  //       setExistingRecord(null)
-  //       setValue('recordId', '')
-  //       // Keep the plate number but clear other fields
-  //       setRecordFields((prev) => ({
-  //         ...prev,
-  //         plateNumber: plateNumber,
-  //         color: '',
-  //         identificationNumber: '',
-  //         engineNumber: '',
-  //         registrant: '',
-  //         phone: '',
-  //         email: '',
-  //         address: '',
-  //         note: '',
-  //         vehicleType: 'Ô tô',
-  //       }))
-  //     }
-  //   } catch (error) {
-  //     setExistingRecord(null)
-  //     setValue('recordId', '')
-  //     setRecordFields((prev) => ({
-  //       ...prev,
-  //       plateNumber: plateNumber,
-  //       color: '',
-  //       identificationNumber: '',
-  //       engineNumber: '',
-  //       registrant: '',
-  //       phone: '',
-  //       email: '',
-  //       address: '',
-  //       note: '',
-  //       vehicleType: 'Ô tô',
-  //     }))
-  //     console.error('Failed to search for record', error)
-  //   }
-  // }
+  useEffect(() => {
+    fetchBulks(debouncedBulkSearch)
+  }, [debouncedBulkSearch, fetchBulks])
 
   const handleCreateBulk = async (bulkData: Partial<Bulk>) => {
     try {
@@ -306,6 +219,7 @@ export default function ProcedureForm({
 
   const handleFormSubmit = async (data: Omit<Procedure, '_id'>) => {
     try {
+      console.log('dueDate from form data:', data.dueDate)
       let recordId = data.recordId
       // If no existing record and we have record fields, create a new record
       if (!existingRecord && recordFields.plateNumber) {
@@ -326,6 +240,20 @@ export default function ProcedureForm({
           setIsCreatingRecord(false)
         }
       }
+
+      if (!recordId) {
+        toast.error('Vui lòng chọn hoặc tạo một hồ sơ xe.')
+        return
+      }
+      // Find the action type ID for the selected registration type
+      const selectedActionType = actionTypes.find((at) =>
+        step === 1 ? at.name === getValues('registrationType') : at.name === getValues('action')
+      )
+      if (!selectedActionType?._id) {
+        toast.error('Vui lòng chọn phương thức xử lý hợp lệ.')
+        return
+      }
+
       // Upload image if present and not yet uploaded
       let uploadedImageUrl = imageUrl
       if (image && (!imageUrl || imageUrl.startsWith('blob:'))) {
@@ -342,29 +270,23 @@ export default function ProcedureForm({
         setIsUploadingImage(false)
       }
       // Prepare step 1 with attachment if creating
-      let finalSteps = initialData ? steps : []
-      if (!initialData) {
-        // Find the action type ID for the selected registration type
-        const selectedActionType = actionTypes.find(
-          (at) => at.name === getValues('registrationType')
-        )
-        const actionTypeId = selectedActionType?._id
+      const finalSteps = initialData ? steps : []
 
-        finalSteps = [
-          {
-            order: 1,
-            step: 1,
-            title: '',
-            action: actionTypeId, // Use ObjectId instead of name
-            note: '',
-            attachments: uploadedImageUrl ? [uploadedImageUrl] : [],
-            isCompleted: false,
-          },
-        ]
-        // step 1 is finished
-        data.currentStep = 2
+      if (selectedActionType) {
+        finalSteps.push({
+          order: steps.length + 1,
+          step: step,
+          title: selectedActionType.name,
+          action: selectedActionType._id, // Use ObjectId instead of name
+          note: '',
+          attachments: uploadedImageUrl ? [uploadedImageUrl] : [],
+          isCompleted: selectedActionType.toStep === LAST_STEP,
+        })
+
+        // step is finished => move to the next step
+        data.currentStep = Number(selectedActionType.toStep)
       }
-      const _record = existingRecord || vehicleRecords.find((e) => e._id === recordId)
+
       // Update bulk size if procedure is created successfully
       if (data.bulkId) {
         try {
@@ -374,26 +296,17 @@ export default function ProcedureForm({
         }
       }
       // Ensure dueDate is a valid Date object
-      let dueDate = data.dueDate
-      if (!(dueDate instanceof Date)) {
-        dueDate = dueDate ? new Date(dueDate) : new Date(Date.now() + 48 * 60 * 60 * 1000)
-      }
-
-      // Find the action type ID for the selected registration type
-      const selectedActionType = actionTypes.find((at) => at.name === data.registrationType)
-      const actionTypeId = selectedActionType?._id
 
       // Map frontend fields to backend fields
       onSubmit({
         ...data,
         record: recordId,
         bulk: data.bulkId,
-        steps: finalSteps.map((step) => ({
-          ...step,
-          action: step.step === 1 ? actionTypeId : step.action, // Use ObjectId for step 1, keep existing for others
-        })),
-        dueDate,
-        _record,
+        steps: finalSteps,
+        paidAmount: data.paidAmount,
+        newPlate: data.newPlate,
+        returnType: data.returnType,
+        isPromoteIdentityPlate: data.isPromoteIdentityPlate,
       } as any)
     } catch (error) {
       console.error('Failed to submit procedure', error)
@@ -431,41 +344,6 @@ export default function ProcedureForm({
     ? `${window.location.origin}/registration-history/${recordId}`
     : ''
 
-  // Helper to parse QR or pasted string for plateNumber and related fields
-  function parsePlateNumberInput(input: string) {
-    // Remove leading/trailing whitespace
-    const str = input.trim()
-    // Pattern 1: "plateNumber; color; engineNumber; identificationNumber"
-    if (str.includes(';')) {
-      const [plateNumber, color, engineNumber, identificationNumber] = str
-        .split(';')
-        .map((s) => s.trim())
-      return {
-        plateNumber: plateNumber?.toUpperCase() || '',
-        color: PLATE_COLORS.find((c) => c.dictionary.includes(color.toLowerCase()))?.label || '',
-        engineNumber: engineNumber || '',
-        identificationNumber: identificationNumber || '',
-      }
-    }
-    // Pattern 2: "plateNumber-[nevermind]-[nevermind]..."
-    if (str.includes('-')) {
-      const [plateNumber] = str.split('-')
-      return {
-        plateNumber: plateNumber?.toUpperCase() || '',
-        color: '',
-        engineNumber: '',
-        identificationNumber: '',
-      }
-    }
-    // Fallback: treat as plateNumber only
-    return {
-      plateNumber: str.toUpperCase(),
-      color: '',
-      engineNumber: '',
-      identificationNumber: '',
-    }
-  }
-
   // Handler to update vehicle record fields when a vehicle is selected from search
   const handleVehicleSelected = (vehicle: VehicleRecord) => {
     setExistingRecord(vehicle)
@@ -482,141 +360,258 @@ export default function ProcedureForm({
       note: vehicle.note || '',
       vehicleType: vehicle.vehicleType || 'Ô tô',
     })
+    toast.success('Đã chọn phương tiện.')
   }
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-      {/* Procedure Fields Section */}
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="flex flex-col gap-12">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="w-3/4 grid grid-cols-2 md:grid-cols-3 gap-6">
+          {step === 1 ? (
+            <div className="space-y-2">
+              <Label htmlFor="registrationType" className="required">
+                {step === 1 ? 'Trạng thái đăng ký' : 'Phương thức xử lý'}
+              </Label>
+              <div className="flex gap-2 items-end">
+                <Select
+                  value={watch('registrationType')}
+                  onValueChange={(value) => setValue('registrationType', value as any)}
+                  disabled={isFetchingActionTypes || isSubmitting}
+                >
+                  <SelectTrigger id="registrationType" className="w-full">
+                    <SelectValue placeholder="Chọn trạng thái đăng ký" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {actionTypes.map((actionType) => (
+                      <SelectItem key={actionType._id} value={actionType.name}>
+                        {actionType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label htmlFor="action" className="required">
+                {step === 1 ? 'Trạng thái đăng ký' : 'Phương thức xử lý'}
+              </Label>
+              <div className="flex gap-2 items-end">
+                <Select
+                  value={watch('action')}
+                  onValueChange={(value) => setValue('action', value as any)}
+                  disabled={isFetchingActionTypes || isSubmitting}
+                >
+                  <SelectTrigger id="actionType" className="w-full">
+                    <SelectValue placeholder="Chọn phương thức xử lý" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {actionTypes.map((actionType) => (
+                      <SelectItem key={actionType._id} value={actionType.name}>
+                        {actionType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          {step === 1 && (
+            <div className="space-y-2 w-full">
+              <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
+              <div className="w-full flex gap-2">
+                <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
+                  <PopoverTrigger asChild disabled={isFetchingBulks || isSubmitting}>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openBulkSelect}
+                      className="flex-1 justify-between"
+                    >
+                      {watch('bulkId')
+                        ? bulks.find((b) => b._id === watch('bulkId'))?.name
+                        : 'Chọn lần nhập (không bắt buộc)'}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                      <CommandInput placeholder="Tìm kiếm lần nhập" onValueChange={setBulkSearch} />
+                      <CommandEmpty>Không tìm thấy lần nhập.</CommandEmpty>
+                      <CommandGroup>
+                        {bulks.map((bulk) => (
+                          <CommandItem
+                            key={bulk._id}
+                            value={bulk._id}
+                            onSelect={(currentValue) => {
+                              setValue(
+                                'bulkId',
+                                currentValue === watch('bulkId') ? '' : currentValue
+                              )
+                              setOpenBulkSelect(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                'mr-2 h-4 w-4',
+                                watch('bulkId') === bulk._id ? 'opacity-100' : 'opacity-0'
+                              )}
+                            />
+                            {bulk.name} ({bulk.size} hồ sơ)
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="registrationType" className="required">
-            Trạng thái đăng ký
-          </Label>
-          <Select
-            value={watch('registrationType')}
-            onValueChange={(value) => setValue('registrationType', value as any)}
-            disabled={isFetchingActionTypes || isSubmitting}
-          >
-            <SelectTrigger id="registrationType" className="w-full">
-              <SelectValue placeholder="Chọn hạng mục" />
-            </SelectTrigger>
-            <SelectContent>
-              {actionTypes.map((actionType) => (
-                <SelectItem key={actionType._id} value={actionType.name}>
-                  {actionType.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                <Dialog open={showBulkForm} onOpenChange={setShowBulkForm}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <PlusCircle className="h-4 w-4" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Tạo lần nhập mới</DialogTitle>
+                    </DialogHeader>
+                    <BulkForm onSubmit={handleCreateBulk} onCancel={() => setShowBulkForm(false)} />
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          )}
 
-        {!hideBulkId && (
-          <div className="space-y-2 w-full">
-            <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
-            <div className="w-full flex gap-2">
-              <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
-                <PopoverTrigger asChild disabled={isFetchingBulks || isSubmitting}>
+          {step === 3 && (
+            <div className="space-y-2 w-full">
+              <Label htmlFor="paidAmount">Phí xử lý</Label>
+              <div className="w-full flex gap-2">
+                <Select
+                  value={watch('paidAmount')}
+                  onValueChange={(value) => setValue('paidAmount', value, { shouldValidate: true })}
+                  disabled={isSubmitting}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn số tiền" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="50000">50.000đ</SelectItem>
+                    <SelectItem value="100000">100.000đ</SelectItem>
+                    <SelectItem value="150000">150.000đ</SelectItem>
+                    <SelectItem value="1000000">1.000.000đ</SelectItem>
+                    <SelectItem value="2000000">2.000.000đ</SelectItem>
+                    <SelectItem value="4000000">4.000.000đ</SelectItem>
+                    <SelectItem value="20000000">20.000.000đ</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          {step === 3 && (
+            <div className="space-y-2 w-full">
+              <Label htmlFor="newPlate">Biển số mới (nếu có)</Label>
+              <div className="w-full flex gap-2">
+                <Input
+                  id="newPlate"
+                  placeholder="Biển số mới (nếu có)"
+                  value={watch('newPlate')}
+                  onChange={(e) => setValue('newPlate', e.target.value)}
+                  className="w-full"
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div className="w-full flex flex-col items-center justify-center gap-4">
+              <Label htmlFor="_"></Label>
+
+              <div className="w-full flex gap-2 items-center">
+                <Checkbox
+                  id="isPromoteIdentityPlate"
+                  checked={!!watch('isPromoteIdentityPlate')}
+                  onCheckedChange={(e) => setValue('isPromoteIdentityPlate', !!e)}
+                  disabled={isSubmitting}
+                />
+                <Label htmlFor="isPromoteIdentityPlate">Đề xuất dập biển định danh</Label>
+              </div>
+              <div className="w-full flex gap-2 items-center">
+                <Checkbox
+                  id="isPromoteBusinessPlate"
+                  checked={!!watch('isPromoteBusinessPlate')}
+                  onCheckedChange={(e) => setValue('isPromoteBusinessPlate', !!e)}
+                  disabled={isSubmitting}
+                />
+                <Label htmlFor="isPromoteBusinessPlate">Đề xuất dập biển vàng</Label>
+              </div>
+            </div>
+          )}
+
+          {step === 7 && (
+            <div className="space-y-2 w-full">
+              <Label htmlFor="returnType">Hình thức trả kết quả</Label>
+              <div className="w-full flex gap-2">
+                <Select
+                  value={watch('returnType')}
+                  onValueChange={(value) => setValue('returnType', value, { shouldValidate: true })}
+                  disabled={isSubmitting}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn hình thức trả kết quả" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="direct">Trả trực tiếp</SelectItem>
+                    <SelectItem value="post_office">Trả qua bưu điện</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="image">Đính kèm</Label>
+            <div className="flex items-start gap-4">
+              <input
+                id="image"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                disabled={isUploadingImage}
+                style={{ display: 'none' }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => document.getElementById('image')?.click()}
+                disabled={isUploadingImage}
+                className="flex-shrink-0"
+              >
+                {isUploadingImage ? 'Đang tải lên...' : 'Chọn tệp'}
+              </Button>
+              {imageUrl && (
+                <div className="relative inline-block">
+                  <img
+                    src={imageUrl.startsWith('blob:') ? imageUrl : `/uploads/du/${imageUrl}`}
+                    alt="Ảnh đính kèm"
+                    className="max-h-20 rounded border ml-2"
+                    style={{ maxWidth: 80 }}
+                  />
                   <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openBulkSelect}
-                    className="flex-1 justify-between"
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
+                    onClick={handleRemoveImage}
                   >
-                    {watch('bulkId')
-                      ? bulks.find((b) => b._id === watch('bulkId'))?.name
-                      : 'Chọn lần nhập (không bắt buộc)'}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <X className="h-3 w-3" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                  <Command>
-                    <CommandInput placeholder="Tìm kiếm lần nhập" onValueChange={setBulkSearch} />
-                    <CommandEmpty>Không tìm thấy lần nhập.</CommandEmpty>
-                    <CommandGroup>
-                      {bulks.map((bulk) => (
-                        <CommandItem
-                          key={bulk._id}
-                          value={bulk._id}
-                          onSelect={(currentValue) => {
-                            setValue('bulkId', currentValue === watch('bulkId') ? '' : currentValue)
-                            setOpenBulkSelect(false)
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              'mr-2 h-4 w-4',
-                              watch('bulkId') === bulk._id ? 'opacity-100' : 'opacity-0'
-                            )}
-                          />
-                          {bulk.name} ({bulk.size} hồ sơ)
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-
-              <Dialog open={showBulkForm} onOpenChange={setShowBulkForm}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="icon">
-                    <PlusCircle className="h-4 w-4" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Tạo lần nhập mới</DialogTitle>
-                  </DialogHeader>
-                  <BulkForm onSubmit={handleCreateBulk} onCancel={() => setShowBulkForm(false)} />
-                </DialogContent>
-              </Dialog>
+                </div>
+              )}
             </div>
           </div>
-        )}
-
-        <div className="space-y-2">
-          <Label htmlFor="image">Đính kèm</Label>
-          <div className="flex items-start gap-4">
-            <input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              disabled={isUploadingImage}
-              style={{ display: 'none' }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => document.getElementById('image')?.click()}
-              disabled={isUploadingImage}
-              className="flex-shrink-0"
-            >
-              {isUploadingImage ? 'Đang tải lên...' : 'Chọn ảnh'}
-            </Button>
-            {imageUrl && (
-              <div className="relative inline-block">
-                <img
-                  src={imageUrl.startsWith('blob:') ? imageUrl : `/uploads/du/${imageUrl}`}
-                  alt="Ảnh đính kèm"
-                  className="max-h-20 rounded border ml-2"
-                  style={{ maxWidth: 80 }}
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
-                  onClick={handleRemoveImage}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* <div className="space-y-2">
+          {/* <div className="space-y-2">
               <Label htmlFor="note">Ghi chú</Label>
               <Textarea
                 id="note"
@@ -625,7 +620,9 @@ export default function ProcedureForm({
                 rows={3}
               />
             </div> */}
-        <div className="space-y-2">
+        </div>
+
+        <div className="w-1/4 space-y-2">
           <div className="h-[14px]"></div>
           <div className="flex justify-end gap-2">
             {/* Print and QR buttons */}
@@ -677,7 +674,7 @@ export default function ProcedureForm({
               </Button>
             )}
             <Button type="submit" disabled={isSubmitting || isCreatingRecord}>
-              {isCreatingRecord ? 'Đang tiếp nhận...' : 'Tiếp nhận'}
+              {isCreatingRecord ? 'Đang xử lý...' : submitButtonText}
             </Button>
           </div>
         </div>
@@ -691,7 +688,6 @@ export default function ProcedureForm({
         useCustomColor={useCustomColor}
         setUseCustomColor={setUseCustomColor}
       />
-
       {/* Accordion moved to VehicleRecordSearch */}
 
       {/* QR Print Component */}
@@ -703,6 +699,7 @@ export default function ProcedureForm({
         />
       )}
 
+      {/* Don't touch this below code please. It's not related */}
       {isEditing && (
         <Card>
           <CardHeader>

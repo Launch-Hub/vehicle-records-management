@@ -27,6 +27,7 @@ export interface StatCardProps extends StatProps {
   title: string
   insights?: string
   colorClass?: string; // Optional custom class for card color
+  url?: string; // Optional URL for view details
 }
 export interface StatChartProps {
   field: string

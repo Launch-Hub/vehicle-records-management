@@ -1,18 +1,28 @@
-import { TrendingDownIcon, TrendingUpIcon } from 'lucide-react'
+import { ChevronRightIcon, TrendingDownIcon, TrendingUpIcon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import type { StatCardProps } from '@/lib/types/props'
+import { useNavigate } from 'react-router-dom'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
 
 interface SectionCardsProps {
+  fetching: boolean
   data: StatCardProps[]
 }
 
-export function SectionCards({ data }: SectionCardsProps) {
+export function SectionCards({ fetching, data }: SectionCardsProps) {
+  const navigate = useNavigate()
   return (
     <div className="*:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4 grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card lg:px-6">
       {data.map((stat) => (
         // If stat.colorClass is provided, apply it to the Card for custom coloring
-        <Card className={`@container/card ${stat.colorClass ?? ''}`.trim()} key={stat.title}>
+        <Card
+          className={`@container/card ${stat.colorClass ?? ''} gap-4 py-4`}
+          key={stat.title}
+          data-fetching={fetching}
+          data-slot="card"
+        >
           <CardHeader className="relative">
             <CardDescription className="text-md text-foreground">{stat.title}</CardDescription>
             <CardTitle className="text-3xl font-semibold tabular-nums">
@@ -31,8 +41,20 @@ export function SectionCards({ data }: SectionCardsProps) {
               </Badge>
             </div>
           </CardHeader>
-          <CardFooter className="flex-col items-start gap-1 text-sm">
-            <div className="line-clamp-1 flex gap-2 font-medium">{stat.insights}</div>
+          <CardFooter className="flex-col items-start gap-2 text-sm">
+            {stat.insights && <div className="line-clamp-1 flex gap-2 font-medium">{stat.insights}</div>}
+            {stat.url && (
+              <Button
+                variant="link"
+                size="sm"
+                onClick={() => navigate(stat.url as string)}
+                className="p-0 text-foreground h-auto"
+              >
+                <div className="flex items-center">
+                  Xem chi tiết <ChevronRightIcon className="size-4" />
+                </div>
+              </Button>
+            )}
           </CardFooter>
         </Card>
       ))}

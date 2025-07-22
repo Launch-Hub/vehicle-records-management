@@ -21,6 +21,7 @@ import type { DashboardStats } from '@/lib/services/dashboard'
 
 interface ChartAreaInteractiveProps {
   stats: DashboardStats
+  fetching: boolean
 }
 
 const chartConfig = {
@@ -47,7 +48,7 @@ const getTimeRangeLabel = (timeRange: string) => {
   }
 }
 
-export function ChartAreaInteractive({ stats }: ChartAreaInteractiveProps) {
+export function ChartAreaInteractive({ stats, fetching }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile()
   const [timeRange, setTimeRange] = React.useState('30d')
 

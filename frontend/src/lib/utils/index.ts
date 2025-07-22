@@ -130,3 +130,27 @@ export async function exportToExcel({
   link.click()
   document.body.removeChild(link)
 }
+
+/**
+ * Beautifies a date for display in the UI.
+ * @param date Date object, timestamp, or string parseable by Date
+ * @param options Intl.DateTimeFormatOptions for custom formatting
+ * @param locale Locale string, defaults to 'vi-VN'
+ * @returns Formatted date string
+ */
+export function beautifyDate(
+  date: Date | number | string,
+  options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  },
+  locale: string = 'vi-VN'
+): string {
+  const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date
+  if (isNaN(d.getTime())) return ''
+  return d.toLocaleString(locale, options)
+}

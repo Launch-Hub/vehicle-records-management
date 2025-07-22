@@ -5,9 +5,10 @@ import { getStatusLabel } from '@/constants/dictionary'
 
 interface StatusCardsProps {
   stats: DashboardStats
+  fetching: boolean
 }
 
-export function StatusCards({ stats }: StatusCardsProps) {
+export function StatusCards({ stats, fetching }: StatusCardsProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'idle':

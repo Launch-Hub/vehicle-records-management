@@ -88,6 +88,8 @@ export const STEP_TABS = [
   { value: 5, label: 'Trình ký', color: 'bg-green-500' },
   { value: 6, label: 'Kết quả đến quầy', color: 'bg-green-500' },
   { value: 7, label: 'Trả kết quả', color: 'bg-green-500' },
-  // { value: 8, label: 'Lưu kho', color: 'bg-purple-500' },
-  // { value: 9, label: 'Xuất kho', color: 'bg-yellow-500' },
+  { value: 8, label: 'Lưu kho', color: 'bg-purple-500' },
+  { value: 9, label: 'Xuất kho', color: 'bg-yellow-500' },
+  { value: 10, label: 'Xử lý xuất kho', color: 'bg-yellow-500' },
 ]
+export const LAST_STEP = 8

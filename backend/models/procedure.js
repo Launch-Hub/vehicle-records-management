@@ -25,6 +25,7 @@ const stepSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "ActionType",
     },
+    //
     note: String,
     attachments: [String],
     isCompleted: { type: Boolean, default: false },
@@ -52,13 +53,20 @@ const procedurechema = new mongoose.Schema(
     oldPlate: String, // old plate number (when the plate is changed)
     steps: [stepSchema], // only 1 step exist isCompleted = false
     currentStep: { type: Number, default: 1 }, // current step number
+    // additional fields for the specific step
+    // paidAmount: { type: mongoose.Schema.Types.ObjectId, ref: "PaidAmount" },
+    paidAmount: { type: String, default: "" },
+    isPromoteIdentityPlate: { type: Boolean, default: false }, // biển định danh
+    isPromoteBusinessPlate: { type: Boolean, default: false }, // biển vàng
+    // returnType: { type: mongoose.Schema.Types.ObjectId, ref: "ReturnType" },
+    returnType: { type: String, default: "" },
     status: {
       type: String,
       enum: ["pending", "processing", "completed", "cancelled"],
       default: "pending", // pending (step 1) -> processing (step 2...) -> completed|cancelled
     }, // no need overdue status -> use the dueDate instead
     note: { type: String, default: "" }, // note for the procedure
-    dueDate: { type: Date, default: Date.now + DEFAULT_DUE_DATE },
+    dueDate: { type: Date, default: () => Date.now() + DEFAULT_DUE_DATE },
     resultReturnType: { type: String, enum: ["direct", "post_office"] },
     completedAt: { type: Date, default: null }, // only when status = completed
     archivedAt: { type: Date, default: null }, // only when status = archived

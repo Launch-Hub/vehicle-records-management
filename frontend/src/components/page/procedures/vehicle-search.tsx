@@ -199,7 +199,13 @@ export default function VehicleRecordSearch({
             </DropdownMenu>
           </div>
         </div>
-        <Button type="button" variant="secondary" onClick={handleSearch} disabled={loading}>
+        <Button
+          type="button"
+          variant="secondary"
+          className="mb-[1px]"
+          onClick={handleSearch}
+          disabled={loading}
+        >
           {loading ? 'Đang tìm...' : 'Tìm kiếm'}
         </Button>
       </div>
