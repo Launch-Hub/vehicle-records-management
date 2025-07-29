@@ -11,11 +11,16 @@ export interface ProcedureListParams {
   pageSize?: number
   search?: string
   step?: number
+  noPagination?: boolean
 }
 
 export const procedureService = {
   getList: async (params?: ProcedureListParams): Promise<ProcedureListResponse> => {
     const response = await api.get('/procedures', { params })
+    return response.data
+  },
+  getByRecordId: async (recordId: string, params?: Omit<ProcedureListParams, 'recordId'>): Promise<ProcedureListResponse> => {
+    const response = await api.get('/procedures', { params: { ...params, recordId } })
     return response.data
   },
   delete: async (id: string): Promise<void> => {

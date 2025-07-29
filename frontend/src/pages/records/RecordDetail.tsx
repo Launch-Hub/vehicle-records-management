@@ -12,6 +12,8 @@ import { backPath } from '@/lib/utils'
 import { useLayout } from '@/contexts/layout'
 import QRPrint from '@/components/shared/qr-code/qr-print'
 import { PrinterIcon } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import ProcedureHistory from '@/components/page/records/procedure-history'
 
 export default function VehicleRecordDetailPage() {
   const { id } = useParams()
@@ -105,11 +107,30 @@ export default function VehicleRecordDetailPage() {
           </Button>
         )}
       </div>
-      <VehicleRecordForm
-        onSubmit={(data) => handleSubmit(defaultAction, data)}
-        initialData={defaultAction === 'update' ? initialData : undefined}
-        isCopying={isCopying}
-      />
+      {isCreating || isCopying ? (
+        <VehicleRecordForm
+          onSubmit={(data) => handleSubmit(defaultAction, data)}
+          initialData={defaultAction === 'update' ? initialData : undefined}
+          isCopying={isCopying}
+        />
+      ) : (
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Thông tin</TabsTrigger>
+            <TabsTrigger value="history">Lịch sử đăng ký</TabsTrigger>
+          </TabsList>
+          <TabsContent value="details" className="mt-6">
+            <VehicleRecordForm
+              onSubmit={(data) => handleSubmit(defaultAction, data)}
+              initialData={defaultAction === 'update' ? initialData : undefined}
+              isCopying={isCopying}
+            />
+          </TabsContent>
+          <TabsContent value="history" className="mt-6">
+            {initialData && <ProcedureHistory recordId={initialData._id} />}
+          </TabsContent>
+        </Tabs>
+      )}
 
       {/* QR Print Component */}
       {showQRPrint && initialData && (

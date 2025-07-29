@@ -13,7 +13,7 @@ exports.getList = async (req, res) => {
     steps: 1, // include steps for population
   };
   try {
-    const { pageIndex, pageSize, search, step } = req.query;
+    const { pageIndex, pageSize, search, step, recordId } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
     const filter = {};
@@ -23,6 +23,9 @@ exports.getList = async (req, res) => {
     }
     if (step) {
       filter.currentStep = Number(step);
+    }
+    if (recordId) {
+      filter.recordId = recordId;
     }
 
     const total = await Procedure.countDocuments(filter);
