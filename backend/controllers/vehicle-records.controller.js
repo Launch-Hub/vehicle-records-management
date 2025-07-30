@@ -55,15 +55,15 @@ exports.getList = async (req, res) => {
         { registrant: regex },
       ];
     }
-    if (plateNumber) filter.plateNumber = plateNumber;
-    if (identificationNumber) filter.identificationNumber = identificationNumber;
-    if (engineNumber) filter.engineNumber = engineNumber;
-    if (vehicleType) filter.vehicleType = vehicleType;
-    if (color) filter.color = color;
-    if (registrant) filter.registrant = registrant;
-    if (phone) filter.phone = phone;
-    if (email) filter.email = email;
-    if (address) filter.address = address;
+    if (plateNumber) filter.plateNumber = new RegExp(plateNumber, "i"); // case-insensitive partial match
+    if (identificationNumber) filter.identificationNumber = new RegExp(identificationNumber, "i");
+    if (engineNumber) filter.engineNumber = new RegExp(engineNumber, "i");
+    if (vehicleType) filter.vehicleType = new RegExp(vehicleType, "i");
+    if (color) filter.color = new RegExp(color, "i");
+    if (registrant) filter.registrant = new RegExp(registrant, "i");
+    if (phone) filter.phone = new RegExp(phone, "i");
+    if (email) filter.email = new RegExp(email, "i");
+    if (address) filter.address = new RegExp(address, "i");
     if (status) filter.status = status;
 
     const total = await VehicleRecord.countDocuments(filter);

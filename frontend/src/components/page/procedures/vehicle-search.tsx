@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch'
 import { ChevronDown } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { getLabel } from '@/constants/dictionary'
+import { useDebounce } from '@/lib/hooks/use-debounce'
 
 interface VehicleRecordSearchProps {
   onVehicleSelected: (vehicle: VehicleRecord) => void
@@ -59,6 +60,15 @@ export default function VehicleRecordSearch({
   const [loading, setLoading] = useState(false)
   const [showDialog, setShowDialog] = useState(false)
 
+  // Suggestions state
+  const [suggestions, setSuggestions] = useState<VehicleRecord[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+
+  // Debounce the plateNumber for suggestions
+  const debouncedPlateNumber = useDebounce(fields.plateNumber, 1000)
+
   // Helper to parse QR or pasted string for plateNumber and related fields
   function parsePlateNumberInput(input: string) {
     const str = input.trim()
@@ -93,6 +103,68 @@ export default function VehicleRecordSearch({
     }
   }
 
+  const fetchSuggestions = useCallback(async (plateNumber: string) => {
+    // Always clear suggestions first when input changes
+    if (!plateNumber || plateNumber.length < 2) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      setSuggestionsLoading(false)
+      return
+    }
+
+    setSuggestionsLoading(true)
+    try {
+      const params = {
+        plateNumber,
+        pageSize: 5,
+        pageIndex: 0,
+      }
+      const res = await api.get('/records', { params })
+      const items = res.data?.items || []
+      setSuggestions(items)
+      setShowSuggestions(items.length > 0)
+    } catch (error) {
+      setSuggestions([])
+      setShowSuggestions(false)
+    } finally {
+      setSuggestionsLoading(false)
+    }
+  }, [])
+
+  // Immediately clear suggestions when input is too short
+  useEffect(() => {
+    if (fields.plateNumber.length < 2) {
+      setSuggestions([])
+      setShowSuggestions(false)
+      setSuggestionsLoading(false)
+      setSelectedSuggestionIndex(-1)
+    }
+  }, [fields.plateNumber])
+
+  // Fetch suggestions when debounced plateNumber changes (only for valid inputs)
+  useEffect(() => {
+    if (debouncedPlateNumber.length >= 2) {
+      fetchSuggestions(debouncedPlateNumber)
+      setSelectedSuggestionIndex(-1) // Reset selection when suggestions change
+    }
+  }, [debouncedPlateNumber, fetchSuggestions])
+
+  // Handle suggestion selection
+  const handleSuggestionSelect = useCallback(
+    (vehicle: VehicleRecord) => {
+      setFields((prev) => ({
+        ...prev,
+        plateNumber: vehicle.plateNumber,
+        engineNumber: vehicle.engineNumber || '',
+        identificationNumber: vehicle.identificationNumber || '',
+        color: vehicle.color || '',
+      }))
+      setShowSuggestions(false)
+      onVehicleSelected(vehicle)
+    },
+    [onVehicleSelected]
+  )
+
   const handleSearch = async () => {
     setLoading(true)
     try {
@@ -126,27 +198,108 @@ export default function VehicleRecordSearch({
     <div className="mb-4 flex flex-col gap-2">
       <div className="font-semibold">Tìm kiếm xe</div>
       <div className="flex gap-4 items-end">
-        <div className="w-3/4 grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-2">
+        <div className="w-3/4 grid grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="space-y-2 relative col-span-2 lg:col-span-3">
             <Label className="text-sm mb-1">{getLabel('plateNumber', 'vehicle_records')}</Label>
-            <Input
-              type="text"
-              value={fields.plateNumber}
-              onChange={(e) =>
-                setFields((prev) => ({ ...prev, plateNumber: e.target.value.toUpperCase() }))
-              }
-              onPaste={(e) => {
-                const pasted = e.clipboardData.getData('text')
-                const parsed = parsePlateNumberInput(pasted)
-                setFields((prev) => ({
-                  ...prev,
-                  ...parsed,
-                }))
-                e.preventDefault()
-              }}
-              placeholder="Nhập hoặc quét mã biển số"
-              autoFocus
-            />
+            <div className="relative">
+              <Input
+                type="text"
+                value={fields.plateNumber}
+                onChange={(e) => {
+                  const value = e.target.value.toUpperCase()
+                  setFields((prev) => ({ ...prev, plateNumber: value }))
+                }}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData('text')
+                  const parsed = parsePlateNumberInput(pasted)
+                  setFields((prev) => ({
+                    ...prev,
+                    ...parsed,
+                  }))
+                  setShowSuggestions(false)
+                  e.preventDefault()
+                }}
+                onFocus={() => {
+                  if (suggestions.length > 0) {
+                    setShowSuggestions(true)
+                  }
+                }}
+                onBlur={() => {
+                  // Delay hiding suggestions to allow clicking on them
+                  setTimeout(() => setShowSuggestions(false), 200)
+                }}
+                onKeyDown={(e) => {
+                  if (!showSuggestions || suggestions.length === 0) return
+
+                  switch (e.key) {
+                    case 'ArrowDown':
+                      e.preventDefault()
+                      setSelectedSuggestionIndex((prev) =>
+                        prev < suggestions.length - 1 ? prev + 1 : prev
+                      )
+                      break
+                    case 'ArrowUp':
+                      e.preventDefault()
+                      setSelectedSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1))
+                      break
+                    case 'Enter':
+                      e.preventDefault()
+                      if (selectedSuggestionIndex >= 0 && suggestions[selectedSuggestionIndex]) {
+                        handleSuggestionSelect(suggestions[selectedSuggestionIndex])
+                      }
+                      break
+                    case 'Escape':
+                      setShowSuggestions(false)
+                      setSelectedSuggestionIndex(-1)
+                      break
+                  }
+                }}
+                placeholder="Nhập hoặc quét mã biển số"
+                autoFocus
+              />
+
+              {/* Suggestions Dropdown */}
+              {showSuggestions && (suggestions.length > 0 || suggestionsLoading) && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {suggestionsLoading ? (
+                    <div className="p-3 text-center text-gray-500">Đang tìm kiếm...</div>
+                  ) : (
+                    suggestions.map((vehicle, index) => (
+                      <div
+                        key={vehicle._id}
+                        className={`p-3 cursor-pointer border-b border-gray-100 last:border-b-0 ${
+                          index === selectedSuggestionIndex
+                            ? 'bg-blue-100 hover:bg-blue-200'
+                            : 'hover:bg-gray-100'
+                        }`}
+                        onClick={() => handleSuggestionSelect(vehicle)}
+                      >
+                        <div className="font-medium">
+                          {vehicle.plateNumber.split('').map((char, index) => {
+                            const inputValue = fields.plateNumber.toLowerCase()
+                            const plateValue = vehicle.plateNumber.toLowerCase()
+                            const isMatch =
+                              plateValue.indexOf(inputValue) === 0 && index < inputValue.length
+
+                            return (
+                              <span
+                                key={index}
+                                className={isMatch ? 'text-blue-600 font-bold' : ''}
+                              >
+                                {char}
+                              </span>
+                            )
+                          })}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {vehicle.registrant} • {vehicle.engineNumber} • {vehicle.identificationNumber}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             <Label className="text-sm mb-1">{getLabel('engineNumber', 'vehicle_records')}</Label>
