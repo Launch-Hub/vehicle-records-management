@@ -10,7 +10,6 @@ import {
   FileClockIcon,
   NotebookPenIcon,
   BookOpenCheckIcon,
-  ImportIcon,
   PackageOpenIcon,
   PackageIcon,
   HardDriveIcon,
@@ -469,6 +468,52 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //     },
   //   ],
   // },
+
+  
+  {
+    auth: true,
+    element: 'ProceduresPage',
+    resource: 'procedures',
+    showSidebar: false,
+    nav: 1,
+    icon: HistoryIcon,
+    path: '/manage-procedures',
+    title: 'Manage Procedures',
+    language: 'en',
+    translations: [
+      {
+        path: '/quan-ly-dang-ky',
+        title: 'Quản lý đăng ký',
+        language: 'vi',
+      },
+    ],
+    children: [
+      {
+        element: 'ProcedureDetailPage',
+        path: ':id',
+        title: 'Procedure Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Chỉnh sửa đăng ký',
+          },
+        ],
+      },
+      {
+        element: 'ProcedureDetailPage',
+        path: 'new',
+        title: 'Create Procedure',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo đăng ký mới',
+          },
+        ],
+      },
+    ],
+  },
 
   {
     auth: true,

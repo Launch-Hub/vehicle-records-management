@@ -311,7 +311,7 @@ const DataTableInner = <T extends Record<string, any>>(
   }))
 
   return (
-    <div className="flex w-full flex-col justify-start gap-6 relative">
+    <div className="flex w-full flex-col justify-start gap-4 relative">
       {loading && <LoaderOverlay />}
       <div className="flex items-center justify-between px-4 lg:px-6">
         {showSearch ? (
@@ -366,7 +366,7 @@ const DataTableInner = <T extends Record<string, any>>(
               <PlusIcon /> <span className="hidden lg:inline">Thêm</span>
             </Button>
           )}
-          {showExport && (
+          {/* {showExport && (
             <Button
               variant="success"
               size="sm"
@@ -376,7 +376,7 @@ const DataTableInner = <T extends Record<string, any>>(
               <FileSpreadsheet className="size-4" />
               In danh sách
             </Button>
-          )}
+          )} */}
         </div>
       </div>
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">

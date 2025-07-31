@@ -20,7 +20,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVerticalIcon } from 'lucide-react'
+import { MoreVerticalIcon, SearchIcon } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 
 const columns: ColumnDef<VehicleRecord>[] = [
   {
@@ -62,6 +63,7 @@ export default function RecordsPage() {
   const [data, setData] = useState<VehicleRecord[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   const [showQRPrint, setShowQRPrint] = useState(false)
   const [selectedRecordForQR, setSelectedRecordForQR] = useState<VehicleRecord | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item?: VehicleRecord }>({
@@ -97,6 +99,20 @@ export default function RecordsPage() {
     if (!search && !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value)
+  }
+
+  const handleSearchInputBlur = () => {
+    handleSearch(searchTerm)
+  }
+
+  const handleSearchInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch(searchTerm)
+    }
   }
 
   const handleChangePage = (newPagination: PaginationProps) => {
@@ -204,23 +220,33 @@ export default function RecordsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-        {/* Batch actions dropdown menu */}
-        {selectedRows.length > 0 && (
-          <div className="flex justify-end pt-4 px-4 md:pt-6 md:px-6">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="success" size="sm">
-                  Thao tác
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {/* <DropdownMenuItem onClick={handleExportDropdown}>In danh sách</DropdownMenuItem> */}
-                <DropdownMenuItem onClick={handleBatchPrintQR}>In danh sách mã QR</DropdownMenuItem>
-                {/* Add more actions here if needed */}
-              </DropdownMenuContent>
-            </DropdownMenu>
+        {/* Search and actions row */}
+        <div className="flex items-center justify-between pt-4 px-4 md:pt-6 md:px-6">
+          <div className="relative w-full max-w-sm">
+            <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Tìm kiếm..."
+              value={searchTerm}
+              onChange={handleSearchInputChange}
+              onBlur={handleSearchInputBlur}
+              onKeyDown={handleSearchInputKeyDown}
+              className="w-full pr-8"
+            />
           </div>
-        )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild disabled={selectedRows.length === 0}>
+              <Button variant="success" size="sm">
+                Thao tác
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleExportDropdown}>In danh sách</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleBatchPrintQR}>In mã QR</DropdownMenuItem>
+              {/* Add more actions here if needed */}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}
@@ -235,6 +261,7 @@ export default function RecordsPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            showSearch={false}
             resource="vehicle_records"
             onRowSelectionChange={handleRowSelectionChange}
           />

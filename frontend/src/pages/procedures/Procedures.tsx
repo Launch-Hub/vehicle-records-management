@@ -9,6 +9,7 @@ import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
 import { DataTable } from '@/components/shared/list-view/table'
 import { procedureService } from '@/lib/services/procedures'
+import { ProcedureFilter } from '@/components/page/procedures/filter'
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -91,12 +92,22 @@ export default function ProceduresPage() {
   })
 
   // Get the step from the merged route config and query params
-  const step = getRoute(location.pathname)?.query?.step ?? -1
+  const routeStep = getRoute(location.pathname)?.query?.step ?? -1
+  const urlStep = searchParams.get('step')
+  const urlSearch = searchParams.get('search') || ''
+  const currentStep = urlStep && urlStep !== 'all' ? parseInt(urlStep) : (routeStep !== -1 ? Number(routeStep) : undefined)
+
+  // Initialize search from URL
+  useEffect(() => {
+    if (urlSearch !== search) {
+      setSearch(urlSearch)
+    }
+  }, [urlSearch])
 
   const fetchData = useCallback(async () => {
     try {
       setIsFetching(true)
-      const stepParam = step !== undefined ? Number(step) : undefined
+      const stepParam = currentStep !== undefined ? currentStep : undefined
       const response = await procedureService.getList({
         search,
         ...pagination,
@@ -113,12 +124,17 @@ export default function ProceduresPage() {
     } finally {
       setIsFetching(false)
     }
-  }, [search, pagination, step])
+  }, [search, pagination, currentStep])
 
   const handleSearch = (searchTerm: string) => {
     if (!search && !searchTerm) return
     setSearch(searchTerm)
     setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+  }
+
+  const handleStepChange = (newStep: number | undefined) => {
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }))
+    // The step change will be handled by the filter component through URL updates
   }
 
   const handleChangePage = (newPagination: PaginationProps) => {
@@ -212,7 +228,7 @@ export default function ProceduresPage() {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => handleEdit(row.original)}>Chỉnh sửa</DropdownMenuItem>
-          {Number(step) > 1 && (
+          {Number(currentStep) > 1 && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleProceed(row.original)}>
@@ -240,6 +256,14 @@ export default function ProceduresPage() {
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+          {/* Filter Component */}
+          <ProcedureFilter
+            onSearchChange={handleSearch}
+            onStepChange={handleStepChange}
+            currentSearch={search}
+            currentStep={currentStep}
+          />
+          
           <DataTable
             loading={isFetching}
             total={total}
@@ -250,10 +274,11 @@ export default function ProceduresPage() {
             onEdit={handleEdit}
             onCopy={handleCopy}
             onDelete={handleDelete}
-            onSearch={handleSearch}
+            onSearch={() => {}} // Disable search in table since we have external filter
             onExport={handleExport}
-            customActionColumn={Number(step) > 1 ? customActionColumn : undefined}
+            customActionColumn={Number(currentStep) > 1 ? customActionColumn : undefined}
             resource="procedures"
+            showSearch={false} // Hide search in table
           />
         </div>
       </div>

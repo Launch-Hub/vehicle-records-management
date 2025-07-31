@@ -414,6 +414,7 @@ export default function ProcedureForm({
               </div>
             </div>
           )}
+          {/* tiếp nhận */}
           {step === 1 && (
             <div className="space-y-2 w-full">
               <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
@@ -479,50 +480,52 @@ export default function ProcedureForm({
               </div>
             </div>
           )}
-
+          {/* thu phí */}
           {step === 3 && (
-            <div className="space-y-2 w-full">
-              <Label htmlFor="paidAmount">Lệ phí</Label>
-              <div className="w-full flex gap-2">
-                <Select
-                  value={watch('paidAmount')}
-                  onValueChange={(value) => setValue('paidAmount', value, { shouldValidate: true })}
-                  disabled={isSubmitting}
-                  required
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Chọn số tiền" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="50000">50.000đ</SelectItem>
-                    <SelectItem value="100000">100.000đ</SelectItem>
-                    <SelectItem value="150000">150.000đ</SelectItem>
-                    <SelectItem value="1000000">1.000.000đ</SelectItem>
-                    <SelectItem value="2000000">2.000.000đ</SelectItem>
-                    <SelectItem value="4000000">4.000.000đ</SelectItem>
-                    <SelectItem value="20000000">20.000.000đ</SelectItem>
-                  </SelectContent>
-                </Select>
+            <>
+              <div className="space-y-2 w-full">
+                <Label htmlFor="paidAmount">Lệ phí</Label>
+                <div className="w-full flex gap-2">
+                  <Select
+                    value={watch('paidAmount')}
+                    onValueChange={(value) =>
+                      setValue('paidAmount', value, { shouldValidate: true })
+                    }
+                    disabled={isSubmitting}
+                    required
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Chọn số tiền" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="50000">50.000đ</SelectItem>
+                      <SelectItem value="100000">100.000đ</SelectItem>
+                      <SelectItem value="150000">150.000đ</SelectItem>
+                      <SelectItem value="1000000">1.000.000đ</SelectItem>
+                      <SelectItem value="2000000">2.000.000đ</SelectItem>
+                      <SelectItem value="4000000">4.000.000đ</SelectItem>
+                      <SelectItem value="20000000">20.000.000đ</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-          )}
-          {step === 3 && (
-            <div className="space-y-2 w-full">
-              <Label htmlFor="newPlate">Biển số mới (nếu có)</Label>
-              <div className="w-full flex gap-2">
-                <Input
-                  id="newPlate"
-                  placeholder="Biển số mới (nếu có)"
-                  value={watch('newPlate')}
-                  onChange={(e) => setValue('newPlate', e.target.value)}
-                  className="w-full"
-                  disabled={isSubmitting}
-                />
+              <div className="space-y-2 w-full">
+                <Label htmlFor="newPlate">Biển số mới (nếu có)</Label>
+                <div className="w-full flex gap-2">
+                  <Input
+                    id="newPlate"
+                    placeholder="Biển số mới (nếu có)"
+                    value={watch('newPlate')}
+                    onChange={(e) => setValue('newPlate', e.target.value)}
+                    className="w-full"
+                    disabled={isSubmitting}
+                  />
+                </div>
               </div>
-            </div>
+            </>
           )}
-
-          {step === 4 && (
+          {/* đề xuất dập biển */}
+          {/* {step === 4 && (
             <div className="w-full flex flex-col items-center justify-center gap-4">
               <Label htmlFor="_"></Label>
 
@@ -545,8 +548,8 @@ export default function ProcedureForm({
                 <Label htmlFor="isPromoteBusinessPlate">Đề xuất dập biển vàng</Label>
               </div>
             </div>
-          )}
-
+          )} */}
+          {/* trả kết quả */}
           {step === 7 && (
             <div className="space-y-2 w-full">
               <Label htmlFor="returnType">Hình thức trả kết quả</Label>
@@ -568,6 +571,7 @@ export default function ProcedureForm({
               </div>
             </div>
           )}
+
           <div className="space-y-2">
             <Label htmlFor="image">Đính kèm</Label>
             <div className="flex items-start gap-4">
@@ -618,6 +622,29 @@ export default function ProcedureForm({
                 rows={3}
               />
             </div> */}
+
+          {/* lưu kho */}
+          {step === 8 && (
+            <div className="space-y-2 w-full">
+              <Label htmlFor="returnType">Hình thức trả kết quả</Label>
+              <div className="w-full flex gap-2">
+                <Select
+                  value={watch('returnType')}
+                  onValueChange={(value) => setValue('returnType', value, { shouldValidate: true })}
+                  disabled={isSubmitting}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Chọn hình thức trả kết quả" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="direct">Trả trực tiếp</SelectItem>
+                    <SelectItem value="post_office">Trả qua bưu điện</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="w-1/4 space-y-2">
