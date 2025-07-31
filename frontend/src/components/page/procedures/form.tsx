@@ -54,7 +54,6 @@ interface ProcedureFormProps {
   isCopying?: boolean
   onSubmit: (data: Omit<Procedure, '_id'>) => void
   onCancel?: () => void
-  isNew?: boolean
   step?: number
   submitButtonText?: string
 }
@@ -63,7 +62,6 @@ export default function ProcedureForm({
   initialData,
   onSubmit,
   onCancel,
-  isNew = false,
   step = 1,
   submitButtonText = 'Tiếp nhận',
 }: ProcedureFormProps) {

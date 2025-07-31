@@ -16,6 +16,7 @@ import {
   HardDriveIcon,
   PrinterCheckIcon,
   SettingsIcon, // <-- add this
+  FolderOpenIcon,
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -35,6 +36,7 @@ import BulkDetailPage from '@/pages/bulks/BulkDetail'
 import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import LogsPage from '@/pages/activities/Logs'
+import UploadsPage from '@/pages/uploads/Uploads'
 import { DEFAULT_LANG } from './constants/env'
 import ProceedProcedurePage from '@/pages/procedures/ProceedProcedure'
 
@@ -143,6 +145,11 @@ export const PAGE_MAP = {
     component: LogsPage,
     default: 'eager',
   },
+  UploadsPage: {
+    lazy: lazy(() => import('@/pages/uploads/Uploads')), // lazy-loaded
+    component: UploadsPage,
+    default: 'eager',
+  },
 }
 
 interface RouteTranslationProps {
@@ -248,6 +255,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
       },
     ],
   },
+
   {
     auth: true,
     element: '', // No direct page
@@ -350,6 +358,23 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
                 title: 'Thêm tạo mục mới',
               },
             ],
+          },
+        ],
+      },
+      {
+        auth: true,
+        element: 'UploadsPage',
+        resource: 'settings',
+        showSidebar: true,
+        icon: FolderOpenIcon,
+        path: 'file-manager',
+        title: 'File Manager',
+        language: 'en',
+        translations: [
+          {
+            path: 'quan-ly-tap-tin',
+            title: 'Quản lý tập tin',
+            language: 'vi',
           },
         ],
       },

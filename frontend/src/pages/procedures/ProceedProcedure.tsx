@@ -74,12 +74,7 @@ export default function ProceedProcedurePage() {
   return (
     <div className="flex flex-col gap-8 p-6">
       {/* <h1 className="text-2xl font-bold">{title}</h1> */}
-      <ProcedureForm
-        onSubmit={handleSubmit}
-        isNew={step === 1}
-        step={step}
-        submitButtonText={title}
-      />
+      <ProcedureForm onSubmit={handleSubmit} step={step} submitButtonText={title} />
       <div>
         <h2 className="font-semibold text-lg mb-2">Đăng ký gần đây</h2>
         <BasicTable

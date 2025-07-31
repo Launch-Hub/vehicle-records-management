@@ -10,6 +10,9 @@ router.get(`${directPath}/:filename`, dController.getFile);
 router.post(`${directPath}/single/image`, directUpload.image, dController.handleUpload);
 router.post(`${directPath}/single/document`, directUpload.document, dController.handleUpload);
 
+// List files endpoint
+router.get("/list", dController.listFiles);
+
 // minio
 const minioPath = "/min";
 // mf = minio file - use a simpler route pattern

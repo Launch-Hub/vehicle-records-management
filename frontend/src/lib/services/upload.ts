@@ -11,6 +11,21 @@ export interface UploadResponse {
   }
 }
 
+export interface FileItem {
+  name: string
+  type: 'file' | 'directory'
+  path: string
+  size: number | null
+  modified: string
+  url?: string
+}
+
+export interface ListFilesResponse {
+  currentPath: string
+  parentPath: string | null
+  items: FileItem[]
+}
+
 export const uploadService = {
   uploadImage: async (file: File): Promise<UploadResponse> => {
     const formData = new FormData()
@@ -20,4 +35,11 @@ export const uploadService = {
     })
     return response.data
   },
-} 
+
+  listFiles: async (directory: string = ''): Promise<ListFilesResponse> => {
+    const response = await api.get('/upload/list', {
+      params: { directory },
+    })
+    return response.data
+  },
+}

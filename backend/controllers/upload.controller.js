@@ -1,4 +1,6 @@
 const { UPLOAD_BUCKET } = require("../constants");
+const fs = require("fs");
+const path = require("path");
 
 const getFile = async (req, res) => {
   try {
@@ -33,8 +35,71 @@ const handleUpload = (req, res) => {
   });
 };
 
+const listFiles = async (req, res) => {
+  try {
+    const { directory = "" } = req.query;
+    const fullPath = path.join(UPLOAD_BUCKET, directory);
+    
+    // Security check: ensure the path is within the upload bucket
+    const normalizedPath = path.normalize(fullPath);
+    if (!normalizedPath.startsWith(path.normalize(UPLOAD_BUCKET))) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    if (!fs.existsSync(fullPath)) {
+      return res.status(404).json({ message: "Directory not found" });
+    }
+
+    const items = [];
+    const entries = fs.readdirSync(fullPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const itemPath = path.join(fullPath, entry.name);
+      const relativePath = path.join(directory, entry.name).replace(/\\/g, '/');
+      
+      if (entry.isDirectory()) {
+        items.push({
+          name: entry.name,
+          type: 'directory',
+          path: relativePath,
+          size: null,
+          modified: fs.statSync(itemPath).mtime
+        });
+      } else {
+        const stats = fs.statSync(itemPath);
+        items.push({
+          name: entry.name,
+          type: 'file',
+          path: relativePath,
+          size: stats.size,
+          modified: stats.mtime,
+          url: `/uploads/${relativePath}`
+        });
+      }
+    }
+
+    // Sort: directories first, then files, both alphabetically
+    items.sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === 'directory' ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    res.json({
+      currentPath: directory,
+      parentPath: directory ? path.dirname(directory) : null,
+      items
+    });
+  } catch (err) {
+    console.error("List files error:", err);
+    res.status(500).json({ message: "Failed to list files", error: err.message });
+  }
+};
+
 module.exports = {
   // GET /uploads/:filename
   getFile,
   handleUpload,
+  listFiles,
 };

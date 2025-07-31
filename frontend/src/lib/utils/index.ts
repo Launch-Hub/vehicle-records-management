@@ -39,6 +39,42 @@ export const backPath = (path: string) => {
   return lastSlashIndex > 0 ? path.slice(0, lastSlashIndex) : ''
 }
 
+/**
+ * Formats bytes into human readable format
+ * @param bytes Number of bytes
+ * @param decimals Number of decimal places
+ * @returns Formatted string (e.g., "1.5 MB")
+ */
+export function formatBytes(bytes: number, decimals: number = 2): string {
+  if (bytes === 0) return '0 Bytes'
+
+  const k = 1024
+  const dm = decimals < 0 ? 0 : decimals
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i]
+}
+
+/**
+ * Formats a date for display
+ * @param date Date object or date string
+ * @returns Formatted date string
+ */
+export function formatDate(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) return ''
+  
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
 export const processImage = (file: File, callback: (base64: string) => void) => {
   if (!file.type.startsWith('image/')) {
     toast.error('Vui lòng chọn tệp hình ảnh (JPG, PNG, ...).')
