@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { 
-  FolderIcon, 
-  FileIcon, 
-  ArrowLeftIcon, 
+import {
+  FolderIcon,
+  FileIcon,
+  ArrowLeftIcon,
   HomeIcon,
   DownloadIcon,
   EyeIcon,
   CalendarIcon,
-  HardDriveIcon
+  HardDriveIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -49,7 +49,7 @@ export default function UploadsPage() {
 
   const goToParent = () => {
     if (files?.parentPath !== null) {
-      setSearchParams({ dir: files.parentPath })
+      setSearchParams({ dir: files?.parentPath || '' })
     } else {
       setSearchParams({})
     }
@@ -149,26 +149,16 @@ export default function UploadsPage() {
           <HardDriveIcon className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">File Manager</h1>
         </div>
-        
+
         <div className="flex items-center gap-2 ml-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToRoot}
-            title="Go to root"
-          >
-            <HomeIcon className="h-4 w-4" />
-          </Button>
           {files?.parentPath !== null && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToParent}
-              title="Go to parent directory"
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={goToRoot} title="Go to root">
+              <HomeIcon className="h-4 w-4" />
             </Button>
           )}
+          <Button variant="outline" size="sm" onClick={goToParent} title="Go to parent directory">
+            <ArrowLeftIcon className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -176,28 +166,20 @@ export default function UploadsPage() {
       {currentDirectory && (
         <div className="mb-4">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Path:</span>
-            <Button
-              variant="link"
-              size="sm"
-              className="p-0 h-auto"
-              onClick={goToRoot}
-            >
-              Root
-            </Button>
+            <span>Đường dẫn:</span>
             {currentDirectory.split('/').map((part, index, parts) => {
               if (!part) return null
               const path = parts.slice(0, index + 1).join('/')
               return (
                 <div key={index} className="flex items-center gap-2">
-                  <span>/</span>
+                  <span>\</span>
                   <Button
                     variant="link"
                     size="sm"
                     className="p-0 h-auto"
                     onClick={() => navigateToDirectory(path)}
                   >
-                    {part}
+                    {part === '.' ? '' : part}
                   </Button>
                 </div>
               )
@@ -213,7 +195,7 @@ export default function UploadsPage() {
             <CardContent className="p-6">
               <div className="text-center text-muted-foreground">
                 <FolderIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                <p>This directory is empty</p>
+                <p>Thư mục này trống</p>
               </div>
             </CardContent>
           </Card>
@@ -221,7 +203,7 @@ export default function UploadsPage() {
           files?.items.map((item) => (
             <Card
               key={item.path}
-              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              className="cursor-pointer hover:bg-muted/50 transition-colors py-0"
               onClick={() => handleFileClick(item)}
             >
               <CardContent className="p-4">
@@ -258,4 +240,4 @@ export default function UploadsPage() {
       </div>
     </div>
   )
-} 
+}

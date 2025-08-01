@@ -705,7 +705,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     showSidebar: true,
     nav: 1,
     icon: HistoryIcon,
-    path: '/logs',
+    path: '/activity-logs',
     title: 'Activity Logs',
     language: 'en',
     translations: [

@@ -81,7 +81,12 @@ services:
 
 volumes:
   uploads_data:
-    external: true
+    driver: local
+    # external: true
+    driver_opts:
+      type: none
+      device: /mnt/vrm-bucket
+      o: bind
   # minio_data:
   #   external: true
   # mongo_data:

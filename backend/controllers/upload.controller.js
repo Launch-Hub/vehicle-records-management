@@ -1,13 +1,14 @@
 const { UPLOAD_BUCKET } = require("../constants");
+const bucketManager = require("../utils/bucket-manager");
 const fs = require("fs");
 const path = require("path");
 
 const getFile = async (req, res) => {
   try {
     const { filename } = req.params;
-    const filePath = path.join(UPLOAD_BUCKET, filename);
+    const filePath = bucketManager.getFilePath(filename);
 
-    if (!fs.existsSync(filePath)) {
+    if (!bucketManager.fileExists(filename)) {
       return res.status(404).json({ message: "File not found" });
     }
 
@@ -38,11 +39,11 @@ const handleUpload = (req, res) => {
 const listFiles = async (req, res) => {
   try {
     const { directory = "" } = req.query;
-    const fullPath = path.join(UPLOAD_BUCKET, directory);
+    const fullPath = path.join(bucketManager.getBucketPath(), directory);
     
     // Security check: ensure the path is within the upload bucket
     const normalizedPath = path.normalize(fullPath);
-    if (!normalizedPath.startsWith(path.normalize(UPLOAD_BUCKET))) {
+    if (!normalizedPath.startsWith(path.normalize(bucketManager.getBucketPath()))) {
       return res.status(403).json({ message: "Access denied" });
     }
 

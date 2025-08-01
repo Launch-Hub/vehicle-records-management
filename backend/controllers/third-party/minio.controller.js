@@ -9,7 +9,7 @@ const {
   GetObjectCommand,
 } = require("@aws-sdk/client-s3");
 // const { getSignedUrl } = require("@aws-sdk/s3-request-presigner"); // need to install @aws-sdk/s3-request-presigner
-const { DEFAULT_BUCKET_NAME, UPLOAD_BUCKET } = require("../../constants");
+const { BUCKET_CONFIG, UPLOAD_BUCKET } = require("../../constants");
 
 const { MINIO_URL, MINIO_API_PORT, MINIO_ROOT_USER, MINIO_ROOT_PASSWORD } = process.env;
 const REGION = "ap-southeast-1"; // Asia Pacific (Singapore)
@@ -57,7 +57,7 @@ const healthCheck = async (_, res) => {
 // handler
 const serveFile = async (req, res) => {
   try {
-    const { bucket = DEFAULT_BUCKET_NAME, objectName } = req.params;
+    const { bucket = BUCKET_CONFIG.name, objectName } = req.params;
 
     // Decode the object name in case it contains special characters
     const decodedObjectName = decodeURIComponent(objectName);
@@ -84,9 +84,9 @@ const uploadToMinio = async (req, res) => {
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
-    // const bucket = req.body.bucket || DEFAULT_BUCKET_NAME;
+    // const bucket = req.body.bucket || BUCKET_CONFIG.name;
     // const folder = req.body.folder || "misc";
-    const bucket = req.body.bucket || "misc"; // simplify it to bucket only
+    const bucket = req.body.bucket || BUCKET_CONFIG.name; // use centralized bucket name
     // Ensure bucket exists
     await ensureBucketExists(s3, bucket);
 
