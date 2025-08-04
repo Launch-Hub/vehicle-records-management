@@ -36,6 +36,8 @@ import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import LogsPage from '@/pages/activities/Logs'
 import UploadsPage from '@/pages/uploads/Uploads'
+import PlateRequestsPage from '@/pages/plate-requests/PlateRequests'
+import PlateRequestDetailPage from '@/pages/plate-requests/PlateRequestDetail'
 import { DEFAULT_LANG } from './constants/env'
 import ProceedProcedurePage from '@/pages/procedures/ProceedProcedure'
 
@@ -147,6 +149,16 @@ export const PAGE_MAP = {
   UploadsPage: {
     lazy: lazy(() => import('@/pages/uploads/Uploads')), // lazy-loaded
     component: UploadsPage,
+    default: 'eager',
+  },
+  PlateRequestsPage: {
+    lazy: lazy(() => import('@/pages/plate-requests/PlateRequests')), // lazy-loaded
+    component: PlateRequestsPage,
+    default: 'eager',
+  },
+  PlateRequestDetailPage: {
+    lazy: lazy(() => import('@/pages/plate-requests/PlateRequestDetail')), // lazy-loaded
+    component: PlateRequestDetailPage,
     default: 'eager',
   },
 }
@@ -698,6 +710,50 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     children: [],
   },
 
+  {
+    auth: true,
+    element: 'PlateRequestsPage',
+    resource: 'plate_requests',
+    showSidebar: true,
+    nav: 1,
+    icon: HistoryIcon,
+    path: '/plate-requests',
+    title: 'Plate Requests',
+    language: 'en',
+    translations: [
+      {
+        path: '/yeu-cau-dap-bien-so',
+        title: 'Yêu cầu dập biển số',
+        language: 'vi',
+      },
+    ],
+    children: [
+      {
+        element: 'PlateRequestDetailPage',
+        path: ':id',
+        title: 'Plate Request Detail',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Chỉnh sửa yêu cầu dập biển số',
+          },
+        ],
+      },
+      {
+        element: 'PlateRequestDetailPage',
+        path: 'new',
+        title: 'Create Plate Request',
+        language: 'en',
+        translations: [
+          {
+            language: 'vi',
+            title: 'Tạo yêu cầu dập biển số mới',
+          },
+        ],
+      },
+    ],
+  },
   {
     auth: true,
     element: 'LogsPage',

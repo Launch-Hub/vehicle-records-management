@@ -120,3 +120,17 @@ interface ActionTypeProps {
   updatedAt?: Date
 }
 export type ActionType = ActionTypeProps
+
+export interface PlateRequestProps {
+  _id: string
+  bulk: string // lô yêu cầu dập biển số
+  color: string // màu biển số
+  vehicleType: string // loại xe
+  letter: string // chữ cái trên biển số
+  suffixNumber: string // số hiệu biển số
+  createdBy: string // người yêu cầu dập biển số
+  updatedBy: string // người nhận biển số đã dập
+  createdAt?: Date // ngày yêu cầu dập biển số
+  updatedAt?: Date // ngày nhận biển số đã dập
+}
+export type PlateRequest = PlateRequestProps
