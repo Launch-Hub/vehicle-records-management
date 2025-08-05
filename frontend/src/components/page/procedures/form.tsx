@@ -41,13 +41,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import BulkForm from '@/components/page/bulks/form'
+import BulkForm from '@/components/page/bulks/form' 
 import { uploadService } from '@/lib/services/upload'
+import { validateAndCorrectImageFile } from '@/lib/utils/image-validator'
 import { QRCodeCanvas } from 'qrcode.react'
 import QRPrint from '@/components/shared/qr-code/qr-print'
 import VehicleRecordSearch from './vehicle-search'
 import { LAST_STEP } from '@/constants/general'
-import { Checkbox } from '@/components/ui/checkbox'
 
 interface ProcedureFormProps {
   initialData?: Procedure
@@ -91,7 +91,6 @@ export default function ProcedureForm({
   })
 
   const [steps, setSteps] = useState<ProcedureStep[]>(initialData?.steps || [])
-  const [vehicleRecords, setVehicleRecords] = useState<VehicleRecord[]>([])
 
   // New states for record fields
   const [recordFields, setRecordFields] = useState({
@@ -122,6 +121,7 @@ export default function ProcedureForm({
 
   // State for step 1 image upload
   const [image, setImage] = useState<File | null>(null)
+  const [correctedImage, setCorrectedImage] = useState<File | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
 
@@ -193,13 +193,25 @@ export default function ProcedureForm({
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setImage(file)
-    setImageUrl(URL.createObjectURL(file)) // for preview only
+
+    // Validate and correct the image file
+    const validation = validateAndCorrectImageFile(file)
+
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Invalid image file')
+      return
+    }
+
+    const correctedFile = validation.correctedFile!
+    setImage(file) // Keep original for reference
+    setCorrectedImage(correctedFile) // Store corrected file for upload
+    setImageUrl(URL.createObjectURL(correctedFile)) // for preview only
   }
 
   // Handle image removal
   const handleRemoveImage = () => {
     setImage(null)
+    setCorrectedImage(null)
     setImageUrl(null)
     // Reset the file input
     const fileInput = document.getElementById('image') as HTMLInputElement
@@ -254,10 +266,10 @@ export default function ProcedureForm({
 
       // Upload image if present and not yet uploaded
       let uploadedImageUrl = imageUrl
-      if (image && (!imageUrl || imageUrl.startsWith('blob:'))) {
+      if (correctedImage && (!imageUrl || imageUrl.startsWith('blob:'))) {
         setIsUploadingImage(true)
         try {
-          const res = await uploadService.uploadImage(image)
+          const res = await uploadService.uploadImage(correctedImage)
           uploadedImageUrl = res.file.storedName
           setImageUrl(res.file.storedName)
         } catch (error) {
@@ -574,7 +586,7 @@ export default function ProcedureForm({
 
           <div className="space-y-2">
             <Label htmlFor="image">Đính kèm</Label>
-            <div className="flex items-start gap-4">
+            <div className="flex flex-col items-start gap-4">
               <input
                 id="image"
                 type="file"
@@ -593,12 +605,12 @@ export default function ProcedureForm({
                 {isUploadingImage ? 'Đang tải lên...' : 'Chọn tệp'}
               </Button>
               {imageUrl && (
-                <div className="relative inline-block">
+                <div className="relative inline-block w-full">
                   <img
                     src={imageUrl.startsWith('blob:') ? imageUrl : `/uploads/du/${imageUrl}`}
                     alt="Ảnh đính kèm"
-                    className="max-h-20 rounded border ml-2"
-                    style={{ maxWidth: 80 }}
+                    className="max-h-60 rounded border"
+                    style={{ maxWidth: '100%' }}
                   />
                   <Button
                     type="button"

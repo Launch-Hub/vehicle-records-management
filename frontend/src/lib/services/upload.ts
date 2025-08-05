@@ -1,4 +1,5 @@
 import api from '@/lib/axios'
+import { validateAndCorrectImageFile } from '@/lib/utils/image-validator'
 
 export interface UploadResponse {
   status: string
@@ -28,9 +29,17 @@ export interface ListFilesResponse {
 
 export const uploadService = {
   uploadImage: async (file: File): Promise<UploadResponse> => {
+    // Validate and correct the image file
+    const validation = validateAndCorrectImageFile(file)
+    
+    if (!validation.isValid) {
+      throw new Error(validation.error || 'Invalid image file')
+    }
+    
+    const correctedFile = validation.correctedFile!
     const formData = new FormData()
-    formData.append('file', file)
-    const response = await api.post('/uploads/du/single/image', formData, {
+    formData.append('file', correctedFile)
+    const response = await api.post('/upload/du/single/image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
     return response.data

@@ -76,10 +76,19 @@ export function formatDate(date: Date | string): string {
 }
 
 export const processImage = (file: File, callback: (base64: string) => void) => {
+  // Validate image type
   if (!file.type.startsWith('image/')) {
     toast.error('Vui lòng chọn tệp hình ảnh (JPG, PNG, ...).')
     return
   }
+  
+  // Check for supported image types
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    toast.error(`Định dạng hình ảnh không được hỗ trợ: ${file.type}. Các định dạng được hỗ trợ: ${allowedTypes.join(', ')}`)
+    return
+  }
+  
   if (file.size > 2 * 1024 * 1024) {
     toast.error('Hình ảnh phải nhỏ hơn 2MB.')
     return

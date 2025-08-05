@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -12,9 +12,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { uploadService } from '@/lib/services/upload'
+import { validateAndCorrectImageFile } from '@/lib/utils/image-validator'
 import type { Procedure, ProcedureStep, VehicleRecord } from '@/lib/types/tables.type'
 import { recordService } from '@/lib/services/records'
-import { toast } from 'sonner'
 
 interface ProcedureStepChangeFormProps {
   procedure: Procedure
@@ -33,16 +33,28 @@ export default function ProcedureStepChangeForm({
   const [attachments, setAttachments] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [canSubmit, setCanSubmit] = useState(false)
+  const [currentFile, setCurrentFile] = useState<File | null>(null)
 
   const handleAttachmentChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    
+    // Validate and correct the image file
+    const validation = validateAndCorrectImageFile(file)
+    
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Invalid image file')
+      return
+    }
+    
+    setCurrentFile(validation.correctedFile!)
     setIsUploading(true)
     try {
-      const res = await uploadService.uploadImage(file)
+      const res = await uploadService.uploadImage(validation.correctedFile!)
       setAttachments((prev) => [...prev, res.file.storedName])
     } catch (error) {
-      // handle error
+      console.error('Failed to upload image:', error)
+      toast.error('Failed to upload image')
     } finally {
       setIsUploading(false)
     }

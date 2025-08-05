@@ -40,6 +40,8 @@ import PlateRequestsPage from '@/pages/plate-requests/PlateRequests'
 import PlateRequestDetailPage from '@/pages/plate-requests/PlateRequestDetail'
 import { DEFAULT_LANG } from './constants/env'
 import ProceedProcedurePage from '@/pages/procedures/ProceedProcedure'
+import SelectableTypesPage from '@/pages/selectable/SelectableTypes'
+import SelectableValuesPage from '@/pages/selectable/SelectableValues'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -159,6 +161,16 @@ export const PAGE_MAP = {
   PlateRequestDetailPage: {
     lazy: lazy(() => import('@/pages/plate-requests/PlateRequestDetail')), // lazy-loaded
     component: PlateRequestDetailPage,
+    default: 'eager',
+  },
+  SelectableTypesPage: {
+    lazy: lazy(() => import('@/pages/selectable/SelectableTypes')), // lazy-loaded
+    component: SelectableTypesPage,
+    default: 'eager',
+  },
+  SelectableValuesPage: {
+    lazy: lazy(() => import('@/pages/selectable/SelectableValues')), // lazy-loaded
+    component: SelectableValuesPage,
     default: 'eager',
   },
 }
@@ -386,6 +398,37 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
             path: 'quan-ly-tap-tin',
             title: 'Quản lý tập tin',
             language: 'vi',
+          },
+        ],
+      },
+      {
+        auth: true,
+        element: 'SelectableTypesPage',
+        resource: 'selectable',
+        showSidebar: true,
+        icon: SettingsIcon,
+        path: 'selectable',
+        title: 'Selectable Values',
+        language: 'en',
+        translations: [
+          {
+            path: 'gia-tri-tuy-chon',
+            title: 'Giá trị tùy chọn',
+            language: 'vi',
+          },
+        ],
+        children: [
+          {
+            element: 'SelectableValuesPage',
+            path: ':type',
+            title: 'Manage Values',
+            language: 'en',
+            translations: [
+              {
+                language: 'vi',
+                title: 'Quản lý giá trị',
+              },
+            ],
           },
         ],
       },

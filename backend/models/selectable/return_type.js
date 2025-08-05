@@ -1,10 +1,13 @@
 const mongoose = require("mongoose");
 
-const paidAmountSchema = new mongoose.Schema({
-  name: String,
-  value: String,
-});
+const returnTypeSchema = new mongoose.Schema(
+  {
+    dictionary: { type: String, require: true, unique: true },
+    name: { type: String, require: true },
+  },
+  { timestamps: false }
+);
 
-const PaidAmount = mongoose.model("PaidAmount", paidAmountSchema);
+const ReturnType = mongoose.model("ReturnType", returnTypeSchema);
 
-module.exports = { paidAmountSchema, PaidAmount };
+module.exports = { returnTypeSchema, ReturnType };
