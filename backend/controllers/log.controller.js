@@ -12,10 +12,15 @@ exports.getList = async (req, res) => {
     createdAt: 1,
   };
   try {
-    const { pageIndex, pageSize, search, resource = "procedures" } = req.query;
+    const { pageIndex, pageSize, search, resource } = req.query;
     const { skip, limit } = parsePagination(pageIndex, pageSize);
 
-    const filter = { resource };
+    // Build filter - only filter by resource if it's provided
+    const filter = {};
+    if (resource) {
+      filter.resource = resource;
+    }
+    
     if (!!search) {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
       filter.$or = [

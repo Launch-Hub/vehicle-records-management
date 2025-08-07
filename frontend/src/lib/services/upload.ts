@@ -45,6 +45,13 @@ export const uploadService = {
     return response.data
   },
 
+  uploadDocument: async (formData: FormData): Promise<UploadResponse> => {
+    const response = await api.post('/upload/du/single/document', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
+
   listFiles: async (directory: string = ''): Promise<ListFilesResponse> => {
     const response = await api.get('/upload/list', {
       params: { directory },

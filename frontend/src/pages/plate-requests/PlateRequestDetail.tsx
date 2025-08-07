@@ -78,6 +78,40 @@ export default function PlateRequestDetailPage() {
     }
   }
 
+  const handleBulkSubmit = async (data: {
+    bulk: string
+    color: string
+    vehicleType: string
+    letter: string
+    rangeFrom: number
+    rangeTo: number
+    excludedNumbers?: string
+    createdBy: string
+    updatedBy?: string
+  }) => {
+    loader.show()
+    try {
+      const result = await plateRequestService.bulkCreate(data)
+      
+      toast.success(
+        `Tạo thành công ${result.created} yêu cầu dập biển số. ` +
+        `${result.skipped > 0 ? `Bỏ qua ${result.skipped} số đã tồn tại. ` : ''}` +
+        `${result.excluded > 0 ? `Loại trừ ${result.excluded} số.` : ''}`
+      )
+      
+      if (result.errors && result.errors.length > 0) {
+        console.error('Bulk creation errors:', result.errors)
+      }
+      
+      navigate(-1)
+    } catch (err) {
+      console.error(err)
+      toast.error('Không thể tạo yêu cầu dập biển số hàng loạt. Vui lòng thử lại.')
+    } finally {
+      loader.hide()
+    }
+  }
+
   return (
     <div className="flex flex-col p-6 md:px-10">
       <div className="flex justify-between mb-6">
@@ -92,7 +126,8 @@ export default function PlateRequestDetailPage() {
       </div>
       
       <PlateRequestForm
-        onSubmit={(data) => handleSubmit(defaultAction, data)}
+        onSubmit={(action, data) => handleSubmit(action, data)}
+        onBulkSubmit={handleBulkSubmit}
         initialData={defaultAction === 'update' ? initialData : undefined}
         isCopying={isCopying}
       />

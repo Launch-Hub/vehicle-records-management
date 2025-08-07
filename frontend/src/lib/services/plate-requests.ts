@@ -41,4 +41,26 @@ export const plateRequestService = {
     const response = await api.put(`${resource}/${id}`, data)
     return response.data
   },
+  bulkCreate: async (data: {
+    bulk: string
+    color: string
+    vehicleType: string
+    letter: string
+    rangeFrom: number
+    rangeTo: number
+    excludedNumbers?: string
+    createdBy: string
+    updatedBy?: string
+  }): Promise<{
+    message: string
+    created: number
+    skipped: number
+    excluded: number
+    items: PlateRequest[]
+    skippedNumbers: number[]
+    errors?: string[]
+  }> => {
+    const response = await api.post(`${resource}/bulk`, data)
+    return response.data
+  },
 } 

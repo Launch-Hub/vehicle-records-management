@@ -13,14 +13,8 @@ import { DataTable } from '@/components/shared/list-view/table'
 import type { DataTableHandle } from '@/components/shared/list-view/table'
 import { TableControls } from '@/components/shared/list-view/table-controls'
 import BulkCreateActionTypes from '@/components/page/action-types/bulk-create'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { STEP_TABS } from '@/constants/general'
 
 const columns: ColumnDef<ActionType>[] = [
@@ -120,7 +114,7 @@ export default function ActionTypesPage() {
       return
     }
 
-    const ids = selectedRows.map(row => row._id).filter(Boolean) as string[]
+    const ids = selectedRows.map((row) => row._id).filter(Boolean) as string[]
     if (ids.length === 0) {
       toast.error('Không có hạng mục hợp lệ để xóa')
       return
@@ -128,7 +122,7 @@ export default function ActionTypesPage() {
 
     loader.show()
     try {
-      await Promise.all(ids.map(id => actionTypeService.delete(id)))
+      await Promise.all(ids.map((id) => actionTypeService.delete(id)))
       toast.success(`Đã xóa ${ids.length} hạng mục thành công.`)
       setSelectedRows([])
       fetchData()
@@ -156,7 +150,7 @@ export default function ActionTypesPage() {
       toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
       return
     }
-    
+
     navigate(`${joinPath(location.pathname, selectedRow._id)}?copy=true`)
   }
 
@@ -176,7 +170,7 @@ export default function ActionTypesPage() {
       toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
       return
     }
-    
+
     navigate(joinPath(location.pathname, selectedRow._id))
   }
 
@@ -250,10 +244,10 @@ export default function ActionTypesPage() {
   }, [fetchData])
 
   return (
-    <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-2">
+    <div className="flex flex-1 flex-col gap-4">
+      <div className="@container/main flex flex-1 flex-col gap-2 pt-4 md:pt-6">
         {/* Step Tabs */}
-        <div className="px-4 lg:px-6 flex items-center justify-between mb-2">
+        <div className="px-4 lg:px-6 flex items-center justify-between">
           <Tabs value={stepFilter} onValueChange={handleStepTabChange} className="">
             <TabsList>
               {STEP_TABS.map((tab) => (
@@ -269,23 +263,6 @@ export default function ActionTypesPage() {
           </Tabs>
           <div className="flex items-center gap-2">
             {/* <Button variant="outlineDestructive" onClick={() => {}}>Khôi phục mặc định</Button> */}
-
-            <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>Thêm nhiều</Button>
-              </DialogTrigger>
-              <DialogContent className="min-w-[90%] lg:min-w-[80%] xl:min-w-[60%] !max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Thêm các tạo mục hàng loạt</DialogTitle>
-                </DialogHeader>
-                <BulkCreateActionTypes
-                  onSuccess={() => {
-                    setBulkDialogOpen(false)
-                    fetchData()
-                  }}
-                />
-              </DialogContent>
-            </Dialog>
           </div>
         </div>
 
@@ -310,8 +287,15 @@ export default function ActionTypesPage() {
           onClearSelection={() => setSelectedRows([])}
           onExport={handleExportDropdown}
           showExport={true}
+          customActions={
+            <>
+              <DropdownMenuItem onClick={() => setBulkDialogOpen(true)}>
+                Thêm nhiều
+              </DropdownMenuItem>
+            </>
+          }
         />
-        
+
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}
@@ -335,6 +319,21 @@ export default function ActionTypesPage() {
           />
         </div>
       </div>
+
+      {/* Bulk Create Dialog */}
+      <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
+        <DialogContent className="min-w-[90%] lg:min-w-[80%] xl:min-w-[60%] !max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Thêm các tạo mục hàng loạt</DialogTitle>
+          </DialogHeader>
+          <BulkCreateActionTypes
+            onSuccess={() => {
+              setBulkDialogOpen(false)
+              fetchData()
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

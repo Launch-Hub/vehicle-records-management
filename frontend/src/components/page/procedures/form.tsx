@@ -41,7 +41,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import BulkForm from '@/components/page/bulks/form' 
+import BulkForm from '@/components/page/bulks/form'
 import { uploadService } from '@/lib/services/upload'
 import { validateAndCorrectImageFile } from '@/lib/utils/image-validator'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -432,16 +432,22 @@ export default function ProcedureForm({
               <Label htmlFor="bulkId">Kiểm tra lần nhập</Label>
               <div className="w-full flex gap-2">
                 <Popover open={openBulkSelect} onOpenChange={setOpenBulkSelect}>
-                  <PopoverTrigger asChild disabled={isFetchingBulks || isSubmitting}>
+                  <PopoverTrigger
+                    asChild
+                    disabled={isFetchingBulks || isSubmitting}
+                    className="flex-1"
+                  >
                     <Button
                       variant="outline"
                       role="combobox"
                       aria-expanded={openBulkSelect}
-                      className="flex-1 justify-between"
+                      className="flex justify-between w-full truncate"
                     >
-                      {watch('bulkId')
-                        ? bulks.find((b) => b._id === watch('bulkId'))?.name
-                        : 'Chọn lần nhập (không bắt buộc)'}
+                      <div className="w-auto truncate">
+                        {watch('bulkId')
+                          ? bulks.find((b) => b._id === watch('bulkId'))?.name
+                          : 'Chọn lần nhập'}
+                      </div>
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { recordService } from '@/lib/services/records'
+import { settingsService } from '@/lib/services/settings'
 import type { VehicleRecord } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { joinPath } from '@/lib/utils'
@@ -21,8 +22,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVerticalIcon, SearchIcon, Trash2Icon, CopyIcon, EditIcon, QrCodeIcon } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { MoreVerticalIcon, QrCodeIcon, FileSpreadsheet } from 'lucide-react'
 
 const columns: ColumnDef<VehicleRecord>[] = [
   {
@@ -30,7 +30,6 @@ const columns: ColumnDef<VehicleRecord>[] = [
     header: () => <div>{getLabel('plateNumber', 'vehicle_records')}</div>,
     cell: (info: any) => <span className="text-muted-foreground">{String(info.getValue())}</span>,
     minSize: 90,
-    // size: 500,
   },
   {
     accessorKey: 'color',
@@ -186,7 +185,7 @@ export default function RecordsPage() {
       return
     }
 
-    const ids = selectedRows.map(row => row._id).filter(Boolean) as string[]
+    const ids = selectedRows.map((row) => row._id).filter(Boolean) as string[]
     if (ids.length === 0) {
       toast.error('Không có hồ sơ hợp lệ để xóa')
       return
@@ -194,7 +193,7 @@ export default function RecordsPage() {
 
     loader.show()
     try {
-      await Promise.all(ids.map(id => recordService.delete(id)))
+      await Promise.all(ids.map((id) => recordService.delete(id)))
       toast.success(`Đã xóa ${ids.length} hồ sơ thành công.`)
       setSelectedRows([])
       fetchData()
@@ -222,7 +221,7 @@ export default function RecordsPage() {
       toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
       return
     }
-    
+
     navigate(`${joinPath(location.pathname, selectedRow._id)}?copy=true`)
   }
 
@@ -242,7 +241,7 @@ export default function RecordsPage() {
       toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
       return
     }
-    
+
     navigate(joinPath(location.pathname, selectedRow._id))
   }
 
@@ -263,6 +262,56 @@ export default function RecordsPage() {
 
   const handleExportDropdown = () => {
     dataTableRef.current?.openExportDialog()
+  }
+
+  const handleExportWithTemplate = async () => {
+    try {
+      // Get selected rows or all data
+      const rowsToExport = selectedRows.length > 0 ? selectedRows : data
+
+      // Check if template exists
+      const templates = await settingsService.getExportTemplates()
+      const vehicleRecordsTemplate = templates.find((t) => t.resource === 'vehicle_records')
+
+      if (!vehicleRecordsTemplate?.hasFile) {
+        toast.error('Chưa có template Excel. Vui lòng tải lên template trong phần Cài đặt.')
+        return
+      }
+
+      // Prepare data for export
+      const exportData = rowsToExport.map((row) => {
+        const data: any = {}
+        // Use all available columns
+        Object.keys(row).forEach((key) => {
+          if (key !== '_id' && key !== '__v') {
+            data[key] = row[key as keyof VehicleRecord] || ''
+          }
+        })
+        return data
+      })
+
+      // Export with template
+      const blob = await settingsService.exportWithTemplate({
+        resource: 'vehicle_records',
+        data: exportData,
+        filename: 'danh-sach-ho-so-xe.xlsx',
+      })
+
+      // Download the file
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'danh-sach-ho-so-xe.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Xuất Excel thành công')
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Không thể xuất Excel. Vui lòng thử lại sau.')
+    }
   }
 
   const customActionColumn: ColumnDef<VehicleRecord> = {
@@ -298,14 +347,14 @@ export default function RecordsPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-2">
+      <div className="@container/main flex flex-1 flex-col gap-2 pt-4 md:pt-6">
         {/* Table Controls */}
         <TableControls
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           onSearch={handleSearch}
           showSearch={true}
-          columns={[]} // Will be populated by DataTable
+          columns={columns as ColumnDef<VehicleRecord>[]}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={handleColumnVisibilityChange}
           onToggleColumn={handleToggleColumn}
@@ -318,17 +367,29 @@ export default function RecordsPage() {
           onBulkCopy={handleBulkCopy}
           onBulkDelete={handleBulkDelete}
           onClearSelection={() => setSelectedRows([])}
-          onExport={handleExportDropdown}
+          onExport={handleExportWithTemplate}
           showExport={true}
+          customActions={
+            <>
+              <DropdownMenuItem onClick={handleExportDropdown}>
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                In danh sách
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleBatchPrintQR}>
+                <QrCodeIcon className="mr-2 h-4 w-4" />
+                In mã QR ({selectedRows.length})
+              </DropdownMenuItem>
+            </>
+          }
         />
-        
+
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}
             loading={isFetching}
             total={total}
             data={data}
-            columns={columns as ColumnDef<VehicleRecord>[]}
+            columns={columns as ColumnDef<VehicleRecord>[]} // Will be populated by TableControls
             customActionColumn={customActionColumn as ColumnDef<VehicleRecord>}
             onPageChange={handleChangePage}
             onCreate={handleCreate}

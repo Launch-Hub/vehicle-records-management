@@ -199,3 +199,15 @@ export function beautifyDate(
   if (isNaN(d.getTime())) return ''
   return d.toLocaleString(locale, options)
 }
+
+export const generateBulkName = (): string => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
+  
+  return `Lô_${year}${month}${day}_${hours}${minutes}${seconds}`
+}

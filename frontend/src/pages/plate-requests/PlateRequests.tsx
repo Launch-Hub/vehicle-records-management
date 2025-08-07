@@ -18,8 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVerticalIcon, SearchIcon, Trash2Icon, CopyIcon, EditIcon } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { MoreVerticalIcon } from 'lucide-react'
 
 const columns: ColumnDef<PlateRequest>[] = [
   {
@@ -183,7 +182,7 @@ export default function PlateRequestsPage() {
       return
     }
 
-    const ids = selectedRows.map(row => row._id).filter(Boolean) as string[]
+    const ids = selectedRows.map((row) => row._id).filter(Boolean) as string[]
     if (ids.length === 0) {
       toast.error('Không có yêu cầu hợp lệ để xóa')
       return
@@ -192,7 +191,7 @@ export default function PlateRequestsPage() {
     loader.show()
     try {
       // Delete multiple items - you may need to implement bulk delete in your service
-      await Promise.all(ids.map(id => plateRequestService.delete(id)))
+      await Promise.all(ids.map((id) => plateRequestService.delete(id)))
       toast.success(`Đã xóa ${ids.length} yêu cầu dập biển số thành công.`)
       setSelectedRows([])
       // Refresh the data
@@ -212,14 +211,14 @@ export default function PlateRequestsPage() {
     }
 
     // Navigate to create page with selected data
-    const selectedData = selectedRows.map(row => ({
+    const selectedData = selectedRows.map((row) => ({
       bulk: row.bulk,
       color: row.color,
       vehicleType: row.vehicleType,
       letter: row.letter,
       suffixNumber: row.suffixNumber,
     }))
-    
+
     // You can store this in localStorage or pass as state
     localStorage.setItem('bulkCopyData', JSON.stringify(selectedData))
     navigate(joinPath(location.pathname, 'new?bulk=true'))
@@ -241,7 +240,7 @@ export default function PlateRequestsPage() {
       toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
       return
     }
-    
+
     navigate(joinPath(location.pathname, selectedRow._id))
   }
 
@@ -280,7 +279,7 @@ export default function PlateRequestsPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-2">
+      <div className="@container/main flex flex-1 flex-col gap-2 pt-4 md:pt-6">
         {/* Table Controls */}
         <TableControls
           searchTerm={searchTerm}
@@ -303,7 +302,7 @@ export default function PlateRequestsPage() {
           onExport={handleExportDropdown}
           showExport={true}
         />
-        
+
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}

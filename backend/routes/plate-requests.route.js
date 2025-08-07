@@ -18,11 +18,21 @@ router.post(
   logActivityMiddleware("create", resource),
   controller.create
 );
+
+// bulk create
+router.post(
+  "/bulk",
+  authenticateToken,
+  requirePermission(resource, "write"),
+  logActivityMiddleware("create", resource),
+  controller.bulkCreate
+);
+
 router.put(
   "/:id",
   authenticateToken,
   requirePermission(resource, "write"),
-  logActivityMiddleware("create", resource),
+  logActivityMiddleware("update", resource),
   controller.update
 );
 // delete
@@ -30,7 +40,7 @@ router.delete(
   "/:id",
   authenticateToken,
   requirePermission(resource, "delete"),
-  logActivityMiddleware("create", resource),
+  logActivityMiddleware("delete", resource),
   controller.delete
 );
 

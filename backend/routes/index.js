@@ -14,6 +14,7 @@ const actionTypeRoutes = require("./action-types.route");
 const logRoutes = require("./log.route");
 const plateRequestRoutes = require("./plate-requests.route");
 const selectableRoutes = require("./selectable.route");
+const settingsRoutes = require("./settings.route");
 
 // Mount routes on the sub-paths
 router.use("/g", generalRoutes);
@@ -28,5 +29,6 @@ router.use("/action-types", actionTypeRoutes);
 router.use("/logs", logRoutes);
 router.use("/plate-requests", plateRequestRoutes);
 router.use("/selectable", selectableRoutes);
+router.use("/settings", settingsRoutes);
 
 module.exports = router;

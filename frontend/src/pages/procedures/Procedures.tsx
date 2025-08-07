@@ -342,7 +342,7 @@ export default function ProceduresPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <div className="@container/main flex flex-1 flex-col gap-2">
+      <div className="@container/main flex flex-1 flex-col gap-2 pt-4 md:pt-6">
         {/* Filter Component */}
         <ProcedureFilter
           onSearchChange={handleSearch}
@@ -372,6 +372,15 @@ export default function ProceduresPage() {
           onClearSelection={() => setSelectedRows([])}
           onExport={handleExportDropdown}
           showExport={true}
+          customActions={
+            <>
+              {selectedRows.length > 0 && Number(currentStep) > 1 && (
+                <DropdownMenuItem onClick={() => handleProceed(selectedRows[0])}>
+                  Tiến trình ({selectedRows.length})
+                </DropdownMenuItem>
+              )}
+            </>
+          }
         />
         
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">

@@ -14,9 +14,11 @@ import {
   PackageIcon,
   HardDriveIcon,
   PrinterCheckIcon,
-  SettingsIcon, // <-- add this
+  SettingsIcon,
   FolderOpenIcon,
   KeyboardMusicIcon,
+  CarIcon,
+  CpuIcon,
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -36,6 +38,7 @@ import BulkDetailPage from '@/pages/bulks/BulkDetail'
 import ActionTypesPage from '@/pages/action-types/ActionTypes'
 import ActionTypeDetailPage from '@/pages/action-types/ActionTypeDetail'
 import LogsPage from '@/pages/activities/Logs'
+import SettingsPage from '@/pages/settings/Settings'
 import UploadsPage from '@/pages/uploads/Uploads'
 import PlateRequestsPage from '@/pages/plate-requests/PlateRequests'
 import PlateRequestDetailPage from '@/pages/plate-requests/PlateRequestDetail'
@@ -146,6 +149,11 @@ export const PAGE_MAP = {
   LogsPage: {
     lazy: lazy(() => import('@/pages/activities/Logs')), // lazy-loaded
     component: LogsPage,
+    default: 'eager',
+  },
+  SettingsPage: {
+    lazy: lazy(() => import('@/pages/settings/Settings')), // lazy-loaded
+    component: SettingsPage,
     default: 'eager',
   },
   UploadsPage: {
@@ -295,6 +303,23 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     children: [
       {
         auth: true,
+        element: 'SettingsPage',
+        resource: 'settings',
+        showSidebar: true,
+        icon: CpuIcon,
+        path: '',
+        title: 'Settings',
+        language: 'en',
+        translations: [
+          {
+            path: 'cai-dat-he-thong',
+            title: 'Cài đặt hệ thống',
+            language: 'vi',
+          },
+        ],
+      },
+      {
+        auth: true,
         element: 'UsersPage',
         resource: 'users',
         showSidebar: true,
@@ -304,7 +329,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         language: 'en',
         translations: [
           {
-            path: 'users',
+            path: 'quan-ly-nguoi-dung',
             title: 'Quản lý người dùng',
             language: 'vi',
           },
@@ -422,7 +447,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     resource: 'records',
     showSidebar: true,
     nav: 1,
-    icon: HistoryIcon,
+    icon: CarIcon,
     path: '/registration-history',
     title: 'Registration History',
     language: 'en',

@@ -90,12 +90,12 @@ function DataRow<T>({ row }: { row: Row<T> }) {
   return (
     <TableRow data-state={row.getIsSelected() && 'selected'}>
       {row.getVisibleCells().map((cell) => {
-        const textAlign = (cell.column.columnDef as any).textAlign || 'left';
+        const textAlign = (cell.column.columnDef as any).textAlign || 'left'
         return (
           <TableCell key={cell.id} style={{ width: cell.column.getSize(), textAlign }}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
-        );
+        )
       })}
     </TableRow>
   )
@@ -335,12 +335,12 @@ const DataTableInner = <T extends Record<string, any>>(
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
-                    const textAlign = (header.column.columnDef as any).textAlign || 'left';
+                    const textAlign = (header.column.columnDef as any).textAlign || 'left'
                     return (
                       <TableHead key={header.id} style={{ width: header.getSize(), textAlign }}>
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
-                    );
+                    )
                   })}
                 </TableRow>
               ))}
@@ -380,9 +380,9 @@ const DataTableInner = <T extends Record<string, any>>(
                   <SelectValue placeholder={table.getState().pagination.pageSize} />
                 </SelectTrigger>
                 <SelectContent side="top">
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                  {[10, 20, 30, 40, 50, -1].map((pageSize) => (
                     <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
+                      {pageSize === -1 ? 'Tất cả' : pageSize}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -480,7 +480,10 @@ const DataTableInner = <T extends Record<string, any>>(
                   }}
                 />
                 <span>
-                  {getLabel(col.accessorKey as keyof typeof DICTIONARY[typeof resource], resource)}
+                  {getLabel(
+                    col.accessorKey as keyof (typeof DICTIONARY)[typeof resource],
+                    resource
+                  )}
                 </span>
               </label>
             ))}
