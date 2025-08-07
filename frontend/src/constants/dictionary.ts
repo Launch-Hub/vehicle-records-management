@@ -81,7 +81,22 @@ type PermissionDictionary = {
 };
 
 type PlateColorDictionary = {
-  code: string;
+  dictionary: string;
+  name: string;
+};
+
+type PaidAmountDictionary = {
+  name: string;
+  value: string;
+};
+
+type VehicleTypeDictionary = {
+  name: string;
+  value: string;
+};
+
+type ReturnTypeDictionary = {
+  dictionary: string;
   name: string;
 };
 
@@ -107,6 +122,17 @@ type RoleDictionary = {
   defaultPermissions: string;
 };
 
+type PlateRequestDictionary = {
+  bulk: string;
+  color: string;
+  vehicleType: string;
+  letter: string;
+  suffixNumber: string;
+  createdBy: string;
+  note: string;
+  status: string;
+  createdAt: string;
+};
 // 2. Combine into a master type
 
 type Dictionary = {
@@ -119,8 +145,12 @@ type Dictionary = {
   issuers: IssuerDictionary;
   permissions: PermissionDictionary;
   plate_colors: PlateColorDictionary;
+  paid_amounts: PaidAmountDictionary;
+  vehicle_types: VehicleTypeDictionary;
+  return_types: ReturnTypeDictionary;
   procedures: ProcedureDictionary;
   roles: RoleDictionary;
+  plate_requests: PlateRequestDictionary;
 };
 
 // 3. Update DICTIONARY with all resources and fields
@@ -199,8 +229,20 @@ export const DICTIONARY: Dictionary = {
     delete: 'Xóa',
   },
   plate_colors: {
-    code: 'Mã màu',
+    dictionary: 'Mã màu',
     name: 'Tên màu',
+  },
+  paid_amounts: {
+    name: 'Tên khoản phí',
+    value: 'Số tiền',
+  },
+  vehicle_types: {
+    name: 'Tên loại xe',
+    value: 'Mã loại xe',
+  },
+  return_types: {
+    dictionary: 'Mã Hình thức trả',
+    name: 'Tên Hình thức trả',
   },
   procedures: {
     record: 'Hồ sơ',
@@ -222,6 +264,17 @@ export const DICTIONARY: Dictionary = {
     description: 'Mô tả',
     defaultPermissions: 'Quyền mặc định',
   },
+  plate_requests: {
+    bulk: 'Lô yêu cầu',
+    color: 'Màu biển số',
+    vehicleType: 'Loại xe',
+    letter: 'Chữ cái',
+    suffixNumber: 'Số cuối',
+    createdBy: 'Người tạo',
+    note: 'Ghi chú',
+    status: 'Trạng thái',
+    createdAt: 'Ngày tạo',
+  },  
 };
 
 export function getLabel<R extends keyof Dictionary, K extends keyof Dictionary[R]>(
@@ -276,4 +329,16 @@ export const PROCEDURE_STATUS_DICTIONARY = {
 }
 export function getProcedureStatusLabel(key: string): string {
   return PROCEDURE_STATUS_DICTIONARY[key as keyof typeof PROCEDURE_STATUS_DICTIONARY] ?? ''
+}
+
+// Vietnamese labels for selectable types
+export const SELECTABLE_TYPE_LABELS = {
+  plate_colors: 'Màu biển số',
+  paid_amounts: 'Số tiền phải trả',
+  vehicle_types: 'Loại xe',
+  return_types: 'Hình thức trả kết quả',
+};
+
+export function getSelectableTypeLabel(key: string): string {
+  return SELECTABLE_TYPE_LABELS[key as keyof typeof SELECTABLE_TYPE_LABELS] ?? key;
 }

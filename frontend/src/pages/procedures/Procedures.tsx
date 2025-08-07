@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import type { Procedure } from '@/lib/types/tables.type'
@@ -8,6 +8,8 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { getRoute } from '@/routes'
 import { useLoader } from '@/contexts/loader'
 import { DataTable } from '@/components/shared/list-view/table'
+import type { DataTableHandle } from '@/components/shared/list-view/table'
+import { TableControls } from '@/components/shared/list-view/table-controls'
 import { procedureService } from '@/lib/services/procedures'
 import { ProcedureFilter } from '@/components/page/procedures/filter'
 import {
@@ -76,9 +78,13 @@ export default function ProceduresPage() {
   const [data, setData] = useState<Procedure[]>([])
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedRows, setSelectedRows] = useState<Procedure[]>([])
+  const [columnVisibility, setColumnVisibility] = useState({})
   const [proceedDialog, setProceedDialog] = useState<{ open: boolean; procedure?: Procedure }>({
     open: false,
   })
+  const dataTableRef = useRef<DataTableHandle>(null)
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -216,6 +222,88 @@ export default function ProceduresPage() {
     fetchData()
   }
 
+  const handleRowSelectionChange = (rows: Procedure[]) => {
+    setSelectedRows(rows)
+  }
+
+  const handleColumnVisibilityChange = (visibility: any) => {
+    setColumnVisibility(visibility)
+  }
+
+  const handleToggleColumn = (columnId: string) => {
+    dataTableRef.current?.toggleColumnVisibility(columnId)
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một đăng ký để xóa')
+      return
+    }
+
+    const ids = selectedRows.map(row => row._id).filter(Boolean) as string[]
+    if (ids.length === 0) {
+      toast.error('Không có đăng ký hợp lệ để xóa')
+      return
+    }
+
+    loader.show()
+    try {
+      await Promise.all(ids.map(id => procedureService.delete(id)))
+      toast.success(`Đã xóa ${ids.length} đăng ký thành công.`)
+      setSelectedRows([])
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa các đăng ký. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
+  }
+
+  const handleBulkCopy = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một đăng ký để sao chép')
+      return
+    }
+
+    if (selectedRows.length > 1) {
+      toast.error('Chỉ có thể sao chép một đăng ký tại một thời điểm')
+      return
+    }
+
+    const selectedRow = selectedRows[0]
+    if (!selectedRow._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+    
+    navigate(`${joinPath(location.pathname, selectedRow._id)}?copy=true`)
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một đăng ký để chỉnh sửa')
+      return
+    }
+
+    if (selectedRows.length > 1) {
+      toast.error('Chỉ có thể chỉnh sửa một đăng ký tại một thời điểm')
+      return
+    }
+
+    const selectedRow = selectedRows[0]
+    if (!selectedRow._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+    
+    navigate(joinPath(location.pathname, selectedRow._id))
+  }
+
+  const handleExportDropdown = () => {
+    dataTableRef.current?.openExportDialog()
+  }
+
   const customActionColumn: ColumnDef<Procedure> = {
     id: 'actions',
     cell: ({ row }) => (
@@ -255,16 +343,40 @@ export default function ProceduresPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-        <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          {/* Filter Component */}
-          <ProcedureFilter
-            onSearchChange={handleSearch}
-            onStepChange={handleStepChange}
-            currentSearch={search}
-            currentStep={currentStep}
-          />
-          
+        {/* Filter Component */}
+        <ProcedureFilter
+          onSearchChange={handleSearch}
+          onStepChange={handleStepChange}
+          currentSearch={search}
+          currentStep={currentStep}
+        />
+        
+        {/* Table Controls */}
+        <TableControls
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onSearch={handleSearch}
+          showSearch={false} // Hide search since we have external filter
+          columns={[]} // Will be populated by DataTable
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
+          onToggleColumn={handleToggleColumn}
+          showColumnToggle={true}
+          resource="procedures"
+          onCreate={handleCreate}
+          showCreate={true}
+          selectedRows={selectedRows}
+          onBulkEdit={handleBulkEdit}
+          onBulkCopy={handleBulkCopy}
+          onBulkDelete={handleBulkDelete}
+          onClearSelection={() => setSelectedRows([])}
+          onExport={handleExportDropdown}
+          showExport={true}
+        />
+        
+        <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
+            ref={dataTableRef}
             loading={isFetching}
             total={total}
             data={data}
@@ -276,9 +388,12 @@ export default function ProceduresPage() {
             onDelete={handleDelete}
             onSearch={() => {}} // Disable search in table since we have external filter
             onExport={handleExport}
+            onRowSelectionChange={handleRowSelectionChange}
             customActionColumn={Number(currentStep) > 1 ? customActionColumn : undefined}
-            resource="procedures"
             showSearch={false} // Hide search in table
+            showCreate={false}
+            showColumnToggle={false}
+            resource="procedures"
           />
         </div>
       </div>

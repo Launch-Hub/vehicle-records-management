@@ -103,6 +103,10 @@ function DataRow<T>({ row }: { row: Row<T> }) {
 
 export interface DataTableHandle {
   openExportDialog: () => void
+  openColumnVisibilityDialog: () => void
+  getColumnVisibilityState: () => VisibilityState
+  setColumnVisibility: (visibility: VisibilityState) => void
+  toggleColumnVisibility: (columnId: string) => void
 }
 
 const DataTableInner = <T extends Record<string, any>>(
@@ -305,80 +309,25 @@ const DataTableInner = <T extends Record<string, any>>(
     setExportDialogOpen(false)
   }
 
-  // Expose openExportDialog to parent
+  // Expose methods to parent
   useImperativeHandle(ref, () => ({
     openExportDialog: () => setExportDialogOpen(true),
+    openColumnVisibilityDialog: () => {
+      // This can be used to trigger column visibility dialog if needed
+    },
+    getColumnVisibilityState: () => table.getState().columnVisibility,
+    setColumnVisibility: (visibility: VisibilityState) => table.setColumnVisibility(visibility),
+    toggleColumnVisibility: (columnId: string) => {
+      const column = table.getColumn(columnId)
+      if (column) {
+        column.toggleVisibility()
+      }
+    },
   }))
 
   return (
     <div className="flex w-full flex-col justify-start gap-4 relative">
       {loading && <LoaderOverlay />}
-      <div className="flex items-center justify-between px-4 lg:px-6">
-        {showSearch ? (
-          <div className="relative w-full max-w-sm">
-            <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Tìm kiếm..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onBlur={(e) => handleSearch(e.target.value)}
-              className="w-full pr-8"
-            />
-          </div>
-        ) : (
-          <div />
-        )}
-        <div className="flex items-center gap-2">
-          {showColumnToggle && (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                disabled={!table.getAllColumns().filter((col) => col.getCanHide()).length}
-                asChild
-              >
-                <Button variant="outline" size="sm">
-                  <ChevronDownIcon className="size-4" /> Cột hiển thị
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {table
-                  .getAllColumns()
-                  .filter((col) => col.getCanHide())
-                  .map((col) => (
-                    <DropdownMenuCheckboxItem
-                      key={col.id}
-                      checked={col.getIsVisible()}
-                      onCheckedChange={() => col.toggleVisibility()}
-                    >
-                      {getLabel(
-                        (col.columnDef.header && typeof col.columnDef.header === 'string'
-                          ? col.columnDef.header
-                          : col.id) as keyof typeof DICTIONARY[typeof resource],
-                        resource
-                      )}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          {showCreate && (
-            <Button variant="default" size="sm" onClick={onCreate}>
-              <PlusIcon /> <span className="hidden lg:inline">Thêm</span>
-            </Button>
-          )}
-          {/* {showExport && (
-            <Button
-              variant="success"
-              size="sm"
-              onClick={handleExportClick}
-              disabled={!selectedRows.length}
-            >
-              <FileSpreadsheet className="size-4" />
-              In danh sách
-            </Button>
-          )} */}
-        </div>
-      </div>
       <div className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6">
         <div className="overflow-hidden rounded-lg border">
           <Table>

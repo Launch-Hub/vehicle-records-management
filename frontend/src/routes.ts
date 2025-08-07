@@ -16,6 +16,7 @@ import {
   PrinterCheckIcon,
   SettingsIcon, // <-- add this
   FolderOpenIcon,
+  KeyboardMusicIcon,
 } from 'lucide-react'
 
 import LoginPage from '@/pages/auth/Login'
@@ -41,7 +42,6 @@ import PlateRequestDetailPage from '@/pages/plate-requests/PlateRequestDetail'
 import { DEFAULT_LANG } from './constants/env'
 import ProceedProcedurePage from '@/pages/procedures/ProceedProcedure'
 import SelectableTypesPage from '@/pages/selectable/SelectableTypes'
-import SelectableValuesPage from '@/pages/selectable/SelectableValues'
 
 export type PageComponent =
   | React.ComponentType<any>
@@ -166,11 +166,6 @@ export const PAGE_MAP = {
   SelectableTypesPage: {
     lazy: lazy(() => import('@/pages/selectable/SelectableTypes')), // lazy-loaded
     component: SelectableTypesPage,
-    default: 'eager',
-  },
-  SelectableValuesPage: {
-    lazy: lazy(() => import('@/pages/selectable/SelectableValues')), // lazy-loaded
-    component: SelectableValuesPage,
     default: 'eager',
   },
 }
@@ -412,25 +407,12 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         language: 'en',
         translations: [
           {
-            path: 'gia-tri-tuy-chon',
-            title: 'Giá trị tùy chọn',
+            path: 'quan-ly-tao-muc',
+            title: 'Quản lý tạo mục',
             language: 'vi',
           },
         ],
-        children: [
-          {
-            element: 'SelectableValuesPage',
-            path: ':type',
-            title: 'Manage Values',
-            language: 'en',
-            translations: [
-              {
-                language: 'vi',
-                title: 'Quản lý giá trị',
-              },
-            ],
-          },
-        ],
+        children: [],
       },
     ],
   },
@@ -524,7 +506,6 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
   //   ],
   // },
 
-  
   {
     auth: true,
     element: 'ProceduresPage',
@@ -759,7 +740,7 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
     resource: 'plate_requests',
     showSidebar: true,
     nav: 1,
-    icon: HistoryIcon,
+    icon: KeyboardMusicIcon,
     path: '/plate-requests',
     title: 'Plate Requests',
     language: 'en',

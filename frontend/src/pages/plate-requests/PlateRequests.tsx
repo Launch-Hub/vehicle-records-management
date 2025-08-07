@@ -5,10 +5,10 @@ import { plateRequestService } from '@/lib/services/plate-requests'
 import type { PlateRequest } from '@/lib/types/tables.type'
 import type { PaginationProps } from '@/lib/types/props'
 import { joinPath } from '@/lib/utils'
-import { getLabel } from '@/constants/dictionary'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/shared/list-view/table'
 import type { DataTableHandle } from '@/components/shared/list-view/table'
+import { TableControls } from '@/components/shared/list-view/table-controls'
 import { useLoader } from '@/contexts/loader/use-loader'
 import { Button } from '@/components/ui/button'
 import {
@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVerticalIcon, SearchIcon } from 'lucide-react'
+import { MoreVerticalIcon, SearchIcon, Trash2Icon, CopyIcon, EditIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 
 const columns: ColumnDef<PlateRequest>[] = [
@@ -73,6 +73,8 @@ export default function PlateRequestsPage() {
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedRows, setSelectedRows] = useState<PlateRequest[]>([])
+  const [columnVisibility, setColumnVisibility] = useState({})
   const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item?: PlateRequest }>({
     open: false,
   })
@@ -163,6 +165,86 @@ export default function PlateRequestsPage() {
     }
   }
 
+  const handleRowSelectionChange = (rows: PlateRequest[]) => {
+    setSelectedRows(rows)
+  }
+
+  const handleColumnVisibilityChange = (visibility: any) => {
+    setColumnVisibility(visibility)
+  }
+
+  const handleToggleColumn = (columnId: string) => {
+    dataTableRef.current?.toggleColumnVisibility(columnId)
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một yêu cầu để xóa')
+      return
+    }
+
+    const ids = selectedRows.map(row => row._id).filter(Boolean) as string[]
+    if (ids.length === 0) {
+      toast.error('Không có yêu cầu hợp lệ để xóa')
+      return
+    }
+
+    loader.show()
+    try {
+      // Delete multiple items - you may need to implement bulk delete in your service
+      await Promise.all(ids.map(id => plateRequestService.delete(id)))
+      toast.success(`Đã xóa ${ids.length} yêu cầu dập biển số thành công.`)
+      setSelectedRows([])
+      // Refresh the data
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa các yêu cầu dập biển số. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
+  }
+
+  const handleBulkCopy = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một yêu cầu để sao chép')
+      return
+    }
+
+    // Navigate to create page with selected data
+    const selectedData = selectedRows.map(row => ({
+      bulk: row.bulk,
+      color: row.color,
+      vehicleType: row.vehicleType,
+      letter: row.letter,
+      suffixNumber: row.suffixNumber,
+    }))
+    
+    // You can store this in localStorage or pass as state
+    localStorage.setItem('bulkCopyData', JSON.stringify(selectedData))
+    navigate(joinPath(location.pathname, 'new?bulk=true'))
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một yêu cầu để chỉnh sửa')
+      return
+    }
+
+    if (selectedRows.length > 1) {
+      toast.error('Chỉ có thể chỉnh sửa một yêu cầu tại một thời điểm')
+      return
+    }
+
+    const selectedRow = selectedRows[0]
+    if (!selectedRow._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+    
+    navigate(joinPath(location.pathname, selectedRow._id))
+  }
+
   const handleExportDropdown = () => {
     dataTableRef.current?.openExportDialog()
   }
@@ -199,32 +281,29 @@ export default function PlateRequestsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-        {/* Search and actions row */}
-        <div className="flex items-center justify-between pt-4 px-4 md:pt-6 md:px-6">
-          <div className="relative w-full max-w-sm">
-            <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Tìm kiếm..."
-              value={searchTerm}
-              onChange={handleSearchInputChange}
-              onBlur={handleSearchInputBlur}
-              onKeyDown={handleSearchInputKeyDown}
-              className="w-full pr-8"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="success" size="sm">
-                Thao tác
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={handleExportDropdown}>In danh sách</DropdownMenuItem>
-              {/* Add more actions here if needed */}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {/* Table Controls */}
+        <TableControls
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onSearch={handleSearch}
+          showSearch={true}
+          columns={[]} // Will be populated by DataTable
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
+          onToggleColumn={handleToggleColumn}
+          showColumnToggle={true}
+          resource="plate_requests"
+          onCreate={handleCreate}
+          showCreate={true}
+          selectedRows={selectedRows}
+          onBulkEdit={handleBulkEdit}
+          onBulkCopy={handleBulkCopy}
+          onBulkDelete={handleBulkDelete}
+          onClearSelection={() => setSelectedRows([])}
+          onExport={handleExportDropdown}
+          showExport={true}
+        />
+        
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}
@@ -239,11 +318,14 @@ export default function PlateRequestsPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
+            onRowSelectionChange={handleRowSelectionChange}
             showSearch={false}
+            showCreate={false}
+            showColumnToggle={false}
             resource="plate_requests"
           />
         </div>
       </div>
     </div>
   )
-} 
+}

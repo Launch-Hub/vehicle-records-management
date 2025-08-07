@@ -9,6 +9,7 @@ import { getLabel } from '@/constants/dictionary'
 import type { ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/shared/list-view/table'
 import type { DataTableHandle } from '@/components/shared/list-view/table'
+import { TableControls } from '@/components/shared/list-view/table-controls'
 import { useLoader } from '@/contexts/loader/use-loader'
 import QRPrint from '@/components/shared/qr-code/qr-print'
 import QRPrintGrid from '@/components/shared/qr-code/qr-print-grid'
@@ -20,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVerticalIcon, SearchIcon } from 'lucide-react'
+import { MoreVerticalIcon, SearchIcon, Trash2Icon, CopyIcon, EditIcon, QrCodeIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 
 const columns: ColumnDef<VehicleRecord>[] = [
@@ -64,6 +65,8 @@ export default function RecordsPage() {
   const [pagination, setPagination] = useState<PaginationProps>({ pageIndex: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedRows, setSelectedRows] = useState<VehicleRecord[]>([])
+  const [columnVisibility, setColumnVisibility] = useState({})
   const [showQRPrint, setShowQRPrint] = useState(false)
   const [selectedRecordForQR, setSelectedRecordForQR] = useState<VehicleRecord | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<{ open: boolean; item?: VehicleRecord }>({
@@ -165,15 +168,91 @@ export default function RecordsPage() {
   }
 
   // DataTable row selection
-  const [selectedRows, setSelectedRows] = useState<VehicleRecord[]>([])
-
-  // Pass this to DataTable to get selected rows
   const handleRowSelectionChange = (rows: VehicleRecord[]) => {
     setSelectedRows(rows)
   }
 
+  const handleColumnVisibilityChange = (visibility: any) => {
+    setColumnVisibility(visibility)
+  }
+
+  const handleToggleColumn = (columnId: string) => {
+    dataTableRef.current?.toggleColumnVisibility(columnId)
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một hồ sơ để xóa')
+      return
+    }
+
+    const ids = selectedRows.map(row => row._id).filter(Boolean) as string[]
+    if (ids.length === 0) {
+      toast.error('Không có hồ sơ hợp lệ để xóa')
+      return
+    }
+
+    loader.show()
+    try {
+      await Promise.all(ids.map(id => recordService.delete(id)))
+      toast.success(`Đã xóa ${ids.length} hồ sơ thành công.`)
+      setSelectedRows([])
+      fetchData()
+    } catch (error) {
+      console.error(error)
+      toast.error('Không thể xóa các hồ sơ. Vui lòng thử lại sau.')
+    } finally {
+      loader.hide()
+    }
+  }
+
+  const handleBulkCopy = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một hồ sơ để sao chép')
+      return
+    }
+
+    if (selectedRows.length > 1) {
+      toast.error('Chỉ có thể sao chép một hồ sơ tại một thời điểm')
+      return
+    }
+
+    const selectedRow = selectedRows[0]
+    if (!selectedRow._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+    
+    navigate(`${joinPath(location.pathname, selectedRow._id)}?copy=true`)
+  }
+
+  const handleBulkEdit = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một hồ sơ để chỉnh sửa')
+      return
+    }
+
+    if (selectedRows.length > 1) {
+      toast.error('Chỉ có thể chỉnh sửa một hồ sơ tại một thời điểm')
+      return
+    }
+
+    const selectedRow = selectedRows[0]
+    if (!selectedRow._id) {
+      toast.error('Có lỗi xảy ra! Vui lòng thử lại sau')
+      return
+    }
+    
+    navigate(joinPath(location.pathname, selectedRow._id))
+  }
+
   // Batch QR print handler
   const handleBatchPrintQR = () => {
+    if (selectedRows.length === 0) {
+      toast.error('Vui lòng chọn ít nhất một hồ sơ để in mã QR')
+      return
+    }
+
     const items = selectedRows.map((record) => ({
       url: `${window.location.origin}/registration-history/${record._id}`,
       label: record.plateNumber,
@@ -220,33 +299,29 @@ export default function RecordsPage() {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
-        {/* Search and actions row */}
-        <div className="flex items-center justify-between pt-4 px-4 md:pt-6 md:px-6">
-          <div className="relative w-full max-w-sm">
-            <SearchIcon className="cursor-pointer absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Tìm kiếm..."
-              value={searchTerm}
-              onChange={handleSearchInputChange}
-              onBlur={handleSearchInputBlur}
-              onKeyDown={handleSearchInputKeyDown}
-              className="w-full pr-8"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild disabled={selectedRows.length === 0}>
-              <Button variant="success" size="sm">
-                Thao tác
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={handleExportDropdown}>In danh sách</DropdownMenuItem>
-              <DropdownMenuItem onClick={handleBatchPrintQR}>In mã QR</DropdownMenuItem>
-              {/* Add more actions here if needed */}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {/* Table Controls */}
+        <TableControls
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onSearch={handleSearch}
+          showSearch={true}
+          columns={[]} // Will be populated by DataTable
+          columnVisibility={columnVisibility}
+          onColumnVisibilityChange={handleColumnVisibilityChange}
+          onToggleColumn={handleToggleColumn}
+          showColumnToggle={true}
+          resource="vehicle_records"
+          onCreate={handleCreate}
+          showCreate={true}
+          selectedRows={selectedRows}
+          onBulkEdit={handleBulkEdit}
+          onBulkCopy={handleBulkCopy}
+          onBulkDelete={handleBulkDelete}
+          onClearSelection={() => setSelectedRows([])}
+          onExport={handleExportDropdown}
+          showExport={true}
+        />
+        
         <div className="flex flex-col gap-4 pb-4 md:gap-6 md:pb-6">
           <DataTable
             ref={dataTableRef}
@@ -261,9 +336,11 @@ export default function RecordsPage() {
             onCopy={handleCopy}
             onDelete={handleDelete}
             onSearch={handleSearch}
-            showSearch={false}
-            resource="vehicle_records"
             onRowSelectionChange={handleRowSelectionChange}
+            showSearch={false}
+            showCreate={false}
+            showColumnToggle={false}
+            resource="vehicle_records"
           />
         </div>
       </div>

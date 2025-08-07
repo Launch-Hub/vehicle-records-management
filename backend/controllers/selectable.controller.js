@@ -12,23 +12,47 @@ const SELECTABLE_MODELS = {
   return_types: ReturnType,
 };
 
+// Vietnamese labels for selectable types
+const VIETNAMESE_LABELS = {
+  plate_colors: 'Màu biển số',
+  paid_amounts: 'Số tiền phải trả',
+  vehicle_types: 'Loại xe',
+  return_types: 'Hình thức trả kết quả',
+};
+
 // Validation schemas for each selectable type
 const VALIDATION_SCHEMAS = {
   plate_colors: {
     required: ["dictionary", "name"],
     unique: ["dictionary"],
+    fields: {
+      dictionary: "Mã màu",
+      name: "Tên màu",
+    },
   },
   paid_amounts: {
     required: ["name", "value"],
     unique: ["value"],
+    fields: {
+      name: "Tên khoản phí",
+      value: "Số tiền",
+    },
   },
   vehicle_types: {
     required: ["name", "value"],
     unique: ["value"],
+    fields: {
+      name: "Tên loại xe",
+      value: "Mã loại xe",
+    },
   },
   return_types: {
     required: ["dictionary", "name"],
     unique: ["dictionary"],
+    fields: {
+      dictionary: "Mã Hình thức trả",
+      name: "Tên Hình thức trả",
+    },
   },
 };
 
@@ -36,7 +60,7 @@ const VALIDATION_SCHEMAS = {
 const getModelByType = (type) => {
   const model = SELECTABLE_MODELS[type];
   if (!model) {
-    throw new Error(`Invalid selectable type: ${type}`);
+    throw new Error(`Loại tạo mục không hợp lệ: ${type}`);
   }
   return model;
 };
@@ -45,7 +69,7 @@ const getModelByType = (type) => {
 const validateData = (type, data) => {
   const schema = VALIDATION_SCHEMAS[type];
   if (!schema) {
-    throw new Error(`Invalid selectable type: ${type}`);
+    throw new Error(`Loại tạo mục không hợp lệ: ${type}`);
   }
 
   const errors = [];
@@ -53,7 +77,8 @@ const validateData = (type, data) => {
   // Check required fields
   schema.required.forEach(field => {
     if (!data[field] || data[field].toString().trim() === '') {
-      errors.push(`${field} is required`);
+      const fieldLabel = schema.fields[field] || field;
+      errors.push(`${fieldLabel} là bắt buộc`);
     }
   });
 
@@ -65,7 +90,7 @@ exports.getSelectableTypes = async (req, res) => {
   try {
     const types = Object.keys(SELECTABLE_MODELS).map(type => ({
       type,
-      displayName: type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      displayName: VIETNAMESE_LABELS[type] || type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
     }));
     
     res.json(types);
@@ -116,7 +141,7 @@ exports.getOne = async (req, res) => {
 
     const result = await model.findById(id);
     if (!result) {
-      return res.status(404).json({ error: true, message: "Not found" });
+      return res.status(404).json({ error: true, message: "Không tìm thấy" });
     }
 
     res.json(result);
@@ -147,9 +172,10 @@ exports.create = async (req, res) => {
     for (const field of uniqueFields) {
       const existing = await model.findOne({ [field]: req.body[field] });
       if (existing) {
+        const fieldLabel = schema.fields[field] || field;
         return res.status(409).json({
           error: true,
-          message: `${field} already exists`,
+          message: `${fieldLabel} đã tồn tại`,
         });
       }
     }
@@ -187,9 +213,10 @@ exports.update = async (req, res) => {
         _id: { $ne: id }
       });
       if (existing) {
+        const fieldLabel = schema.fields[field] || field;
         return res.status(409).json({
           error: true,
-          message: `${field} already exists`,
+          message: `${fieldLabel} đã tồn tại`,
         });
       }
     }
@@ -201,7 +228,7 @@ exports.update = async (req, res) => {
     );
 
     if (!result) {
-      return res.status(404).json({ error: true, message: "Not found" });
+      return res.status(404).json({ error: true, message: "Không tìm thấy" });
     }
 
     res.json(result);
@@ -218,10 +245,10 @@ exports.delete = async (req, res) => {
 
     const result = await model.findByIdAndDelete(id);
     if (!result) {
-      return res.status(404).json({ error: true, message: "Not found" });
+      return res.status(404).json({ error: true, message: "Không tìm thấy" });
     }
 
-    res.json({ message: "Deleted successfully" });
+    res.json({ message: "Xóa thành công" });
   } catch (err) {
     res.status(500).json({ error: true, message: err.message });
   }
@@ -237,7 +264,7 @@ exports.createBulk = async (req, res) => {
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         error: true,
-        message: "Items array is required and cannot be empty",
+        message: "Danh sách items là bắt buộc và không được để trống",
       });
     }
 
@@ -262,7 +289,8 @@ exports.createBulk = async (req, res) => {
       for (const field of uniqueFields) {
         const existing = await model.findOne({ [field]: item[field] });
         if (existing) {
-          errors.push(`Item ${i + 1}: ${field} already exists`);
+          const fieldLabel = schema.fields[field] || field;
+          errors.push(`Item ${i + 1}: ${fieldLabel} đã tồn tại`);
           hasDuplicate = true;
           break;
         }
@@ -281,14 +309,14 @@ exports.createBulk = async (req, res) => {
     if (errors.length > 0) {
       return res.status(400).json({
         error: true,
-        message: "Some items failed to create",
+        message: "Một số items không thể tạo",
         errors,
         created: results,
       });
     }
 
     res.status(201).json({
-      message: "All items created successfully",
+      message: "Tất cả items đã được tạo thành công",
       items: results,
     });
   } catch (err) {
