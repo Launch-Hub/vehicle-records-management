@@ -432,8 +432,8 @@ const GLOBAL_ROUTES: Array<CustomRouteProps> = [
         language: 'en',
         translations: [
           {
-            path: 'quan-ly-tao-muc',
-            title: 'Quản lý tạo mục',
+            path: 'quan-ly-tuy-chinh',
+            title: 'Quản lý tuỳ chỉnh',
             language: 'vi',
           },
         ],

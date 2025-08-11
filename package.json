@@ -10,6 +10,9 @@
   "scripts": {
     "start:db": "start-localdb.bat",
     "stop:db": "stop-localdb.bat",
+    "dev": "npm-run-all --parallel dev:client dev:server",
+    "dev:client": "npm --prefix frontend start",
+    "dev:server": "npm --prefix backend start",
     "dev:be": "cd backend && nodemon server.js",
     "dev:fe": "cd frontend && npm run dev",
     "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
@@ -33,9 +36,7 @@
   },
   "homepage": "https://github.com/Launch-Hub/vehicle-records-management#readme",
   "devDependencies": {
-    "nodemon": "^3.1.10"
-  },
-  "dependencies": {
-    "exceljs": "^4.4.0"
+    "nodemon": "^3.1.10",
+    "npm-run-all": "^4.1.5"
   }
 }
