@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const issuerSchema = new mongoose.Schema({
-  citizenIDNumber: { type: String, required: true, unique: true, index: true },
+  citizenIDNumber: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   phone: { type: String, minLength: 6, maxLength: 12 },
   address: String,

@@ -25,7 +25,6 @@ const settingsSchema = new mongoose.Schema({
 });
 
 // Index for efficient queries
-settingsSchema.index({ key: 1 });
 settingsSchema.index({ category: 1 });
 
 const Settings = mongoose.model('Settings', settingsSchema);
