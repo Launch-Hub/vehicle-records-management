@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge'
 import type { PlateRequest } from '@/lib/types/tables.type'
 import { generateBulkName } from '@/lib/utils'
 import { PLATE_COLORS } from '@/constants/general'
+import { useAuth } from '@/contexts/auth'
 
 const plateRequestSchema = z
   .object({
@@ -37,34 +38,17 @@ const plateRequestSchema = z
     excludedNumbers: z.string().optional(),
     createdBy: z.string().min(1, 'Người yêu cầu là bắt buộc'),
     updatedBy: z.string().optional(),
+    // New fields from updated model
+    total: z.number().min(0, 'Tổng số biển phải là số dương').optional(),
+    remaining: z.number().min(0, 'Số biển còn lại phải là số dương').optional(),
+    receivedAt: z.date().optional(),
+    receivedBy: z.string().optional(),
   })
-  .refine(
-    (data) => {
-      const from = parseInt(data.rangeFrom)
-      const to = parseInt(data.rangeTo)
-      return !isNaN(from) && !isNaN(to) && from >= 0 && to >= 0 && from <= to
-    },
-    {
-      message: 'Số bắt đầu phải nhỏ hơn hoặc bằng số kết thúc và phải là số nguyên dương',
-      path: ['rangeFrom', 'rangeTo'],
-    }
-  )
 
 type PlateRequestFormData = z.infer<typeof plateRequestSchema>
 
 interface PlateRequestFormProps {
   onSubmit: (action: 'create' | 'update' | 'copy', data: Omit<PlateRequest, '_id'>) => void
-  onBulkSubmit: (data: {
-    bulk: string
-    color: string
-    vehicleType: string
-    letter: string
-    rangeFrom: number
-    rangeTo: number
-    excludedNumbers?: string
-    createdBy: string
-    updatedBy?: string
-  }) => void
   initialData?: PlateRequest
   isCopying?: boolean
 }
@@ -81,41 +65,12 @@ const colors = PLATE_COLORS.map((color) => ({
   label: color.label,
 }))
 
-const letters = [
-  { value: 'A', label: 'A' },
-  { value: 'B', label: 'B' },
-  { value: 'C', label: 'C' },
-  { value: 'D', label: 'D' },
-  { value: 'E', label: 'E' },
-  { value: 'F', label: 'F' },
-  { value: 'G', label: 'G' },
-  { value: 'H', label: 'H' },
-  { value: 'I', label: 'I' },
-  { value: 'J', label: 'J' },
-  { value: 'K', label: 'K' },
-  { value: 'L', label: 'L' },
-  { value: 'M', label: 'M' },
-  { value: 'N', label: 'N' },
-  { value: 'O', label: 'O' },
-  { value: 'P', label: 'P' },
-  { value: 'Q', label: 'Q' },
-  { value: 'R', label: 'R' },
-  { value: 'S', label: 'S' },
-  { value: 'T', label: 'T' },
-  { value: 'U', label: 'U' },
-  { value: 'V', label: 'V' },
-  { value: 'W', label: 'W' },
-  { value: 'X', label: 'X' },
-  { value: 'Y', label: 'Y' },
-  { value: 'Z', label: 'Z' },
-]
-
 export default function PlateRequestForm({
   onSubmit,
-  onBulkSubmit,
   initialData,
   isCopying,
 }: PlateRequestFormProps) {
+  const { user } = useAuth()
   const form = useForm<PlateRequestFormData>({
     resolver: zodResolver(plateRequestSchema),
     defaultValues: {
@@ -128,6 +83,10 @@ export default function PlateRequestForm({
       excludedNumbers: '',
       createdBy: '',
       updatedBy: '',
+      total: 0,
+      remaining: 0,
+      receivedAt: undefined,
+      receivedBy: '',
     },
   })
 
@@ -177,44 +136,45 @@ export default function PlateRequestForm({
 
   useEffect(() => {
     if (initialData) {
-      form.reset({
-        bulk: initialData.bulk || '',
-        color: initialData.color || '',
-        vehicleType: initialData.vehicleType || '',
-        letter: initialData.letter || '',
-        rangeFrom: '',
-        rangeTo: '',
-        excludedNumbers: '',
-        createdBy: initialData.createdBy || '',
-        updatedBy: initialData.updatedBy || '',
-      })
+      form.reset(initialData)
     } else {
       // Auto-generate bulk name for new creation
       form.setValue('bulk', generateBulkName())
+      // Set createdBy to current user
+      form.setValue('createdBy', user!._id)
     }
-  }, [initialData, form])
+  }, [initialData, form, user])
 
   const handleSubmit = (data: PlateRequestFormData) => {
-    if (initialData) {
-      // For editing existing records, use the original single record format
-      const action = isCopying ? 'copy' : 'update'
-      onSubmit(action, {
-        ...data,
-        suffixNumber: data.rangeFrom, // Use rangeFrom as suffixNumber for single records
-      } as Omit<PlateRequest, '_id'>)
-    } else {
-      // For new records, use bulk creation
-      onBulkSubmit({
-        bulk: data.bulk,
-        color: data.color,
-        vehicleType: data.vehicleType,
-        letter: data.letter,
-        rangeFrom: parseInt(data.rangeFrom),
-        rangeTo: parseInt(data.rangeTo),
-        excludedNumbers: data.excludedNumbers,
-        createdBy: data.createdBy,
-        updatedBy: data.updatedBy,
-      })
+    try {
+      if (initialData) {
+        // For editing existing records, use the original single record format
+        const action = isCopying ? 'copy' : 'update'
+        onSubmit(action, {
+          ...data,
+          rangeFrom: parseInt(data.rangeFrom), // Use rangeFrom as suffixNumber for single records
+          rangeTo: parseInt(data.rangeTo),
+        } as Omit<PlateRequest, '_id'>)
+      } else {
+        // For new records, use bulk creation
+        onSubmit('create', {
+          bulk: data.bulk,
+          color: data.color,
+          vehicleType: data.vehicleType,
+          letter: data.letter,
+          rangeFrom: parseInt(data.rangeFrom),
+          rangeTo: parseInt(data.rangeTo),
+          excludedNumbers: data.excludedNumbers,
+          createdBy: data.createdBy || user?.name || user?.email || 'Unknown',
+          updatedBy: data.updatedBy,
+          total: data.total,
+          remaining: data.remaining,
+          receivedAt: data.receivedAt,
+          receivedBy: data.receivedBy,
+        })
+      }
+    } catch (error) {
+      console.error('Error in handleSubmit:', error)
     }
   }
 
@@ -235,35 +195,12 @@ export default function PlateRequestForm({
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            {/* Preview Section */}
-            {isCreating && previewNumbers.toGenerate > 0 && (
-              <div className="p-4 bg-muted rounded-lg">
-                <h4 className="font-medium mb-2">Xem trước</h4>
-                <div className="flex gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span>Tổng số trong khoảng:</span>
-                    <Badge variant="secondary">{previewNumbers.total}</Badge>
-                  </div>
-                  {previewNumbers.excluded > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span>Số loại trừ:</span>
-                      <Badge variant="destructive">{previewNumbers.excluded}</Badge>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <span>Sẽ tạo:</span>
-                    <Badge variant="default">{previewNumbers.toGenerate}</Badge>
-                  </div>
-                </div>
-              </div>
-            )}
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* <FormField
+              <FormField
                 control={form.control}
                 name="bulk"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-2">
                     <FormLabel>Lô yêu cầu</FormLabel>
                     <FormControl>
                       <Input placeholder="Nhập lô yêu cầu" {...field} />
@@ -271,7 +208,7 @@ export default function PlateRequestForm({
                     <FormMessage />
                   </FormItem>
                 )}
-              /> */}
+              />
 
               <FormField
                 control={form.control}
@@ -383,34 +320,6 @@ export default function PlateRequestForm({
                   </FormItem>
                 )}
               />
-
-              {/* <FormField
-                control={form.control}
-                name="createdBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Người yêu cầu</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nhập tên người yêu cầu" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="updatedBy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Người nhận biển số</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nhập tên người nhận biển số" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
             </div>
 
             <div className="flex justify-end space-x-4">
@@ -420,6 +329,29 @@ export default function PlateRequestForm({
             </div>
           </form>
         </Form>
+
+        {/* Preview Section */}
+        {isCreating && previewNumbers.toGenerate > 0 && (
+          <div className="mt-4 p-4 bg-muted rounded-lg">
+            <h4 className="font-medium mb-2">Xem trước</h4>
+            <div className="flex gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span>Tổng số trong khoảng:</span>
+                <Badge variant="secondary">{previewNumbers.total}</Badge>
+              </div>
+              {previewNumbers.excluded > 0 && (
+                <div className="flex items-center gap-2">
+                  <span>Số loại trừ:</span>
+                  <Badge variant="destructive">{previewNumbers.excluded}</Badge>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span>Sẽ tạo:</span>
+                <Badge variant="default">{previewNumbers.toGenerate}</Badge>
+              </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   )

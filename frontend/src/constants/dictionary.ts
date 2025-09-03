@@ -127,11 +127,18 @@ type PlateRequestDictionary = {
   color: string;
   vehicleType: string;
   letter: string;
+  rangeFrom: string;
+  rangeTo: string;
+  excludedNumbers: string;
   suffixNumber: string;
   createdBy: string;
+  createdAt: string;
+  receivedBy: string;
+  receivedAt: string;
+  total: string;
+  remaining: string;
   note: string;
   status: string;
-  createdAt: string;
 };
 // 2. Combine into a master type
 
@@ -271,6 +278,10 @@ export const DICTIONARY: Dictionary = {
     letter: 'Chữ cái',
     suffixNumber: 'Số cuối',
     createdBy: 'Người tạo',
+    receivedBy: 'Người nhận',
+    receivedAt: 'Ngày nhận',
+    total: 'Tổng số biển',
+    remaining: 'Số biển còn lại',
     note: 'Ghi chú',
     status: 'Trạng thái',
     createdAt: 'Ngày tạo',

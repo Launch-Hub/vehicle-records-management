@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       refreshSession().then(() => {
         // If on login page and authenticated, redirect to dashboard
         const loginRoute = ROUTES.find((e) => e.enPath === '/login')?.path || '/login'
-        const dashboardRoute = ROUTES.find((e) => e.enPath === '/dashboard')?.path || '/dashboard'
+        const dashboardRoute = ROUTES.find((e) => e.enPath === '/dashboard')?.path || '/'
         if (window.location.pathname === loginRoute && _user) {
           navigate(dashboardRoute)
         }

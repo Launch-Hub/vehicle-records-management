@@ -66,7 +66,6 @@ export default function ProcedureForm({
   submitButtonText = 'Tiếp nhận',
 }: ProcedureFormProps) {
   const {
-    register,
     handleSubmit,
     reset,
     getValues,
@@ -154,13 +153,16 @@ export default function ProcedureForm({
       })
       if (res.data.items) {
         setActionTypes(res.data.items)
+        if (step === 1) {
+          setValue('registrationType', res.data.items[0].name)
+        } else setValue('action', res.data.items[0].name)
       }
     } catch (error) {
       console.error('Failed to fetch action types', error)
     } finally {
       setIsFetchingActionTypes(false)
     }
-  }, [step])
+  }, [step, setActionTypes, setValue])
 
   useEffect(() => {
     fetchActionTypes()
@@ -380,7 +382,7 @@ export default function ProcedureForm({
           {step === 1 ? (
             <div className="space-y-2">
               <Label htmlFor="registrationType" className="required">
-                {step === 1 ? 'Trạng thái đăng ký' : 'Phương thức xử lý'}
+                Trạng thái đăng ký
               </Label>
               <div className="flex gap-2 items-end">
                 <Select
@@ -404,7 +406,7 @@ export default function ProcedureForm({
           ) : (
             <div className="space-y-2">
               <Label htmlFor="action" className="required">
-                {step === 1 ? 'Trạng thái đăng ký' : 'Phương thức xử lý'}
+                Phương thức xử lý
               </Label>
               <div className="flex gap-2 items-end">
                 <Select

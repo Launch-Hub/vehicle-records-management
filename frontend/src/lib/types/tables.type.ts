@@ -128,9 +128,11 @@ export interface PlateRequestProps {
   vehicleType: string // loại xe
   letter: string // chữ cái trên biển số
   suffixNumber: string // số hiệu biển số
-  createdBy: string // người yêu cầu dập biển số
-  updatedBy: string // người nhận biển số đã dập
   createdAt?: Date // ngày yêu cầu dập biển số
-  updatedAt?: Date // ngày nhận biển số đã dập
+  createdBy: string // người yêu cầu dập biển số
+  receivedAt?: Date // ngày nhận biển số đã dập
+  receivedBy?: string // người nhận biển số đã dập
+  total?: number // tổng số biển yêu cầu (đã dập)
+  remaining?: number // tổng số biển còn lại trong lô (chưa trả đi)
 }
 export type PlateRequest = PlateRequestProps

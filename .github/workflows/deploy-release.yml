@@ -3,7 +3,7 @@ name: 🚀 Deploy to Self-Hosted Server | VPS Sieu Toc
 on:
   push:
     branches:
-      - develop
+      - release
 
 env:
   PROJECT_NAME: "vrm_app"

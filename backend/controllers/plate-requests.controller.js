@@ -7,8 +7,10 @@ exports.getList = async (req, res) => {
     bulk: 1,
     color: 1,
     vehicleType: 1,
-    letter: 1,
-    suffixNumber: 1,
+    prefixLetters: 1,
+    rangeFrom: 1,
+    rangeTo: 1,
+    excludedNumbers: 1,
     createdBy: 1,
     updatedBy: 1,
     createdAt: 1,
@@ -23,13 +25,16 @@ exports.getList = async (req, res) => {
       bulk,
       color,
       vehicleType,
-      letter,
-      suffixNumber,
+      prefixLetters,
+      rangeFrom,
+      rangeTo,
+      excludedNumbers,
       createdBy,
       updatedBy,
     } = req.query;
-    let skip = 0, limit = 50;
-    if (!noPagination || noPagination === 'false') {
+    let skip = 0,
+      limit = 50;
+    if (!noPagination || noPagination === "false") {
       const parsed = parsePagination(pageIndex, pageSize);
       skip = parsed.skip;
       limit = parsed.limit;
@@ -43,8 +48,10 @@ exports.getList = async (req, res) => {
       const regex = new RegExp(search, "i"); // case-insensitive partial match
       filter.$or = [
         { bulk: regex },
-        { letter: regex },
-        { suffixNumber: regex },
+        { prefixLetters: regex },
+        { rangeFrom: regex },
+        { rangeTo: regex },
+        { excludedNumbers: regex },
         { createdBy: regex },
         { updatedBy: regex },
       ];
@@ -52,17 +59,18 @@ exports.getList = async (req, res) => {
     if (bulk) filter.bulk = new RegExp(bulk, "i"); // case-insensitive partial match
     if (color) filter.color = new RegExp(color, "i");
     if (vehicleType) filter.vehicleType = new RegExp(vehicleType, "i");
-    if (letter) filter.letter = new RegExp(letter, "i");
-    if (suffixNumber) filter.suffixNumber = new RegExp(suffixNumber, "i");
+    if (prefixLetters) filter.prefixLetters = new RegExp(prefixLetters, "i");
+    if (rangeFrom) filter.rangeFrom = new RegExp(rangeFrom, "i");
+    if (rangeTo) filter.rangeTo = new RegExp(rangeTo, "i");
+    if (excludedNumbers) filter.excludedNumbers = new RegExp(excludedNumbers, "i");
     if (createdBy) filter.createdBy = new RegExp(createdBy, "i");
     if (updatedBy) filter.updatedBy = new RegExp(updatedBy, "i");
 
     const total = await PlateRequest.countDocuments(filter);
     if (total === 0) return res.json({ total, items: [] });
 
-    let query = PlateRequest.find(filter, projection)
-      .sort({ updatedAt: -1 }); // ✅ Default sort by latest first
-    if (!noPagination || noPagination === 'false') {
+    let query = PlateRequest.find(filter, projection).sort({ updatedAt: -1 }); // ✅ Default sort by latest first
+    if (!noPagination || noPagination === "false") {
       query = query.skip(skip).limit(limit);
     }
     const items = await query.exec();
@@ -85,18 +93,23 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
   try {
-    const { bulk, color, vehicleType, letter, suffixNumber, createdBy } = req.body;
+    const { prefixLetters, rangeFrom, rangeTo, excludedNumbers } = req.body;
 
     // Check if a plate request with the same combination already exists
-    const existingItem = await PlateRequest.findOne({
-      $and: [{ bulk }, { letter }, { suffixNumber }],
+    const dupplicatingItems = await PlateRequest.find({
+      $and: [{ prefixLetters }],
     });
 
-    if (existingItem) {
-      return res.status(409).json({
-        error: true,
-        message: "Yêu cầu dập biển số đã tồn tại.",
-      });
+    for (const item of dupplicatingItems) {
+      if (
+        (item.rangeFrom <= rangeTo && item.rangeFrom >= rangeFrom) ||
+        (item.rangeTo >= rangeFrom && item.rangeTo <= rangeTo)
+      ) {
+        return res.status(409).json({
+          error: true,
+          message: "Yêu cầu dập biển số đã tồn tại hoặc bị trùng với yêu cầu trước đó.",
+        });
+      }
     }
 
     const result = await PlateRequest.create(req.body);
@@ -139,12 +152,12 @@ const generatePlateRequest = (index) => {
   const colors = ["Xanh", "Trắng", "Vàng", "Đỏ"];
   const vehicleTypes = ["Ô tô", "Xe máy", "Xe tải"];
   const letters = ["A", "B", "C", "D", "E", "F"];
-  
+
   return {
     bulk: `Lô-${(1000 + index).toString().padStart(4, "0")}`,
     color: colors[Math.floor(Math.random() * colors.length)],
     vehicleType: vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)],
-    letter: letters[Math.floor(Math.random() * letters.length)],
+    prefixLetters: letters[Math.floor(Math.random() * letters.length)],
     suffixNumber: (1000 + Math.floor(Math.random() * 9000)).toString(),
     createdBy: `User-${Math.floor(Math.random() * 100)}`,
     updatedBy: `User-${Math.floor(Math.random() * 100)}`,
@@ -162,11 +175,17 @@ exports.mockCreate = async (req, res) => {
       const plateRequestData = generatePlateRequest(i);
 
       const exists = await PlateRequest.findOne({
-        $and: [{ bulk: plateRequestData.bulk }, { letter: plateRequestData.letter }, { suffixNumber: plateRequestData.suffixNumber }],
+        $and: [
+          { bulk: plateRequestData.bulk },
+          { prefixLetters: plateRequestData.prefixLetters },
+          { suffixNumber: plateRequestData.suffixNumber },
+        ],
       });
 
       if (exists) {
-        console.log(`🔁 Skipped: ${plateRequestData.bulk} (${plateRequestData.letter} - ${plateRequestData.suffixNumber})`);
+        console.log(
+          `🔁 Skipped: ${plateRequestData.bulk} (${plateRequestData.prefixLetters} - ${plateRequestData.suffixNumber})`
+        );
         continue;
       }
 
@@ -186,20 +205,20 @@ exports.mockCreate = async (req, res) => {
 // Bulk create plate requests with range
 exports.bulkCreate = async (req, res) => {
   try {
-    const { 
-      bulk, 
-      color, 
-      vehicleType, 
-      letter, 
-      rangeFrom, 
-      rangeTo, 
-      excludedNumbers, 
+    const {
+      bulk,
+      color,
+      vehicleType,
+      prefixLetters,
+      rangeFrom,
+      rangeTo,
+      excludedNumbers,
       createdBy,
-      updatedBy 
+      updatedBy,
     } = req.body;
 
     // Validate required fields
-    if (!bulk || !color || !vehicleType || !letter || !rangeFrom || !rangeTo || !createdBy) {
+    if (!bulk || !color || !vehicleType || !prefixLetters || !rangeFrom || !rangeTo || !createdBy) {
       return res.status(400).json({
         error: true,
         message: "Tất cả các trường bắt buộc phải được điền đầy đủ.",
@@ -209,7 +228,7 @@ exports.bulkCreate = async (req, res) => {
     // Validate range
     const from = parseInt(rangeFrom);
     const to = parseInt(rangeTo);
-    
+
     if (isNaN(from) || isNaN(to) || from < 0 || to < 0) {
       return res.status(400).json({
         error: true,
@@ -227,12 +246,12 @@ exports.bulkCreate = async (req, res) => {
     // Parse excluded numbers
     const excludedSet = new Set();
     if (excludedNumbers && excludedNumbers.trim()) {
-      const excludedParts = excludedNumbers.split(',').map(part => part.trim());
-      
+      const excludedParts = excludedNumbers.split(",").map((part) => part.trim());
+
       for (const part of excludedParts) {
-        if (part.includes('-')) {
+        if (part.includes("-")) {
           // Handle range like "100-150"
-          const [start, end] = part.split('-').map(num => parseInt(num.trim()));
+          const [start, end] = part.split("-").map((num) => parseInt(num.trim()));
           if (!isNaN(start) && !isNaN(end) && start <= end) {
             for (let i = start; i <= end; i++) {
               excludedSet.add(i);
@@ -261,11 +280,11 @@ exports.bulkCreate = async (req, res) => {
       }
 
       // Format suffix number to 5 digits with leading zeros
-      const suffixNumber = i.toString().padStart(5, '0');
+      const suffixNumber = i.toString().padStart(5, "0");
 
       // Check if plate request already exists
       const existingItem = await PlateRequest.findOne({
-        $and: [{ bulk }, { letter }, { suffixNumber }],
+        $and: [{ bulk }, { prefixLetters }, { suffixNumber }],
       });
 
       if (existingItem) {
@@ -278,10 +297,10 @@ exports.bulkCreate = async (req, res) => {
           bulk,
           color,
           vehicleType,
-          letter,
+          prefixLetters,
           suffixNumber,
           createdBy,
-          updatedBy: updatedBy || '',
+          updatedBy: updatedBy || "",
         };
 
         const result = await PlateRequest.create(plateRequestData);
@@ -300,8 +319,7 @@ exports.bulkCreate = async (req, res) => {
       skippedNumbers: skippedItems,
       errors: errors.length > 0 ? errors : undefined,
     });
-
   } catch (err) {
     res.status(400).json({ error: true, message: err.message });
   }
-}; 
+};

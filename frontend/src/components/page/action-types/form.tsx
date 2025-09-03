@@ -45,7 +45,6 @@ export default function ActionTypeForm({ initialData, onSubmit, onCancel }: Acti
   })
 
   const [isLoading, setIsLoading] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
 
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -53,7 +52,6 @@ export default function ActionTypeForm({ initialData, onSubmit, onCancel }: Acti
 
   useEffect(() => {
     if (id && id !== 'new') {
-      setIsEditing(true)
       fetchActionType()
     }
   }, [id])

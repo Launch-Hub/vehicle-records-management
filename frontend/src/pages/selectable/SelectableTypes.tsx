@@ -332,7 +332,7 @@ const SelectableTypes: React.FC = () => {
             {(editingItem || !editingItem) && (
               <div className="border rounded-lg p-4">
                 <h3 className="text-lg font-semibold mb-4">
-                  {editingItem ? 'Chỉnh sửa tạo mục' : 'Tạo tạo mục mới'}
+                  {editingItem ? 'Chỉnh sửa tạo mục' : 'Thêm tạo mục'}
                 </h3>
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">

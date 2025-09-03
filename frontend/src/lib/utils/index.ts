@@ -65,13 +65,13 @@ export function formatBytes(bytes: number, decimals: number = 2): string {
 export function formatDate(date: Date | string): string {
   const d = typeof date === 'string' ? new Date(date) : date
   if (isNaN(d.getTime())) return ''
-  
+
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 
@@ -81,14 +81,18 @@ export const processImage = (file: File, callback: (base64: string) => void) => 
     toast.error('Vui lòng chọn tệp hình ảnh (JPG, PNG, ...).')
     return
   }
-  
+
   // Check for supported image types
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
   if (!allowedTypes.includes(file.type)) {
-    toast.error(`Định dạng hình ảnh không được hỗ trợ: ${file.type}. Các định dạng được hỗ trợ: ${allowedTypes.join(', ')}`)
+    toast.error(
+      `Định dạng hình ảnh không được hỗ trợ: ${
+        file.type
+      }. Các định dạng được hỗ trợ: ${allowedTypes.join(', ')}`
+    )
     return
   }
-  
+
   if (file.size > 2 * 1024 * 1024) {
     toast.error('Hình ảnh phải nhỏ hơn 2MB.')
     return
@@ -140,34 +144,36 @@ export async function exportToExcel({
   footerRows = [], // array of arrays, each sub-array is a row
   columns = [],
 }: {
-  data: any[],
-  filename?: string,
-  sheetName?: string,
-  headerRows?: any[][],
-  footerRows?: any[][],
-  columns?: { key: string, label: string }[]
+  data: any[]
+  filename?: string
+  sheetName?: string
+  headerRows?: any[][]
+  footerRows?: any[][]
+  columns?: { key: string; label: string }[]
 }) {
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet(sheetName)
 
   // Add header rows
-  headerRows.forEach(row => worksheet.addRow(row))
+  headerRows.forEach((row) => worksheet.addRow(row))
 
   // Add main data rows
   if (data.length > 0) {
-    const keys = columns.map(column => column.key)
+    const keys = columns.map((column) => column.key)
     worksheet.addRow(keys)
-    data.forEach(item => {
-      worksheet.addRow(keys.map(k => item[k] || ''))
+    data.forEach((item) => {
+      worksheet.addRow(keys.map((k) => item[k] || ''))
     })
   }
 
   // Add footer rows
-  footerRows.forEach(row => worksheet.addRow(row))
+  footerRows.forEach((row) => worksheet.addRow(row))
 
   // Write to file (browser)
   const buffer = await workbook.xlsx.writeBuffer()
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
   const link = document.createElement('a')
   link.href = URL.createObjectURL(blob)
   link.download = filename
@@ -208,6 +214,6 @@ export const generateBulkName = (): string => {
   const hours = String(now.getHours()).padStart(2, '0')
   const minutes = String(now.getMinutes()).padStart(2, '0')
   const seconds = String(now.getSeconds()).padStart(2, '0')
-  
-  return `Lô_${year}${month}${day}_${hours}${minutes}${seconds}`
+
+  return `Lô ngày ${day}/${month}/${year} (${hours}:${minutes}:${seconds})`
 }

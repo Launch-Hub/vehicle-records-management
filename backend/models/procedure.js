@@ -21,10 +21,11 @@ const stepSchema = new mongoose.Schema(
     order: Number, // created order | auto-increase
     step: Number, // step number
     title: String, // step name
-    action: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "ActionType",
-    },
+    // action: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "ActionType",
+    // },
+    action: { type: String, required: true },
     //
     note: String,
     attachments: [String],
